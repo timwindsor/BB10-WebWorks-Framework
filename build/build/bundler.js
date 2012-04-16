@@ -18,7 +18,7 @@ module.exports = {
                     return transform ? transform(str, file) : str;
                 }).join('\n');
             },
-            output = "",
+            output = "(function () { \n",
             version = fs.readFileSync("version", "utf-8").trim(),
             filepath;
 
@@ -28,7 +28,7 @@ module.exports = {
         });
 
         //include require
-        output += include("dependencies/webplatform-framework/dependencies/browser-require/require.js");
+        output += include("dependencies/browser-require/require.js");
 
         //include modules
         output += include(files, function (file, path) {
@@ -38,7 +38,8 @@ module.exports = {
 
         //include window.webworks
         output += include("lib/public/window-webworks.js");
-
+        
+        output += "\n}());";
         //create output folder if it doesn't exist
         filepath = __dirname.replace(/\\/g, '/') + "/../../clientFiles";
         if (!path.existsSync(filepath)) {
