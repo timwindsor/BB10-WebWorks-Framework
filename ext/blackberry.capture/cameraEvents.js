@@ -17,7 +17,7 @@ function requireLocal(id) {
     return !!require.resolve ? require("../../" + id) : window.require(id);
 }
 
-var _ppsUtils = requireLocal("../../lib/ppsUtils");
+var _ppsUtils = requireLocal("lib/pps/ppsUtils");
 
 module.exports = {
     addEventListener: function (event, trigger) {
@@ -25,9 +25,13 @@ module.exports = {
         if (event) {
             event.ppsUtils = _ppsUtils.createObject();
             event.ppsUtils.init();
-            event.ppsUtils.open(event.path, event.mode);
-            console.log("after ppsUtils.open");
-            event.ppsUtils.onChange = trigger;
+
+            if (event.ppsUtils.open(event.path, event.mode)) {
+                console.log("after ppsUtils.open");
+                event.ppsUtils.onChange = trigger;
+            } else {
+                console.log("could not open " + event.path);
+            }
         }
     },
     removeEventListener: function (event) {

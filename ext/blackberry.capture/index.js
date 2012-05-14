@@ -18,12 +18,13 @@ function requireLocal(id) {
 }
 
 var _event = requireLocal("lib/event"),
+    _picturesTaken = [],
     _actionMap = {
         photoIndex: {
             context: require("./cameraEvents"),
             event: {
                 name: "photoIndex",
-                path: "/pps/services/multimedia/camera/private?wait,delta",
+                path: "/pps/services/multimedia/sync/changes?wait,delta",
                 mode: 0
             },
             trigger: function (data) {
@@ -33,7 +34,7 @@ var _event = requireLocal("lib/event"),
             }
         },
         cameraStatus: {
-            context: requireLocal("./cameraEvents"),
+            context: require("./cameraEvents"),
             event: {
                 name: "cameraEvents",
                 path: "/pps/services/multimedia/camera/status?wait,delta",
@@ -56,6 +57,8 @@ module.exports = {
 
             _event.on(photoIndexAction);
             _event.on(cameraStatusAction);
+
+            qnx.callExtensionMethod("navigator.invoke", "camera://photo");
 
             if (success) {
                 success();
