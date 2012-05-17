@@ -20,6 +20,8 @@
 #include <bps/bps.h>
 #include <bps/netstatus.h>
 
+class Connection;
+
 namespace webworks {
 
 enum ConnectionTypes {
@@ -36,9 +38,12 @@ enum ConnectionTypes {
 
 class ConnectionBPS {
 public:
-    ConnectionBPS();
+    explicit ConnectionBPS(Connection *parent = NULL);
     ~ConnectionBPS();
     ConnectionTypes GetConnectionType();
+    int WaitForEvents(bool *enabled);
+private:
+    Connection *m_parent;
 };
 
 } // namespace webworks
