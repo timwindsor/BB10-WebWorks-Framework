@@ -21,6 +21,8 @@
 
 namespace webworks {
 
+bool ConnectionBPS::m_eventsEnabled = 0;
+
 ConnectionBPS::ConnectionBPS(Connection *parent) : m_parent(parent)
 {
     bps_initialize();
@@ -85,14 +87,14 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
     return returnType;
 }
 
-int ConnectionBPS::WaitForEvents(bool *enabled)
+int ConnectionBPS::WaitForEvents()
 {
     int status = netstatus_request_events(0);
 
     if (status == BPS_SUCCESS) {
         ConnectionTypes oldType = GetConnectionType();
 
-        while (*enabled) {
+        while (m_eventsEnabled) {
             bps_event_t *event = NULL;
             bps_get_event(&event, 0);   // Returns immediately
 
@@ -117,12 +119,19 @@ int ConnectionBPS::WaitForEvents(bool *enabled)
                 }
             }
         }
-
-        // Compiler produces error that function is out of scope...
-        //status = netstatus_stop_events(0);
     }
 
     return (status == BPS_SUCCESS) ? 0 : 1;
+}
+
+void ConnectionBPS::EnableEvents()
+{
+    m_eventsEnabled = 1;
+}
+
+void ConnectionBPS::DisableEvents()
+{
+    m_eventsEnabled = 0;
 }
 
 } // namespace webworks

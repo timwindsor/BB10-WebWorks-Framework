@@ -18,8 +18,6 @@
 #include "connection_js.hpp"
 #include "connection_bps.hpp"
 
-bool eventsEnabled = 0;
-
 void* ConnectionEventThread(void *args)
 {
     Connection *parent = static_cast<Connection *>(args);
@@ -27,7 +25,7 @@ void* ConnectionEventThread(void *args)
 
     if (connection) {
         // Poll for events in ConnectionBPS. This will run until StopEvents() disables events.
-        connection->WaitForEvents(&eventsEnabled);
+        connection->WaitForEvents();
 
         delete connection;
     }
@@ -38,12 +36,11 @@ void* ConnectionEventThread(void *args)
 Connection::Connection(const std::string& id) : m_id(id)
 {
     m_thread = 0;
-    eventsEnabled = 0;
 }
 
 Connection::~Connection()
 {
-    if (eventsEnabled && m_thread) {
+    if (m_thread) {
         StopEvents();
     }
 }
@@ -103,17 +100,16 @@ void Connection::NotifyEvent(const std::string& event)
 
 void Connection::StartEvents()
 {
-    if (!eventsEnabled && !m_thread) {
-        eventsEnabled = 1;
+    if (!m_thread) {
+        webworks::ConnectionBPS::EnableEvents();
         pthread_create(&m_thread, NULL, ConnectionEventThread, static_cast<void *>(this));
     }
 }
 
 void Connection::StopEvents()
 {
-    if (eventsEnabled && m_thread) {
-        eventsEnabled = 0;
-
+    if (m_thread) {
+        webworks::ConnectionBPS::DisableEvents();
         pthread_join(m_thread, NULL);
         m_thread = 0;
     }
