@@ -18,9 +18,9 @@
 #define CONNECTION_JS_H_
 
 #include <pthread.h>
+#include <plugin.h>
 #include <sstream>
 #include <string>
-#include "../common/plugin.h"
 
 void* ConnectionEventThread(void *args);
 
