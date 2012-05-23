@@ -79,6 +79,7 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
             };
 
             netstatus_free_interface_details(&details);
+            bps_free(interface);
         }
     } else {
         returnType = NONE;
