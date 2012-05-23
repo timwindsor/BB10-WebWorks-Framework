@@ -14,19 +14,7 @@
  * limitations under the License.
  */
 
-function requireLocal(id) {
-    if (/^lib/.test(id)) {
-        return !!require.resolve ? require("../../" + id) : window.require(id);
-    } else if (/^ext/.test(id)) {
-        var idParts = id.split("/"),
-            nodePath;
-        idParts.splice(0, 1);
-        nodePath = "../" + idParts.join("/");
-        return !!require.resolve ? require(nodePath) : window.require(id);
-    }
-}
-
-var connection = requireLocal("ext/blackberry.connection/connectionJNEXT").connection;
+var connection = require("./connectionJNEXT").connection;
 
 module.exports = {
     addEventListener: function (event, trigger) {

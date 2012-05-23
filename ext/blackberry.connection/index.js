@@ -26,7 +26,7 @@ function requireLocal(id) {
     }
 }
 
-var connection = requireLocal("ext/blackberry.connection/connectionJNEXT").connection,
+var connection = require("./connectionJNEXT").connection,
     _event = requireLocal("lib/event"),
     _eventExt = requireLocal("ext/blackberry.event/index"),
     _actionMap = {
