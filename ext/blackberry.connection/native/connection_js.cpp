@@ -30,7 +30,7 @@ void* ConnectionEventThread(void *args)
         delete connection;
     }
 
-    pthread_exit(NULL);
+    return NULL;
 }
 
 Connection::Connection(const std::string& id) : m_id(id)
