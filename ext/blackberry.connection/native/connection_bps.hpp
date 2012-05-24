@@ -38,14 +38,14 @@ enum ConnectionTypes {
 
 class ConnectionBPS {
 public:
-    explicit ConnectionBPS(Connection *parent = NULL);
+    explicit ConnectionBPS(ConnectionInterface *parent = NULL);
     ~ConnectionBPS();
     ConnectionTypes GetConnectionType();
     int WaitForEvents();
     static void EnableEvents();
     static void DisableEvents();
 private:
-    Connection *m_parent;
+    ConnectionInterface *m_parent;
     static bool m_eventsEnabled;
 };
 

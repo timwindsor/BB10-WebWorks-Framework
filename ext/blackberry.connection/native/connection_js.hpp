@@ -24,7 +24,15 @@
 
 void* ConnectionEventThread(void *args);
 
-class Connection : public JSExt
+class ConnectionInterface
+{
+public
+    virtual void NotifyEvent(const std::string& event) = 0;
+    virtual void StartEvents() = 0;
+    virtual void StopEvents() = 0;
+};
+
+class Connection : public JSExt, public ConnectionInterface
 {
 public:
     explicit Connection(const std::string& id);

@@ -18,12 +18,13 @@
 #include <string>
 #include "connection_js.hpp"
 #include "connection_bps.hpp"
+#include "bps_netstatus.hpp"
 
 namespace webworks {
 
 bool ConnectionBPS::m_eventsEnabled = 0;
 
-ConnectionBPS::ConnectionBPS(Connection *parent) : m_parent(parent)
+ConnectionBPS::ConnectionBPS(ConnectionInterface *parent) : m_parent(parent)
 {
     bps_initialize();
 }
