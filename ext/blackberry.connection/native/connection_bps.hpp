@@ -20,7 +20,7 @@
 #include <bps/bps.h>
 #include <bps/netstatus.h>
 
-class Connection;
+class ConnectionInterface;
 
 namespace webworks {
 
