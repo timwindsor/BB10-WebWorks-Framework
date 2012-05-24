@@ -20,15 +20,14 @@
 #include <bps/bps.h>
 #include <bps/netstatus.h>
 
-class BPSNetstatus
-{
+class BPSNetstatus {
 public:
     BPSNetstatus() {}
     virtual ~BPSNetstatus() {}
 
     virtual void Initialize() {
         bps_initialize();
-    
+    }
 
     virtual void Shutdown() {
         bps_shutdown();
@@ -46,14 +45,37 @@ public:
         return netstatus_get_interface_details(interface, details);
     }
 
-    virtual netstatus_interface_type_t GetInterfaceType(netstatus_interface_details_t details);
-    virtual void FreeInterfaceDetails(netstatus_interface_details_t *details);
-    virtual void Free(char *object);
-    virtual int RequestEvents(int flags);
-    virtual void GetEvent(bps_event_t **event, int flags);
-    virtual void GetEventDomain(bps_event_t *event);
-    virtual void GetDomain();
-    virtual void GetEventCode(bps_event_t *event)
+    virtual netstatus_interface_type_t GetInterfaceType(netstatus_interface_details_t details) {
+        return netstatus_interface_get_type (details);
+    }
+
+    virtual void FreeInterfaceDetails(netstatus_interface_details_t *details) {
+        netstatus_free_interface_details(details);
+    }
+
+    virtual void Free(char *object) {
+        bps_free(object);
+    }
+
+    virtual int RequestEvents(int flags) {
+        return netstatus_request_events(flags);
+    }
+
+    virtual void GetEvent(bps_event_t **event, int flags) {
+        bps_get_event(event, flags);
+    }
+
+    virtual int GetEventDomain(bps_event_t *event) {
+        return bps_event_get_doman(event);
+    }
+
+    virtual int GetDomain() {
+        return netstatus_get_domain();
+    }
+
+    virtual unsigned int GetEventCode(bps_event_t *event) {
+        return bps_event_get_code(event);
+    }
 };
 
 /*
