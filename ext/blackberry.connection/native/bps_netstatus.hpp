@@ -66,7 +66,7 @@ public:
     }
 
     virtual int GetEventDomain(bps_event_t *event) {
-        return bps_event_get_doman(event);
+        return bps_event_get_domain(event);
     }
 
     virtual int GetDomain() {
