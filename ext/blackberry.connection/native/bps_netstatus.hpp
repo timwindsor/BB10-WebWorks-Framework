@@ -1,4 +1,3 @@
-
 /*
 * Copyright 2012 Research In Motion Limited.
 *
@@ -100,3 +99,4 @@ public:
 */
 
 #endif /* BPS_CONNECTION_H_ */
+
