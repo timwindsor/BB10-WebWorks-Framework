@@ -63,6 +63,7 @@ COMP_PATHS=" \
     -L$STAGE_USR_LIB \
     -L$QNX_LIB \
     -L$QNX_USR_LIB \
+    -L$QNX_USR_LIB/qt4/lib \
     -I$QNX_INCLUDE"
 
 if [ "$CCWRAP" ] ; then
