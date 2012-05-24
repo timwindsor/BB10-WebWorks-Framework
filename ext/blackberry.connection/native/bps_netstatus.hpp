@@ -22,24 +22,28 @@
 
 class BPSNetstatus
 {
-    virtual void Initialize() { 
-        bps_initialize(); 
-    }
+public:
+    BPSNetstatus() {}
+    virtual ~BPSNetstatus() {}
 
-    virtual void Shutdown() { 
-        bps_shutdown(); 
-    }
+    virtual void Initialize() {
+        bps_initialize();
     
-    virtual void GetAvailability(bool *available) { 
-        netstatus_get_availability(available) 
+
+    virtual void Shutdown() {
+        bps_shutdown();
     }
 
-    virtual void GetDefaultInterface(char **interface) { 
-        netstatus_get_default_interface(interface) 
+    virtual void GetAvailability(bool *available) {
+        netstatus_get_availability(available);
     }
 
-    virtual int GetInterfaceDetails(char *interface, netstatus_interface_details_t *details) { 
-        return netstatus_get_interface_details(interface, details); 
+    virtual void GetDefaultInterface(char **interface) {
+        netstatus_get_default_interface(interface);
+    }
+
+    virtual int GetInterfaceDetails(char *interface, netstatus_interface_details_t *details) {
+        return netstatus_get_interface_details(interface, details);
     }
 
     virtual netstatus_interface_type_t GetInterfaceType(netstatus_interface_details_t details);
@@ -49,7 +53,7 @@ class BPSNetstatus
     virtual void GetEvent(bps_event_t **event, int flags);
     virtual void GetEventDomain(bps_event_t *event);
     virtual void GetDomain();
-    virtual void GetEventCode(bps_event_t *event);
+    virtual void GetEventCode(bps_event_t *event)
 };
 
 /*

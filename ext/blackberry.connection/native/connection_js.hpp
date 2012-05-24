@@ -27,6 +27,9 @@ void* ConnectionEventThread(void *args);
 class ConnectionInterface
 {
 public
+    ConnectionInterface() {}
+    virtual ~ConnectionInterface() {}
+
     virtual void NotifyEvent(const std::string& event) = 0;
     virtual void StartEvents() = 0;
     virtual void StopEvents() = 0;
