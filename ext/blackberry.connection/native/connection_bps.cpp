@@ -26,12 +26,14 @@ bool ConnectionBPS::m_eventsEnabled = 0;
 
 ConnectionBPS::ConnectionBPS(ConnectionInterface *parent) : m_parent(parent)
 {
-    bps_initialize();
+    m_bps = new BPSNetstatus();
+    m_bps->bps_initialize();
 }
 
 ConnectionBPS::~ConnectionBPS()
 {
-    bps_shutdown();
+    m_bps->bps_shutdown();
+    delete m_bps;
 }
 
 ConnectionTypes ConnectionBPS::GetConnectionType()
@@ -43,14 +45,14 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
     int status;
     ConnectionTypes returnType;
 
-    netstatus_get_availability(&available);
+    m_bps->netstatus_get_availability(&available);
 
     if (available) {
-        netstatus_get_default_interface(&interface);
-        status = netstatus_get_interface_details(interface, &details);
+        m_bps->netstatus_get_default_interface(&interface);
+        status = m_bps->netstatus_get_interface_details(interface, &details);
 
         if (status == BPS_SUCCESS) {
-            type = netstatus_interface_get_type(details);
+            type = m_bps->netstatus_interface_get_type(details);
 
             switch (type) {
             case NETSTATUS_INTERFACE_TYPE_UNKNOWN:
@@ -79,8 +81,8 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
                 break;
             };
 
-            netstatus_free_interface_details(&details);
-            bps_free(interface);
+            m_bps->netstatus_free_interface_details(&details);
+            m_bps->bps_free(interface);
         }
     } else {
         returnType = NONE;
@@ -91,18 +93,18 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
 
 int ConnectionBPS::WaitForEvents()
 {
-    int status = netstatus_request_events(0);
+    int status = m_bps->netstatus_request_events(0);
 
     if (status == BPS_SUCCESS) {
         ConnectionTypes oldType = GetConnectionType();
 
         while (m_eventsEnabled) {
             bps_event_t *event = NULL;
-            bps_get_event(&event, 0);   // Returns immediately
+            m_bps->bps_get_event(&event, 0);   // Returns immediately
 
             if (event) {
-                if (bps_event_get_domain(event) == netstatus_get_domain()) {
-                    if (bps_event_get_code(event) == NETSTATUS_INFO) {
+                if (m_bps->bps_event_get_domain(event) == m_bps->netstatus_get_domain()) {
+                    if (m_bps->bps_event_get_code(event) == NETSTATUS_INFO) {
                         ConnectionTypes newType = GetConnectionType();
 
                         if (newType != oldType)

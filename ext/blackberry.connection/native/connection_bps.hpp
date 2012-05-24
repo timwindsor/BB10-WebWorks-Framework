@@ -17,8 +17,7 @@
 #ifndef CONNECTION_BPS_H_
 #define CONNECTION_BPS_H_
 
-#include <bps/bps.h>
-#include <bps/netstatus.h>
+#include "bps_netstatus.hpp"
 
 class ConnectionInterface;
 
@@ -47,6 +46,7 @@ public:
 private:
     ConnectionInterface *m_parent;
     static bool m_eventsEnabled;
+    BPSNetstatus *m_bps;
 };
 
 } // namespace webworks
