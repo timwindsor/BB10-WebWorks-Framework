@@ -41,15 +41,15 @@ public:
         netstatus_get_default_interface(interface);
     }
 
-    virtual int GetInterfaceDetails(char *interface, netstatus_interface_details_t *details) {
+    virtual int GetInterfaceDetails(char *interface, netstatus_interface_details_t **details) {
         return netstatus_get_interface_details(interface, details);
     }
 
-    virtual netstatus_interface_type_t GetInterfaceType(netstatus_interface_details_t details) {
-        return netstatus_interface_get_type (details);
+    virtual netstatus_interface_type_t GetInterfaceType(netstatus_interface_details_t *details) {
+        return netstatus_interface_get_type(details);
     }
 
-    virtual void FreeInterfaceDetails(netstatus_interface_details_t *details) {
+    virtual void FreeInterfaceDetails(netstatus_interface_details_t **details) {
         netstatus_free_interface_details(details);
     }
 

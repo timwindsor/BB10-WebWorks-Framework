@@ -26,7 +26,7 @@ void* ConnectionEventThread(void *args);
 
 class ConnectionInterface
 {
-public
+public:
     ConnectionInterface() {}
     virtual ~ConnectionInterface() {}
 
