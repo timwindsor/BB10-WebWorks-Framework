@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-var framework = require("../../lib/framework");
+var application = window.qnx.webplatform.getApplication();
 
 module.exports = {
     addEventListener: function (event, trigger) {
         if (event) {
             switch (event) {
             case "pause":
-                framework.setOnPause(trigger);
+                application.onWindowInactive(trigger);
                 break;
 
             case "resume":
-                framework.setOnResume(trigger);
+                application.onWindowActive(trigger);
                 break;
 
             default:
@@ -38,11 +38,11 @@ module.exports = {
         if (event) {
             switch (event) {
             case "pause":
-                framework.setOnPause(null);
+                application.onWindowInactive(null);
                 break;
 
             case "resume":
-                framework.setOnResume(null);
+                application.onWindowActive(null);
                 break;
 
             default:
