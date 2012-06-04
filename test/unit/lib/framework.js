@@ -18,8 +18,12 @@ var srcPath = __dirname + '/../../../lib/',
     framework = require(srcPath + 'framework'),
     util = require(srcPath + "utils"),
     webview,
+<<<<<<< HEAD
     overlayWebView,
     controllerWebView,
+=======
+    chromeWebview = require(srcPath + "chromeWebview"),
+>>>>>>> 04c1995... Disable lint for html folder for now.  Update tests for framework.js
     Whitelist = require(srcPath + 'policy/whitelist').Whitelist,
     mockedWebview,
     mockedApplicationWindow,
@@ -74,6 +78,7 @@ describe("framework", function () {
         spyOn(webview, "destroy");
         spyOn(webview, "executeJavascript");
         spyOn(webview, "setURL");
+        spyOn(chromeWebview, "setURL");
         spyOn(console, "log");
     });
 
