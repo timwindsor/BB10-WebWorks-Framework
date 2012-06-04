@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-var application = window.qnx.webplatform.getApplication();
-
 module.exports = {
     addEventListener: function (event, trigger) {
         if (event) {
             switch (event) {
             case "pause":
-                application.onWindowInactive(trigger);
+                window.qnx.webplatform.getApplication().onWindowInactive(trigger);
                 break;
 
             case "resume":
-                application.onWindowActive(trigger);
+                window.qnx.webplatform.getApplication().onWindowActive(trigger);
                 break;
 
             default:
@@ -38,11 +35,11 @@ module.exports = {
         if (event) {
             switch (event) {
             case "pause":
-                application.onWindowInactive(null);
+                window.qnx.webplatform.getApplication().onWindowInactive(null);
                 break;
 
             case "resume":
-                application.onWindowActive(null);
+                window.qnx.webplatform.getApplication().onWindowActive(null);
                 break;
 
             default:

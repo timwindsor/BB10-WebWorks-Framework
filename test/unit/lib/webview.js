@@ -3,7 +3,7 @@ describe("webview", function () {
         libPath = "./../../../", 
         mockedController,
         mockedWebview,
-        mockedApplicationWindow,
+        mockedApplication,
         request = require(libPath + "lib/request");
 
     beforeEach(function () {
@@ -28,7 +28,7 @@ describe("webview", function () {
             executeJavaScript: jasmine.createSpy(),
             windowGroup: undefined
         };
-        mockedApplicationWindow = {
+        mockedApplication = {
             visible: undefined
         };
         GLOBAL.qnx = {
@@ -43,8 +43,8 @@ describe("webview", function () {
                     runs(createFunction);
                     return mockedWebview;
                 },
-                getApplicationWindow: function () {
-                    return mockedApplicationWindow;
+                getApplication: function () {
+                    return mockedApplication;
                 }
             }
         };
@@ -83,7 +83,7 @@ describe("webview", function () {
                 expect(mockedWebview.zOrder).toEqual(0);
                 expect(mockedWebview.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
 
-                expect(mockedApplicationWindow.visible).toEqual(true);
+                expect(mockedApplication.visible).toEqual(true);
 
                 expect(request.init).toHaveBeenCalledWith(mockedWebview);
                 expect(mockedWebview.onNetworkResourceRequested).toEqual(request.init(mockedWebview).networkResourceRequestedHandler);
