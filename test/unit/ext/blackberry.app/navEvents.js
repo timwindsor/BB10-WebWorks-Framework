@@ -17,8 +17,10 @@
 var _apiDir = __dirname + "./../../../../ext/blackberry.app/",
     _libDir = __dirname + "./../../../../lib/",
     navEvents,
-    activeSpy = jasmine.createSpy(),
-    inactiveSpy = jasmine.createSpy();
+    addActiveSpy = jasmine.createSpy(),
+    addInactiveSpy = jasmine.createSpy(),
+    removeActiveSpy = jasmine.createSpy(),
+    removeInactiveSpy = jasmine.createSpy();
 
 beforeEach(function () {
     GLOBAL.window = GLOBAL;
@@ -26,8 +28,10 @@ beforeEach(function () {
         webplatform: {
             getApplication: function () {
                 return {
-                    onWindowActive: activeSpy,
-                    onWindowInactive: inactiveSpy
+                    addWindowActiveListener: addActiveSpy,
+                    addWindowInactiveListener: addInactiveSpy,
+                    removeWindowActiveListener: removeActiveSpy,
+                    removeWindowInactiveListener: removeInactiveSpy
                 };
             }
         }
@@ -39,26 +43,28 @@ describe("blackberry.app navEvents", function () {
     describe("addEventListener", function () {
         var trigger = function () {};
 
-        it("calls application.onWindowInactive for 'pause' event", function () {
+        it("calls application.addWindowInactiveListener for 'pause' event", function () {
             navEvents.addEventListener("pause", trigger);
-            expect(inactiveSpy).toHaveBeenCalledWith(trigger);
+            expect(addInactiveSpy).toHaveBeenCalledWith(trigger);
         });
 
-        it("calls application.onWindowActive for 'resume' event", function () {
+        it("calls application.addWindowActiveListener for 'resume' event", function () {
             navEvents.addEventListener("resume", trigger);
-            expect(activeSpy).toHaveBeenCalledWith(trigger);
+            expect(addActiveSpy).toHaveBeenCalledWith(trigger);
         });
     });
 
     describe("removeEventListener", function () {
+        var trigger = function () {};
+
         it("calls application.onWindowInactive for 'pause' event", function () {
-            navEvents.removeEventListener("pause");
-            expect(inactiveSpy).toHaveBeenCalledWith(null);
+            navEvents.removeEventListener("pause", trigger);
+            expect(removeInactiveSpy).toHaveBeenCalledWith(trigger);
         });
 
         it("calls application.onWindowActive for 'resume' event", function () {
-            navEvents.removeEventListener("resume");
-            expect(activeSpy).toHaveBeenCalledWith(null);
+            navEvents.removeEventListener("resume", trigger);
+            expect(removeActiveSpy).toHaveBeenCalledWith(trigger);
         });
     });
 });

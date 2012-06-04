@@ -29,7 +29,7 @@ describe("webview", function () {
             windowGroup: undefined
         };
         mockedApplication = {
-            visible: undefined
+            windowVisible: undefined
         };
         GLOBAL.qnx = {
             callExtensionMethod: jasmine.createSpy(),
@@ -83,7 +83,7 @@ describe("webview", function () {
                 expect(mockedWebview.zOrder).toEqual(0);
                 expect(mockedWebview.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
 
-                expect(mockedApplication.visible).toEqual(true);
+                expect(mockedApplication.windowVisible).toEqual(true);
 
                 expect(request.init).toHaveBeenCalledWith(mockedWebview);
                 expect(mockedWebview.onNetworkResourceRequested).toEqual(request.init(mockedWebview).networkResourceRequestedHandler);

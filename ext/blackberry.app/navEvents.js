@@ -18,11 +18,11 @@ module.exports = {
         if (event) {
             switch (event) {
             case "pause":
-                window.qnx.webplatform.getApplication().onWindowInactive(trigger);
+                window.qnx.webplatform.getApplication().addWindowInactiveListener(trigger);
                 break;
 
             case "resume":
-                window.qnx.webplatform.getApplication().onWindowActive(trigger);
+                window.qnx.webplatform.getApplication().addWindowActiveListener(trigger);
                 break;
 
             default:
@@ -31,15 +31,15 @@ module.exports = {
             }
         }
     },
-    removeEventListener: function (event) {
+    removeEventListener: function (event, trigger) {
         if (event) {
             switch (event) {
             case "pause":
-                window.qnx.webplatform.getApplication().onWindowInactive(null);
+                window.qnx.webplatform.getApplication().removeWindowInactiveListener(trigger);
                 break;
 
             case "resume":
-                window.qnx.webplatform.getApplication().onWindowActive(null);
+                window.qnx.webplatform.getApplication().removeWindowActiveListener(trigger);
                 break;
 
             default:
