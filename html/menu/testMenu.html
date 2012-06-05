@@ -4,9 +4,9 @@
         <meta name="viewport" content="user-scalable=no, target-densitydpi=device-dpi, width=device-width">
         <title>Menu Page</title>
        
-        <link rel="stylesheet" href="styles/styles.css" type="text/css" media="screen" charset="utf-8">
+        <link rel="stylesheet" href="styles/chrome.css" type="text/css" media="screen" charset="utf-8">
         
-        <script type="text/javascript" src="local:///dependencies/require/require.js"></script>
+        <script type="text/javascript" src="local:///chrome/require.js"></script>
         <script type="text/javascript" src="index.js"></script>
 
         
@@ -14,6 +14,10 @@
         <script type="text/javascript">
             function showMenu() {
                 var menu = require('html/menu');
+                menu.init();
+                menu.setMenuOptions(
+                  [{name: "menu", "function": function() {alert("funtion");} }, {name: "menu2", "function": function() {alert("funtion2");} }]
+                  );
                 menu.crosscutMenuVisible(true);
             } 
         </script>

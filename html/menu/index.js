@@ -4,9 +4,7 @@ define('html/menu', function (require, exports, module) {
  * Copyright (C) Research In Motion Limited 2012. All rights reserved.
  */
 
-var self,
-    event = require('iris/event'),
-    screenManager = require('screen/manager'),
+var self,    
     menuVisible,
     hideCrosscutMenu = function () { self.crosscutMenuVisible(false); },
     touchStarted = false,
@@ -32,6 +30,7 @@ function init() {
 }
 
 self = {
+	"init": init,
     setMenuOptions: function (options) {
         var menu = document.getElementById("crosscutMenuContent");
 
@@ -67,13 +66,15 @@ self = {
         var menu = document.getElementById('crosscutMenu');
 
         if (show) {
-            qnx.callExtensionMethod("webview.setSensitivity", iris.chromeId, "SensitivityAlways");
+			//TODO: 3 for iris.chromeId
+            qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityAlways");
             menu.className = 'showMenu';
             menuVisible = true;
             hideMenuOnTouchEnd = !touchStarted;
             event.emit('screen.menu.showing', [], true);
         } else {
-            qnx.callExtensionMethod("webview.setSensitivity", iris.chromeId, "SensitivityTest");
+			//TODO: 3 for iris.chromeId
+            qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityTest");
             menuVisible = false;
             menu.className = 'hideMenu';
             event.emit('screen.menu.hiding', [], true);
@@ -92,7 +93,7 @@ self = {
     menuType: {context: 'context', overflow: 'overflow'}
 };
 
-event.on('browser.plugins.init', init);
+//event.on('browser.plugins.init', init);
 
 module.exports = self;
 
