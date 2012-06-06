@@ -12,15 +12,12 @@
 1. git clone https://github.com/blackberry-webworks/BB10-WebWorks-Framework.git
 2. cd BB10-WebWorks-Framework
 3. git checkout next
-4. Configuration:
+4. Setup bbndk environment variable
     - For Mac:
         ./configure
     - For Windows:
         bash configure (run from command prompt)
 5. Run 'jake test' and check that jake runs and completes
 6. Setup bbndk environment variable
-    - For Mac:
-        Add "source *installation directory here*/bbndk-env.sh" to your bash profile
-    - For Windows:
         Run *BBNDK Installation Directory*\bbndk-env.bat.
 7. Run 'jake' or 'jake build' and check that the output folder is created under the "target/zip" subfolder. If on windows, run jake from command prompt.
