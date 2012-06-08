@@ -18,8 +18,7 @@
 #include "connection_js.hpp"
 #include "connection_bps.hpp"
 
-bool eventsInitialized = false;
-
+/*
 void* ConnectionEventThread(void *args)
 {
     Connection *parent = static_cast<Connection *>(args);
@@ -39,15 +38,16 @@ void* ConnectionEventThread(void *args)
     eventsInitialized = true;
     return NULL;
 }
+*/
 
 Connection::Connection(const std::string& id) : m_id(id)
 {
-    m_thread = 0;
+	m_eventsInitialized = false;
 }
 
 Connection::~Connection()
 {
-    if (m_thread) {
+    if (m_eventsInitialized) {
         StopEvents();
     }
 }
@@ -107,24 +107,10 @@ void Connection::NotifyEvent(const std::string& event)
 
 void Connection::StartEvents()
 {
-    if (!m_thread) {
-        eventsInitialized = false;
-        int error = pthread_create(&m_thread, NULL, ConnectionEventThread, static_cast<void *>(this));
-
-        if (error) {
-            m_thread = 0;
-        }
-    }
+	webworks::ConnectionBPS::SendStartEvent();
 }
 
 void Connection::StopEvents()
 {
-    if (m_thread) {
-        // Ensure that the secondary thread was initialized
-        while (!eventsInitialized);
-
-        webworks::ConnectionBPS::SendEndEvent();
-        pthread_join(m_thread, NULL);
-        m_thread = 0;
-    }
+	webworks::ConnectionBPS::SendEndEvent();
 }

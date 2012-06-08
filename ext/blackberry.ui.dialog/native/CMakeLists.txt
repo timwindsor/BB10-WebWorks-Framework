@@ -10,9 +10,11 @@ set(dialog_srcs
     ../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/src/lib_json/json_value.cpp
     ../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/src/lib_json/json_writer.cpp
     ../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common/plugin.cpp
+    ../../../dependencies/bps_thread/BPSMaster.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/bps_thread)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/jnext_1_0_8_3/jncore/jnext-core/Win-Linux-npapi/gecko-sdk/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/include)

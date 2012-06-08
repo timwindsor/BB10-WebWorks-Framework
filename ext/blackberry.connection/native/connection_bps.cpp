@@ -22,7 +22,7 @@
 namespace webworks {
 
 int ConnectionBPS::m_eventChannel = -1;
-int ConnectionBPS::m_endEventDomain = -1;
+int ConnectionBPS::m_internalEventDomain = -1;
 
 ConnectionBPS::ConnectionBPS(Connection *parent) : m_parent(parent)
 {
@@ -89,29 +89,28 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
     return returnType;
 }
 
-int ConnectionBPS::InitializeEvents()
+int ConnectionBPS::BPSDomain() const
 {
-    m_eventChannel = bps_channel_get_active();
-    m_endEventDomain = bps_register_domain();
-
-    return (m_endEventDomain >= 0) ? 0 : 1;
+	return netstatus_get_domain();
 }
 
-int ConnectionBPS::WaitForEvents()
+void ConnectionBPS::OnBPSInit()
 {
-    int status = netstatus_request_events(0);
+	netstatus_request_events(0);
+    m_eventChannel = bps_channel_get_active();
+    m_internalEventDomain = bps_register_domain();
+}
 
-    if (status == BPS_SUCCESS) {
-        ConnectionTypes oldType = GetConnectionType();
-
-        for (;;) {
-            bps_event_t *event = NULL;
-            bps_get_event(&event, -1);   // Blocking
-
-            if (event) {
+void ConnectionBPS::OnBPSEvent(bps_event_t *event)
+{
+    if (event) {
+	ConnectionTypes oldType;
+    if (m_eventsRunning) {
+    	oldType = GetConnectionType();
+    }
                 int event_domain = bps_event_get_domain(event);
 
-                if (event_domain == netstatus_get_domain()) {
+                if (event_domain == netstatus_get_domain() && m_eventsRunning) {
                     if (bps_event_get_code(event) == NETSTATUS_INFO) {
                         ConnectionTypes newType = GetConnectionType();
 
@@ -129,22 +128,32 @@ int ConnectionBPS::WaitForEvents()
                         }
                     }
                 }
-                else if (event_domain == m_endEventDomain) {
-                    break;
+                else if (event_domain == m_internalEventDomain) {
+                	m_eventsRunning = static_cast<bool>(bps_event_get_code(event));
+                	bps_event_destroy(event);
                 }
             }
-        }
-    }
+}
 
-    return (status == BPS_SUCCESS) ? 0 : 1;
+void ConnectionBPS::OnBPSShutdown()
+{
+	
+}
+
+// This function will be called by the primary thread
+void ConnectionBPS::SendStartEvent()
+{
+    bps_event_t *event = NULL;
+    bps_event_create(&event, m_internalEventDomain, true, NULL, NULL);
+    bps_channel_push_event(m_eventChannel, event);
 }
 
 // This function will be called by the primary thread
 void ConnectionBPS::SendEndEvent()
 {
-    bps_event_t *end_event = NULL;
-    bps_event_create(&end_event, m_endEventDomain, 0, NULL, NULL);
-    bps_channel_push_event(m_eventChannel, end_event);
+    bps_event_t *event = NULL;
+    bps_event_create(&event, m_internalEventDomain, false, NULL, NULL);
+    bps_channel_push_event(m_eventChannel, event);
 }
 
 } // namespace webworks

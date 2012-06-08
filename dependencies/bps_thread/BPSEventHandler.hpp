@@ -19,12 +19,13 @@
 
 #include <bps/bps.h>
 #include <bps/event.h>
+#include <pthread.h>
 
 class BPSEventHandler {
 public:
-    BPSEventHandler();
-    virtual ~BPSEventHandler() = 0;
-    int bps_domain() const;
+    BPSEventHandler() { };
+    virtual ~BPSEventHandler() { };
+    virtual int BPSDomain() const = 0;
     virtual void OnBPSInit() = 0;
     virtual void OnBPSShutdown() = 0;
     virtual void OnBPSEvent(bps_event_t *event) = 0;

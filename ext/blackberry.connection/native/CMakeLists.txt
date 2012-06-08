@@ -1,4 +1,5 @@
 include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/bps_thread)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/jnext_1_0_8_3/jncore/jnext-core/Win-Linux-npapi/gecko-sdk/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common)
 
@@ -6,6 +7,7 @@ set(connection_srcs
     connection_bps.cpp
     connection_js.cpp
     ../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common/plugin.cpp
+    ../../../dependencies/bps_thread/BPSMaster.cpp
 )
 
 add_subdirectory(unitTests)

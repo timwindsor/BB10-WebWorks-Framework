@@ -34,6 +34,7 @@ public:
     void RemoveEventListener(BPSEventHandler *handler);
     static void* MainEventThread(void *);
     static BPSMaster* GetInstance();
+    static int GetChannel();
 private:
     void StartThread();
     void StopThread();

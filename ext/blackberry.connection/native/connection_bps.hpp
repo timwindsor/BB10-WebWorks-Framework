@@ -19,6 +19,7 @@
 
 #include <bps/bps.h>
 #include <bps/netstatus.h>
+#include <BPSEventHandler.hpp>
 
 class Connection;
 
@@ -36,18 +37,22 @@ enum ConnectionTypes {
     NONE = 8
 };
 
-class ConnectionBPS {
+class ConnectionBPS : public BPSEventHandler {
 public:
     explicit ConnectionBPS(Connection *parent = NULL);
     ~ConnectionBPS();
+    int BPSDomain() const;
     ConnectionTypes GetConnectionType();
-    int InitializeEvents();
-    int WaitForEvents();
+    void OnBPSInit();
+    void OnBPSShutdown();
+    void OnBPSEvent(bps_event_t *event);
+    static void SendStartEvent();
     static void SendEndEvent();
 private:
     Connection *m_parent;
+    static bool m_eventsRunning;
     static int m_eventChannel;
-    static int m_endEventDomain;
+    static int m_internalEventDomain;
 };
 
 } // namespace webworks

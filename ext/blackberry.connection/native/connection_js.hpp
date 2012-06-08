@@ -17,12 +17,9 @@
 #ifndef CONNECTION_JS_H_
 #define CONNECTION_JS_H_
 
-#include <pthread.h>
 #include <plugin.h>
 #include <sstream>
 #include <string>
-
-void* ConnectionEventThread(void *args);
 
 class Connection : public JSExt
 {
@@ -36,7 +33,7 @@ public:
     void StopEvents();
 private:
     std::string m_id;
-    pthread_t m_thread;
+    bool m_eventsInitialized;
 };
 
 #endif /* CONNECTION_JS_H_ */

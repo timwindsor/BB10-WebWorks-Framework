@@ -16,6 +16,8 @@
 
 #include <bps/bps.h>
 #include "BPSMaster.hpp"
+#include <stdio.h>
+#include <iostream>
 
 int BPSMaster::m_channel;
 int BPSMaster::m_domain;
@@ -60,17 +62,21 @@ void BPSMaster::NotifyInternalEvent(InternalEvent e, void *payload)
 
 void* BPSMaster::MainEventThread(void *)
 {
+    m_channel = bps_channel_get_active();
+    fprintf(stderr, "%s\n", "event handler running");
     bool isRunning = true;
     while (isRunning) {
         bps_event_t *event;
         bps_get_event(&event, -1); // blocking
 
+    fprintf(stderr, "%s\n", "processing event");
         if (bps_event_get_domain(event) == m_domain) {
             InternalEvent code = static_cast<InternalEvent>(bps_event_get_code(event));
             BPSEventHandler *handler = reinterpret_cast<BPSEventHandler *>(bps_event_get_payload(event)->data1);
             std::list<BPSEventHandler *>::iterator it;
             switch (code) {
             case ListenerAdded:
+    fprintf(stderr, "%s\n", "trying to call event handler");
                 handler->OnBPSInit();
                 break;
             case ShutdownThread:
@@ -83,6 +89,7 @@ void* BPSMaster::MainEventThread(void *)
                 break;
             }
         } else {
+    fprintf(stderr, "%s\n", "trying to call bps handler");
             std::list<BPSEventHandler *>::iterator it;
             for (it = m_listeners.begin(); it != m_listeners.end(); it++) {
                 (*it)->OnBPSEvent(event);
@@ -95,7 +102,8 @@ void* BPSMaster::MainEventThread(void *)
 
 void BPSMaster::AddEventListener(BPSEventHandler *handler)
 {
-    m_listeners.push_back(handler);
+    fprintf(stderr, "%s\n", "trying to add event handler");
+m_listeners.push_back(handler);
     NotifyInternalEvent(ListenerAdded, reinterpret_cast<void *>(handler));
 }
 
@@ -108,4 +116,10 @@ BPSMaster* BPSMaster::GetInstance()
 {
     static BPSMaster instance;
     return &instance;
+}
+
+int BPSMaster::GetChannel()
+{
+    fprintf(stderr, "%s %d\n", "channel : ", m_channel);
+    return m_channel;
 }
