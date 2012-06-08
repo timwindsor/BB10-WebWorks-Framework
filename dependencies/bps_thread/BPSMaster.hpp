@@ -19,7 +19,7 @@
 
 #include <list>
 #include <pthread.h>
-#include "BPSEventHandler.h"
+#include "BPSEventHandler.hpp"
 
 enum InternalEvent {
     ListenerAdded = 0,
