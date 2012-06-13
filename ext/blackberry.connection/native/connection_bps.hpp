@@ -20,6 +20,7 @@
 #include <bps/bps.h>
 #include <bps/netstatus.h>
 #include <BPSEventHandler.hpp>
+#include <BPSMaster.hpp>
 
 class Connection;
 
@@ -46,13 +47,13 @@ public:
     void OnBPSInit();
     void OnBPSShutdown();
     void OnBPSEvent(bps_event_t *event);
-    static void SendStartEvent();
-    static void SendEndEvent();
+    void SendStartEvent();
+    void SendEndEvent();
 private:
     Connection *m_parent;
-    static bool m_eventsRunning;
-    static int m_eventChannel;
-    static int m_internalEventDomain;
+    bool m_eventsRunning;
+    int m_eventChannel;
+    int m_internalEventDomain;
 };
 
 } // namespace webworks

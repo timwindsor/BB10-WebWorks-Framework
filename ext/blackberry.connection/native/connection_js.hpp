@@ -14,9 +14,10 @@
 * limitations under the License.
 */
 
-#ifndef CONNECTION_JS_H_
-#define CONNECTION_JS_H_
+#ifndef CONNECTION_JS_HPP_
+#define CONNECTION_JS_HPP_
 
+#include "connection_bps.hpp"
 #include <plugin.h>
 #include <sstream>
 #include <string>
@@ -32,8 +33,9 @@ public:
     void StartEvents();
     void StopEvents();
 private:
+    webworks::ConnectionBPS *m_pConnection;
     std::string m_id;
     bool m_eventsInitialized;
 };
 
-#endif /* CONNECTION_JS_H_ */
+#endif /* CONNECTION_JS_HPP_ */

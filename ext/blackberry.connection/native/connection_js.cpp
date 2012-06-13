@@ -16,39 +16,21 @@
 
 #include <string>
 #include "connection_js.hpp"
-#include "connection_bps.hpp"
-
-/*
-void* ConnectionEventThread(void *args)
-{
-    Connection *parent = static_cast<Connection *>(args);
-    webworks::ConnectionBPS *connection  = new webworks::ConnectionBPS(parent);
-
-    if (connection) {
-        if (connection->InitializeEvents() == 0) {
-            eventsInitialized = true;
-
-            // Poll for events in ConnectionBPS. This will run until StopEvents() disables events.
-            connection->WaitForEvents();
-
-            delete connection;
-        }
-    }
-
-    eventsInitialized = true;
-    return NULL;
-}
-*/
 
 Connection::Connection(const std::string& id) : m_id(id)
 {
-	m_eventsInitialized = false;
+    m_pConnection = new webworks::ConnectionBPS(this);
+    m_eventsInitialized = false;
 }
 
 Connection::~Connection()
 {
     if (m_eventsInitialized) {
         StopEvents();
+    }
+
+    if (m_pConnection) {
+        delete m_pConnection;
     }
 }
 
@@ -74,10 +56,8 @@ std::string Connection::InvokeMethod(const std::string& command)
     string strCommand = command.substr(0, index);
 
     if (strCommand == "getType") {
-        webworks::ConnectionBPS *connection = new webworks::ConnectionBPS();
         std::stringstream ss;
-        ss << connection->GetConnectionType();
-        delete connection;
+        ss << m_pConnection->GetConnectionType();
         return ss.str();
     }
     else if (strCommand == "startEvents") {
@@ -107,10 +87,10 @@ void Connection::NotifyEvent(const std::string& event)
 
 void Connection::StartEvents()
 {
-	webworks::ConnectionBPS::SendStartEvent();
+    m_pConnection->SendStartEvent();
 }
 
 void Connection::StopEvents()
 {
-	webworks::ConnectionBPS::SendEndEvent();
+    m_pConnection->SendEndEvent();
 }

@@ -9,6 +9,7 @@ set(srcs
     ../connection_js.cpp
     ../../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common/plugin.cpp
     ../../../../dependencies/gtest/src/gmock-gtest-all.cc
+    ../../../../dependencies/bps_thread/BPSMaster.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR})

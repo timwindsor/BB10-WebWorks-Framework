@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+#include <BPSMaster.hpp>
 #include <sstream>
 #include <string>
 #include "connection_js.hpp"
@@ -21,17 +22,15 @@
 
 namespace webworks {
 
-int ConnectionBPS::m_eventChannel = -1;
-int ConnectionBPS::m_internalEventDomain = -1;
-
 ConnectionBPS::ConnectionBPS(Connection *parent) : m_parent(parent)
 {
-    bps_initialize();
+    m_eventChannel = -1;
+    m_internalEventDomain = -1;
+    BPSMaster::GetInstance()->AddEventListener(this);
 }
 
 ConnectionBPS::~ConnectionBPS()
 {
-    bps_shutdown();
 }
 
 ConnectionTypes ConnectionBPS::GetConnectionType()
@@ -53,30 +52,30 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
             type = netstatus_interface_get_type(details);
 
             switch (type) {
-            case NETSTATUS_INTERFACE_TYPE_UNKNOWN:
-                returnType = UNKNOWN;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_WIRED:
-                returnType = ETHERNET;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_WIFI:
-                returnType = WIFI;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_BLUETOOTH_DUN:
-                returnType = BLUETOOTH_DUN;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_USB:
-                returnType = USB;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_VPN:
-                returnType = VPN;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_BB:
-                returnType = BB;
-                break;
-            case NETSTATUS_INTERFACE_TYPE_CELLULAR:
-                returnType = CELLULAR;
-                break;
+                case NETSTATUS_INTERFACE_TYPE_UNKNOWN:
+                    returnType = UNKNOWN;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_WIRED:
+                    returnType = ETHERNET;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_WIFI:
+                    returnType = WIFI;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_BLUETOOTH_DUN:
+                    returnType = BLUETOOTH_DUN;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_USB:
+                    returnType = USB;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_VPN:
+                    returnType = VPN;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_BB:
+                    returnType = BB;
+                    break;
+                case NETSTATUS_INTERFACE_TYPE_CELLULAR:
+                    returnType = CELLULAR;
+                    break;
             };
 
             netstatus_free_interface_details(&details);
@@ -91,56 +90,56 @@ ConnectionTypes ConnectionBPS::GetConnectionType()
 
 int ConnectionBPS::BPSDomain() const
 {
-	return netstatus_get_domain();
+    return netstatus_get_domain();
 }
 
 void ConnectionBPS::OnBPSInit()
 {
-	netstatus_request_events(0);
+    netstatus_request_events(0);
     m_eventChannel = bps_channel_get_active();
     m_internalEventDomain = bps_register_domain();
 }
 
 void ConnectionBPS::OnBPSEvent(bps_event_t *event)
 {
+    ConnectionTypes oldType;
+
     if (event) {
-	ConnectionTypes oldType;
-    if (m_eventsRunning) {
-    	oldType = GetConnectionType();
-    }
-                int event_domain = bps_event_get_domain(event);
+        int event_domain = bps_event_get_domain(event);
 
-                if (event_domain == netstatus_get_domain() && m_eventsRunning) {
-                    if (bps_event_get_code(event) == NETSTATUS_INFO) {
-                        ConnectionTypes newType = GetConnectionType();
+        if (event_domain == netstatus_get_domain() && m_eventsRunning) {
+            if (bps_event_get_code(event) == NETSTATUS_INFO) {
+                ConnectionTypes newType = GetConnectionType();
 
-                        if (newType != oldType)
-                        {
-                            // Convert to string
-                            std::stringstream ss;
-                            ss << oldType;
-                            ss << " ";
-                            ss << newType;
-                            std::string result = ss.str();
-
-                            m_parent->NotifyEvent(result);
-                            oldType = newType;
-                        }
-                    }
-                }
-                else if (event_domain == m_internalEventDomain) {
-                	m_eventsRunning = static_cast<bool>(bps_event_get_code(event));
-                	bps_event_destroy(event);
+                if (newType != oldType)
+                {
+                    // Convert to string
+                    std::stringstream ss;
+                    ss << oldType;
+                    ss << " ";
+                    ss << newType;
+                    std::string result = ss.str();
+                    m_parent->NotifyEvent(result);
+                    oldType = newType;
                 }
             }
+        }
+        else if (event_domain == m_internalEventDomain) {
+            m_eventsRunning = static_cast<bool>(bps_event_get_code(event));
+
+            if (m_eventsRunning) {
+                oldType = GetConnectionType();
+            }
+
+            bps_event_destroy(event);
+        }
+    }
 }
 
 void ConnectionBPS::OnBPSShutdown()
 {
-	
 }
 
-// This function will be called by the primary thread
 void ConnectionBPS::SendStartEvent()
 {
     bps_event_t *event = NULL;
@@ -148,7 +147,6 @@ void ConnectionBPS::SendStartEvent()
     bps_channel_push_event(m_eventChannel, event);
 }
 
-// This function will be called by the primary thread
 void ConnectionBPS::SendEndEvent()
 {
     bps_event_t *event = NULL;
