@@ -94,20 +94,25 @@ self = {
         menuVisible = false;
         menuPeeked = false;
         menu.className = 'hideMenu';
+        // TODO: 2 for client webview
+        qnx.callExtensionMethod("webview.notifyContextMenuCancelled", 2);
+        
         /*tabs.getSelected(0, function (tab) {
             if (tab) {
                 qnx.callExtensionMethod("webview.notifyContextMenuCancelled", tab.id);
             }
         });*/
         // Reset sensitivity
-        qnx.callExtensionMethod("webview.setSensitivity", iris.chromeId, "SensitivityTest");
+        // TODO: 3 for ui webview
+        qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityTest");
     },
 
     peekContextMenu: function (show, zIndex) {
         if (menuVisible || menuPeeked) {
             return;
         }
-        qnx.callExtensionMethod("webview.setSensitivity", iris.chromeId, "SensitivityNoFocus");
+        //TODO: 3 for ui webview
+        qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityNoFocus");
         var menu = document.getElementById('contextMenu');
         var handle = document.getElementById('contextMenuHandle');
         handle.className = 'showContextMenuHandle';
