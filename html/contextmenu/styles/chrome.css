@@ -66,3 +66,61 @@ html {
     width: 121px;
     background-image: url('../assets/drag_bar.png');
 }
+
+#crosscutMenu {
+	height: 100%;
+	width: 563px;
+    border-image: url('../assets/core_crosscutmenu_bg.png') 1 1 1 15 fill / 0 0 0 0 repeat;
+	-webkit-box-shadow: -10px 0px 25px #121212;
+	-webkit-transition-duration: 0.25s;
+	-webkit-animation-timing-function: ease-out;
+	position: absolute;
+    right: -583px;
+    top: 0px;
+    bottom: 0px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-box-pack: center;
+    z-index: 100;
+}
+
+.showMenu {
+    -webkit-transform:translate(-583px,0);
+}
+
+.hideMenu {
+    display: none;
+    -webkit-transform:translate(0px,0);
+}
+
+#crosscutMenuContent {
+    font-size: 1.35em;
+}
+
+.menuItem {	
+    border-bottom: 2px solid #414141;
+    height: 119px;
+    white-space: nowrap;
+    color: #FAFAFA;
+}
+
+.menuItem:first-child {
+    border-top: 2px solid #414141;
+}
+
+    .menuItem img {
+        margin: 20px 19px;
+        vertical-align: middle;
+    }
+
+.menuItem:active {
+    border-image: url('../assets/core_crosscutmenu_selected.png') 2 1 2 13 / 1 1 1 1;
+}
+
+.menuImage {
+    width: 81px;
+    height: 81px;
+}
+
