@@ -2,11 +2,14 @@
  * Copyright (C) Research In Motion Limited 2012. All rights reserved.
  */
 
-var self,    
+var menu,    
     menuVisible,
-    hideCrosscutMenu = function () { self.crosscutMenuVisible(false); },
     touchStarted = false,
     hideMenuOnTouchEnd = false;
+
+function hideCrosscutMenu() { 
+    menu.crosscutMenuVisible(false); 
+}
 
 function touchStart() {
     touchStarted = true;
@@ -22,24 +25,28 @@ function touchEnd() {
 
 function init() {
     var menu = document.getElementById('crosscutMenu');
-    menu.addEventListener('webkitTransitionEnd', self.transitionEnd.bind(self));
+    menu.addEventListener('webkitTransitionEnd', menu.transitionEnd.bind(menu));
     document.addEventListener('touchstart', touchStart, true);
     document.addEventListener('touchend', touchEnd, true);
 }
 
-self = {
+menu = {
 	"init": init,
     setMenuOptions: function (options) {
-        var menu = document.getElementById("crosscutMenuContent");
+        var menu = document.getElementById("crosscutMenuContent"),
+            menuItem,
+            callback,
+            menuImage,
+            i;
 
         while (menu.childNodes.length >= 1) {
             menu.removeChild(menu.firstChild);
         }
 
-        for (var i = 0; i < options.length; i++) {
-            var menuItem = document.createElement('div');
-            var callback = options[i].function;
-            var menuImage = document.createElement('img');
+        for (i = 0; i < options.length; i++) {
+            menuItem = document.createElement('div');
+            callback = options[i].function;
+            menuImage = document.createElement('img');
             menuImage.src = options[i].imageUrl ? options[i].imageUrl : 'assets/generic_81_81_placeholder.png';
             menuImage.setAttribute("class", "menuImage");
             menuItem.appendChild(menuImage);
@@ -57,16 +64,16 @@ self = {
     },
 
     crosscutMenuVisible: function (show, zIndex) {
-        if (show == menuVisible) {
+        if (show === menuVisible) {
             return;
         }
 
-        var menu = document.getElementById('crosscutMenu');
+        var menuElement = document.getElementById('crosscutMenu');
 
         if (show) {
 			//TODO: 3 for iris.chromeId
             qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityAlways");
-            menu.className = 'showMenu';
+            menuElement.className = 'showMenu';
             menuVisible = true;
             hideMenuOnTouchEnd = !touchStarted;
             event.emit('screen.menu.showing', [], true);
@@ -74,7 +81,7 @@ self = {
 			//TODO: 3 for iris.chromeId
             qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityTest");
             menuVisible = false;
-            menu.className = 'hideMenu';
+            menuElement.className = 'hideMenu';
             event.emit('screen.menu.hiding', [], true);
         }
     },
@@ -93,4 +100,4 @@ self = {
 
 //event.on('browser.plugins.init', init);
 
-module.exports = self;
+module.exports = menu;

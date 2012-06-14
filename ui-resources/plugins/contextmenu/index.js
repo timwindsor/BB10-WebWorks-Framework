@@ -2,47 +2,52 @@
  * Copyright (C) Research In Motion Limited 2012. All rights reserved.
  */
 
-var self,
+var contextmenu,
     menuVisible,
     menuPeeked;
 
 function init() {
     var menu = document.getElementById('contextMenu');
-    menu.addEventListener('webkitTransitionEnd', self.transitionEnd.bind(self));
+    menu.addEventListener('webkitTransitionEnd', contextmenu.transitionEnd.bind(contextmenu));
 }
 
-self = {
+contextmenu = {
     init: init,
     setMenuOptions: function (options) {
-        var menu = document.getElementById("contextMenuContent");
+        var menu = document.getElementById("contextMenuContent"),
+            i,
+            header,
+            menuItem,
+            callback,
+            menuImage;
 
         while (menu.childNodes.length >= 1) {
             menu.removeChild(menu.firstChild);
         }
-        self.setHeadText('');
-        self.setSubheadText('');
+        contextmenu.setHeadText('');
+        contextmenu.setSubheadText('');
 
-        for (var i = 0; i < options.length; i++) {
+        for (i = 0; i < options.length; i++) {
             if (options[i].headText || options[i].subheadText) {
-                var header = document.getElementById('contextMenuHeader');
+                header = document.getElementById('contextMenuHeader');
                 header.className = 'contextMenuHeader';
                 if (options[i].headText) {
-                    self.setHeadText(options[i].headText);
+                    contextmenu.setHeadText(options[i].headText);
                 }
                 if (options[i].subheadText) {
-                    self.setSubheadText(options[i].subheadText);
+                    contextmenu.setSubheadText(options[i].subheadText);
                 }
                 continue;
             }
-            var menuItem = document.createElement('div');
-            var callback = options[i].function;
-            var menuImage = document.createElement('img');
+            menuItem = document.createElement('div');
+            callback = options[i].function;
+            menuImage = document.createElement('img');
             menuImage.src = options[i].imageUrl ? options[i].imageUrl : 'assets/generic_81_81_placeholder.png';
             menuItem.appendChild(menuImage);
             menuItem.appendChild(document.createTextNode(options[i].name));
             menuItem.setAttribute("class", "menuItem");
             menuItem.ontouchend = callback.bind(this, menuItem);
-            menuItem.addEventListener('mousedown', self.handleMouseDown, false);
+            menuItem.addEventListener('mousedown', contextmenu.handleMouseDown, false);
             // FIXME: need to make this work
             //menuItem.onmousedown = function () { menuItem.attr("class", "menuItem click"); };
             menu.appendChild(menuItem);
@@ -84,10 +89,10 @@ self = {
         if (!menuVisible && !menuPeeked) {
             return;
         }
-        var menu = document.getElementById('contextMenu');
-        menu.removeEventListener('touchend', self.hideContextMenu, false);
-        var handle = document.getElementById('contextMenuHandle');
-        handle.removeEventListener('touchend', self.showContextMenu, false);
+        var menu = document.getElementById('contextMenu'),
+            handle = document.getElementById('contextMenuHandle');
+        menu.removeEventListener('touchend', contextmenu.hideContextMenu, false);
+        handle.removeEventListener('touchend', contextmenu.showContextMenu, false);
         menuVisible = false;
         menuPeeked = false;
         menu.className = 'hideMenu';
@@ -110,8 +115,8 @@ self = {
         }
         //TODO: 3 for ui webview
         qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityNoFocus");
-        var menu = document.getElementById('contextMenu');
-        var handle = document.getElementById('contextMenuHandle');
+        var menu = document.getElementById('contextMenu'),
+            handle = document.getElementById('contextMenuHandle');
         handle.className = 'showContextMenuHandle';
         menuVisible = false;
         menuPeeked = true;
@@ -119,19 +124,20 @@ self = {
     },
 
     transitionEnd: function () {
-        var menu = document.getElementById('contextMenu');
-        var handle = document.getElementById('contextMenuHandle');
+        var menu = document.getElementById('contextMenu'),
+            handle = document.getElementById('contextMenuHandle'),
+            header;
         if (menuVisible) {
-            menu.addEventListener('touchend', self.hideContextMenu, false);
-            handle.removeEventListener('touchend', self.showContextMenu, false);
+            menu.addEventListener('touchend', contextmenu.hideContextMenu, false);
+            handle.removeEventListener('touchend', contextmenu.showContextMenu, false);
         } else if (menuPeeked) {
-            handle.addEventListener('touchend', self.showContextMenu, false);
-            menu.addEventListener('touchend', self.hideContextMenu, false);
+            handle.addEventListener('touchend', contextmenu.showContextMenu, false);
+            menu.addEventListener('touchend', contextmenu.hideContextMenu, false);
         } else {
-            var header = document.getElementById('contextMenuHeader');
+            header = document.getElementById('contextMenuHeader');
             header.className = '';
-            self.setHeadText('');
-            self.setSubheadText('');
+            contextmenu.setHeadText('');
+            contextmenu.setSubheadText('');
         }
     }
 
@@ -139,4 +145,4 @@ self = {
 
 //event.on('browser.plugins.init', init);
 
-module.exports = self;
+module.exports = contextmenu;
