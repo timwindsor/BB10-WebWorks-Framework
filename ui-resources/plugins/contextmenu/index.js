@@ -1,11 +1,8 @@
-define('htmlcontextmenu', function (require, exports, module) {
-
 /*
  * Copyright (C) Research In Motion Limited 2012. All rights reserved.
  */
 
 var self,
-    //tabs = require('chrome/tabs'),
     menuVisible,
     menuPeeked;
 
@@ -143,4 +140,3 @@ self = {
 //event.on('browser.plugins.init', init);
 
 module.exports = self;
-});

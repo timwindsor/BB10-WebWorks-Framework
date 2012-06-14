@@ -11,11 +11,12 @@
 
         <script type="text/javascript">
             function showMenu() {
-                var menu = require('htmlcontextmenu');
+                var menu = require('contextmenu');
                 menu.init();
-                menu.setMenuOptions(
-                  [{name: "menu", "function": function() {alert("function");} }, {name: "menu2", "function": function() {alert("function2");} }]
-                  );
+                menu.setMenuOptions([
+                        {name: "menu", "function": function() {alert("function");} }, 
+                        {name: "menu2", "function": function() {alert("function2");} }
+                        ]);
                 menu.peekContextMenu(true);
             } 
         </script>

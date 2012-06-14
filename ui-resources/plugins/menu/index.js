@@ -1,5 +1,3 @@
-define('html/menu', function (require, exports, module) {
-
 /*
  * Copyright (C) Research In Motion Limited 2012. All rights reserved.
  */
@@ -96,5 +94,3 @@ self = {
 //event.on('browser.plugins.init', init);
 
 module.exports = self;
-
-});
