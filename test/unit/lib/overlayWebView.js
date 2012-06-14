@@ -3,7 +3,7 @@ describe("Overlay Webview", function () {
         libPath = "./../../../", 
         mockedController,
         mockedWebview,
-        mockedApplicationWindow,
+        mockedApplication,
         request = require(libPath + "lib/request");
 
     beforeEach(function () {
@@ -22,8 +22,8 @@ describe("Overlay Webview", function () {
             windowGroup: undefined,
             addEventListener: jasmine.createSpy()
         };
-        mockedApplicationWindow = {
-            visible: undefined
+        mockedApplication = {
+            windowVisible: undefined
         };
         GLOBAL.qnx = {
             callExtensionMethod: jasmine.createSpy(),
@@ -37,8 +37,8 @@ describe("Overlay Webview", function () {
                     runs(createFunction);
                     return mockedWebview;
                 },
-                getApplicationWindow: function () {
-                    return mockedApplicationWindow;
+                getApplication: function () {
+                    return mockedApplication;
                 }
             }
         };
@@ -63,7 +63,7 @@ describe("Overlay Webview", function () {
                 expect(mockedWebview.zOrder).toEqual(1);
                 expect(mockedWebview.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
 
-                expect(mockedApplicationWindow.visible).toEqual(true);
+                expect(mockedApplication.windowVisible).toEqual(true);
 
                 expect(request.init).toHaveBeenCalledWith(mockedWebview);
                 expect(mockedWebview.onNetworkResourceRequested).toEqual(request.init(mockedWebview).networkResourceRequestedHandler);
