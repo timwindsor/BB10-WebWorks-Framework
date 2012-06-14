@@ -53,7 +53,6 @@ describe("Overlay Webview", function () {
 
     describe("create", function () {
         it("sets up the visible webview", function () {
-            spyOn(request, "init").andCallThrough();
             webview.create();
             waits(1);
             runs(function () {
@@ -65,8 +64,9 @@ describe("Overlay Webview", function () {
 
                 expect(mockedApplication.windowVisible).toEqual(true);
 
-                expect(request.init).toHaveBeenCalledWith(mockedWebview);
-                expect(mockedWebview.onNetworkResourceRequested).toEqual(request.init(mockedWebview).networkResourceRequestedHandler);
+                expect(mockedWebview.addEventListener).toHaveBeenCalledWith("ContextMenuRequestEvent", jasmine.any(Function));
+                expect(qnx.callExtensionMethod).toHaveBeenCalledWith("webview.setBackgroundColor", mockedWebview.id, "0x00FFFFFF");
+                expect(qnx.callExtensionMethod).toHaveBeenCalledWith("webview.setSensitivity", mockedWebview.id, "SensitivityTest");
             });
         });
 
