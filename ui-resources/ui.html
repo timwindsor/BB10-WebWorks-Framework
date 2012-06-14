@@ -9,6 +9,17 @@
         <script src="thirdparty/xui.js" type="text/javascript"></script>
         <script src="thirdparty/almond.js" type="text/javascript"></script>
         <script src="index.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            function showMenu() {
+                var menu = require('contextmenu');
+                menu.init();
+                menu.setMenuOptions([
+                        {name: "menu", "function": function() {alert("function");} }, 
+                        {name: "menu2", "function": function() {alert("function2");} }
+                        ]);
+                menu.peekContextMenu(true);
+            } 
+        </script>
     </head>
     <body>
     </body>
