@@ -39,6 +39,7 @@ private:
     void StartThread();
     void StopThread();
     void NotifyInternalEvent(InternalEvent e, void *payload);
+    bool m_eventsRunning;
     pthread_t m_thread;
     static std::list<BPSEventHandler *> m_listeners;
     static int m_domain;
