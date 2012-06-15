@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <iostream>
 
+bool BPSMaster::m_eventsRunning;
 int BPSMaster::m_channel;
 int BPSMaster::m_domain;
 std::list<BPSEventHandler *> BPSMaster::m_listeners;
@@ -41,7 +42,6 @@ void BPSMaster::StartThread()
 {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     pthread_create(&m_thread, &attr, MainEventThread, NULL);
     pthread_attr_destroy(&attr);
 }
@@ -49,6 +49,8 @@ void BPSMaster::StartThread()
 void BPSMaster::StopThread()
 {
     NotifyInternalEvent(ShutdownThread, NULL);
+    // wait for thread to shutdown
+    pthread_join(m_thread, NULL);
 }
 
 void BPSMaster::NotifyInternalEvent(InternalEvent e, void *payload)
@@ -67,8 +69,9 @@ void* BPSMaster::MainEventThread(void *)
     while (m_eventsRunning) {
         bps_event_t *event;
         bps_get_event(&event, -1); // blocking
+        int currentDomain = bps_event_get_domain(event);
 
-        if (bps_event_get_domain(event) == m_domain) {
+        if (m_domain == currentDomain) {
             InternalEvent code = static_cast<InternalEvent>(bps_event_get_code(event));
             BPSEventHandler *handler = reinterpret_cast<BPSEventHandler *>(bps_event_get_payload(event)->data1);
             std::list<BPSEventHandler *>::iterator it;
@@ -90,7 +93,9 @@ void* BPSMaster::MainEventThread(void *)
         } else {
             std::list<BPSEventHandler *>::iterator it;
             for (it = m_listeners.begin(); it != m_listeners.end(); it++) {
-                (*it)->OnBPSEvent(event);
+                if ((*it)->BPSDomain() == currentDomain) {
+                    (*it)->OnBPSEvent(event);
+                }
             }
         }
     }
@@ -100,7 +105,6 @@ void* BPSMaster::MainEventThread(void *)
 
 void BPSMaster::AddEventListener(BPSEventHandler *handler)
 {
-    fprintf(stderr, "%s\n", "trying to add event handler");
     while (!m_eventsRunning);
     m_listeners.push_back(handler);
     NotifyInternalEvent(ListenerAdded, reinterpret_cast<void *>(handler));
