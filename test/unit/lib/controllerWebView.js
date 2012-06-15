@@ -46,7 +46,7 @@ describe("controllerWebView", function () {
             controllerWebView.init({debugEnabled: true});
             expect(mockedController.enableWebInspector).toEqual(true);
             expect(mockedController.enableCrossSiteXHR).toEqual(true);
-            expect(mockedController.visible).toEqual(true);
+            expect(mockedController.visible).toEqual(false);
             expect(mockedController.active).toEqual(false);
             expect(mockedController.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
         });

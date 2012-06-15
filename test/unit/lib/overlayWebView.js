@@ -3,8 +3,7 @@ describe("Overlay Webview", function () {
         libPath = "./../../../", 
         mockedController,
         mockedWebview,
-        mockedApplication,
-        request = require(libPath + "lib/request");
+        mockedApplication;
 
     beforeEach(function () {
         webview = require(libPath + "lib/overlayWebView");
