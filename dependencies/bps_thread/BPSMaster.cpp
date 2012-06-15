@@ -81,7 +81,7 @@ void* BPSMaster::MainEventThread(void *)
                     for (it = m_listeners.begin(); it != m_listeners.end(); it++) {
                         (*it)->OnBPSShutdown();
                     }
-                    isRunning = false;
+                    m_eventsRunning = false;
                     break;
                 default:
                     break;
