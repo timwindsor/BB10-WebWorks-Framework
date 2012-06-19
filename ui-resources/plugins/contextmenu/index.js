@@ -204,7 +204,7 @@ contextmenu = {
                 items.push({'name': 'Share Link', 'function': foo, 'imageUrl': 'assets/Browser_ShareLink.png'});
                 break;
             case 'ShareImage':
-                items.push({'name': 'Share Image', 'function': foo, 'imageUrl': 'assets/Browser_ShareImage.png'});
+                items.push({'name': 'Share Image', 'function': contextmenu.shareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
                 break;
             case 'InspectElement':
                 items.push({'name': 'Inspect Element', 'function': foo, 'imageUrl': 'assets/generic_81_81_placeholder.png'});
@@ -218,6 +218,39 @@ contextmenu = {
         }
         */
         return items;
+    },
+    
+    share : function (type, errorMessage, dataCallback) {
+        var invocation = window.qnx.webplatform.getApplication().invocation,
+            request = {
+                action: 'bb.action.SHARE',
+                type: type,
+                target_type: invocation.TARGET_TYPE_ALL,
+                action_type: invocation.ACTION_TYPE_MENU
+            };
+
+        invocation.queryTargets(request, function (error, results) {
+            if (error || results.length === 0) {
+                //TODO: nice dialog
+                alert(errorMessage);
+            } else {
+                console.log(results);
+               // TODO: get an invocation list 
+                
+                /*var invocationList = screenManager.loadScreen('invocationlist');
+                dataCallback(request);
+                invocationList.setContext({request: request, results: results[0]});
+                screenManager.pushScreen(invocationList); */
+            
+            }
+        });
+    },
+
+    shareImage : function () {
+        contextmenu.share('image/*', 'No image sharing applications installed', function (request) {
+            //TODO: implement PropertyCurrentContextEvent
+            //request.uri = currentContext.src;
+        });
     }
 
 };
