@@ -10,13 +10,11 @@
         <script src="thirdparty/almond.js" type="text/javascript"></script>
         <script src="index.js" type="text/javascript"></script>
         <script type="text/javascript">
-            function showMenu() {
+            function showMenu(menuItems) {
                 var menu = require('contextmenu');
                 menu.init();
-                menu.setMenuOptions([
-                        {name: "menu", "function": function() {alert("function");} }, 
-                        {name: "menu2", "function": function() {alert("function2");} }
-                        ]);
+                var menuItems = menu.generateContextMenuItems(menuItems);
+                menu.setMenuOptions(menuItems);
                 menu.peekContextMenu(true);
             } 
         </script>

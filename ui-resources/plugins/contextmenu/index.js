@@ -139,6 +139,85 @@ contextmenu = {
             contextmenu.setHeadText('');
             contextmenu.setSubheadText('');
         }
+    },
+
+      // TODO: i18n
+    generateContextMenuItems: function (value) {
+        var items = [], 
+            i,
+            // TODO: just for demo, should be replaced by a real function
+            foo = function () {
+                alert("Menu");
+            };
+
+        for (i = 0; i < value.length; i++) {
+            switch (value[i]) {
+            case 'ClearField':
+            case 'SendLink':
+            case 'SendImageLink':
+            case 'FullMenu':
+            case 'Delete':
+                break;
+            case 'Cancel':
+                items.push({'name': 'Cancel', 'function': foo, 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+                break;
+            case 'Cut':
+                items.push({'name': 'Cut', 'function': foo, 'imageUrl': 'assets/Browser_Cut.png'});
+                break;
+            case 'Copy':
+                items.push({'name': 'Copy', 'function': foo, 'imageUrl': 'assets/Browser_Copy.png'});
+                break;
+            case 'Paste':
+                items.push({'name': 'Paste', 'function': foo, 'imageUrl': 'assets/crosscutmenu_paste.png'});
+                break;
+            case 'Select':
+                items.push({'name': 'Select', 'function': foo, 'imageUrl': 'assets/crosscutmenu_paste.png'});
+                break;
+            case 'OpenLinkInNewTab':
+                items.push({'name': 'Open in New Tab', 'function': foo, 'imageUrl': 'assets/Browser_OpenLinkInNewTab.png'});
+                break;
+            case 'AddLinkToBookmarks':
+                items.push({'name': 'Bookmark Link', 'function': foo, 'imageUrl': 'assets/Browser_BookmarkLink.png'});
+                break;
+            case 'CopyLink':
+                items.push({'name': 'Copy Link', 'function': foo, 'imageUrl': 'assets/Browser_CopyLink.png'});
+                break;
+            case 'OpenLink':
+                items.push({'name': 'Open', 'function': foo, 'imageUrl': 'assets/Browser_OpenLink.png'});
+                break;
+            case 'SaveLinkAs':
+                items.push({'name': 'Save Link as', 'function': foo, 'imageUrl': 'assets/Browser_SaveLink.png'});
+                break;
+            case 'SaveImage':
+                items.push({'name': 'Save Image', 'function': foo, 'imageUrl': 'assets/Browser_SaveImage.png'});
+                break;
+            case 'CopyImageLink':
+                items.push({'name': 'Copy Image Link', 'function': foo, 'imageUrl': 'assets/Browser_CopyImageLink.png'});
+                break;
+            case 'ViewImage':
+                items.push({'name': 'View Image', 'function': foo, 'imageUrl': 'assets/Browser_ViewImage.png'});
+                break;
+            case 'Search':
+                items.push({'name': 'Search', 'function': foo, 'imageUrl': 'assets/Browser_Search.png'});
+                break;
+            case 'ShareLink':
+                items.push({'name': 'Share Link', 'function': foo, 'imageUrl': 'assets/Browser_ShareLink.png'});
+                break;
+            case 'ShareImage':
+                items.push({'name': 'Share Image', 'function': foo, 'imageUrl': 'assets/Browser_ShareImage.png'});
+                break;
+            case 'InspectElement':
+                items.push({'name': 'Inspect Element', 'function': foo, 'imageUrl': 'assets/generic_81_81_placeholder.png'});
+                break;
+            }
+        }
+
+        /*
+        if (currentContext && currentContext.url && currentContext.text) {
+            items.push({'headText': currentContext.text, 'subheadText': currentContext.url});
+        }
+        */
+        return items;
     }
 
 };
