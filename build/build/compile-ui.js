@@ -16,6 +16,7 @@
 var wrench = require("../../node_modules/wrench"),
     fs = require("fs"),
     path = require("path"),
+    util = require("./utils"),
     _c = require("./conf"),
     CSS_FILE = "/styles/chrome.css",
     HTML_FILE = "/chrome.html",
@@ -57,7 +58,9 @@ module.exports = function (prev, baton) {
         cssDest = path.join(_c.DEPLOY_STYLES, 'styles.css'),
         jsDest = path.join(_c.DEPLOY_UI, 'index.js'),
         thirdPartyDest = path.join(_c.DEPLOY_UI, 'thirdparty'),
-        assetsDest = path.join(_c.DEPLOY_UI, 'assets');
+        assetsDest = path.join(_c.DEPLOY_UI, 'assets'),
+        easset,
+        eassets;
 
     // Read in all the possible ui plugins and set up templating for each
     allPlugins = fs.readdirSync(_c.UI_PLUGINS);
@@ -105,10 +108,14 @@ module.exports = function (prev, baton) {
     
     wrench.mkdirSyncRecursive(uiFolderDest, "0755");
     wrench.mkdirSyncRecursive(cssFolderDest, "0755");
+    wrench.mkdirSyncRecursive(assetsDest, "0755");
     wrench.copyDirSyncRecursive(thirdParty, thirdPartyDest);
     
     for (asset in assets) {
-        wrench.copyDirSyncRecursive(assets[asset], assetsDest);
+        eassets = fs.readdirSync(assets[asset]);
+        for (easset in eassets) {
+            util.copyFile(path.normalize(assets[asset] + "/" + eassets[easset]), assetsDest);
+        }
     } 
     
     fs.writeFileSync(cssDest, outputCSS); 
