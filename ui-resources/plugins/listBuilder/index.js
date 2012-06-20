@@ -21,6 +21,11 @@ function handleMouseDown(evt) {
 
 listBuilder = {
     init: init,
+    setHeader: function (headerText) {
+        var listHeader = document.getElementById('listHeader');
+        listHeader.innerHTML = "";
+        listHeader.appendChild(document.createTextNode(headerText));
+    },
     populateList: function (itemArray) {
         var listContent = document.getElementById('listContent'),
             listItem,
