@@ -3,15 +3,22 @@
  */
 
 var listBuilder,
-    listItems;
+    listItems,
+    invocation = window.qnx.webplatform.getApplication().invocation;
 
 function init() {
     listItems = [];
 }
 
-function invokeApp(listItem) {
+function invokeApp(key) {
     // invoke some app based on ID
     console.log("invoking");
+    var invokeRequest = {
+        target: listItems[key].target,
+        action: listItems[key].action
+    };
+
+    invocation.invoke(invokeRequest);
     listBuilder.hide();
 }
 
@@ -36,8 +43,12 @@ listBuilder = {
             listItem = document.createElement('div');
             listItem.appendChild(document.createTextNode(itemArray[item].name));
             listItem.setAttribute('class', 'listItem');
-            listItem.ontouchend = invokeApp.bind(this, listItem);
             listItem.addEventListener('mousedown', handleMouseDown, false);
+            listItem.ontouchend = invokeApp.bind(this, itemArray[item].key);
+            listItems[itemArray[item].key] = {
+                target: itemArray[item].key,
+                action: 'bb.action.SHARE'
+            };
             listContent.appendChild(listItem);
         }
         // subdivs will have a click handler to run stuff
