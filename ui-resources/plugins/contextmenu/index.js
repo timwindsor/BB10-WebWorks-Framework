@@ -221,7 +221,7 @@ contextmenu = {
     },
     
     share : function (type, errorMessage, dataCallback) {
-        var invocation = window.qnx.webplatform.getApplication().invocation,
+        /*var invocation = window.qnx.webplatform.getApplication().invocation,
             request = {
                 action: 'bb.action.SHARE',
                 type: type,
@@ -237,13 +237,15 @@ contextmenu = {
                 console.log(results);
                // TODO: get an invocation list 
                 
-                /*var invocationList = screenManager.loadScreen('invocationlist');
-                dataCallback(request);
-                invocationList.setContext({request: request, results: results[0]});
-                screenManager.pushScreen(invocationList); */
+                //var invocationList = screenManager.loadScreen('invocationlist');
+                //dataCallback(request);
+                //invocationList.setContext({request: request, results: results[0]});
+                //screenManager.pushScreen(invocationList); 
             
             }
-        });
+        });*/
+        var code = JSON.stringify([type, errorMessage]);
+        qnx.callExtensionMethod('browser.rpc', code, 1);
     },
 
     shareImage : function () {
