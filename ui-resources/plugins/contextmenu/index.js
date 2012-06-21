@@ -220,7 +220,7 @@ contextmenu = {
         return items;
     },
     
-    share : function (type, errorMessage, dataCallback) {
+    getQueryTargets : function (type, errorMessage, dataCallback) {
         /*var invocation = window.qnx.webplatform.getApplication().invocation,
             request = {
                 action: 'bb.action.SHARE',
@@ -249,9 +249,10 @@ contextmenu = {
     },
 
     shareImage : function () {
-        contextmenu.share('image/*', 'No image sharing applications installed', function (request) {
+        contextmenu.getQueryTargets('image/*', 'No image sharing applications installed', function (request) {
             //TODO: implement PropertyCurrentContextEvent
             //request.uri = currentContext.src;
+            console.log("set requres.uri here");
         });
     }
 
