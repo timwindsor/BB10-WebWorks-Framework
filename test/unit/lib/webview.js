@@ -13,7 +13,7 @@ describe("webview", function () {
             enableCrossSiteXHR: undefined,
             visible: undefined,
             active: undefined,
-            setGeometry: jasmine.createSpy()            
+            setGeometry: jasmine.createSpy()
         };
         mockedWebview = {
             id: 42,
@@ -27,7 +27,8 @@ describe("webview", function () {
             onNetworkResourceRequested: undefined,
             destroy: jasmine.createSpy(),
             executeJavaScript: jasmine.createSpy(),
-            windowGroup: undefined
+            windowGroup: undefined,
+            enableWebEventRedirect: jasmine.createSpy()
         };
         mockedApplication = {
             windowVisible: undefined

@@ -19,7 +19,8 @@ describe("Overlay Webview", function () {
             destroy: jasmine.createSpy(),
             executeJavaScript: jasmine.createSpy(),
             windowGroup: undefined,
-            addEventListener: jasmine.createSpy()
+            addEventListener: jasmine.createSpy(),
+            enableWebEventRedirect: jasmine.createSpy()
         };
         mockedApplication = {
             windowVisible: undefined
