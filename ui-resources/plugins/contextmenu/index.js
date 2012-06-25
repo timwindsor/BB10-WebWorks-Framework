@@ -140,7 +140,7 @@ contextmenu = {
         }
     },
 
-    contextMenuResponseHandler: function(menuAction) {
+    contextMenuResponseHandler: function (menuAction) {
         if (!menuAction) {
             return;
         }

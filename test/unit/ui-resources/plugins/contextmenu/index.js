@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 describe("ui-resources/contextmenu", function () {
 
     var srcPath = '../../../../../',
@@ -23,20 +23,33 @@ describe("ui-resources/contextmenu", function () {
     menuContent,
     headText,
     subheadText,
-    header;
+    header,
+    mockedController;
 
     beforeEach(function () {
+        mockedController = {
+            remoteExec : jasmine.createSpy()
+        };
+        GLOBAL.window = {
+                qnx : {
+                    webplatform : {
+                            getController : function(){
+                                return mockedController;
+                            }
+                        }
+                }
+            };
         GLOBAL.document = {
             createTextNode: jasmine.createSpy(),
             createElement: jasmine.createSpy().andReturn({
                 appendChild: jasmine.createSpy(),
                 setAttribute: jasmine.createSpy(),
                 addEventListener: jasmine.createSpy()
-            }), 
+            }),
             getElementById: function (id) {
                 var returnElement;
                 if (id === "contextMenu") {
-                    menu = { 
+                    menu = {
                         addEventListener: jasmine.createSpy(),
                         removeEventListener: jasmine.createSpy(),
                         showContextmenu: jasmine.createSpy(),
@@ -60,14 +73,14 @@ describe("ui-resources/contextmenu", function () {
                     header = { className: undefined };
                     returnElement = header;
                 } else if (id === "contextMenuContent") {
-                    menuContent = { 
+                    menuContent = {
                         childNodes: [],
                         appendChild: jasmine.createSpy()
                     };
                     returnElement = menuContent;
-                } 
+                }
                 return returnElement;
-            } 
+            }
         };
         GLOBAL.qnx = {
             callExtensionMethod: jasmine.createSpy("bond")
@@ -84,7 +97,7 @@ describe("ui-resources/contextmenu", function () {
 
     it("has an init function that sets an event listener", function () {
         contextmenu.init();
-        expect(menu.addEventListener).toHaveBeenCalledWith("webkitTransitionEnd", jasmine.any(Function)); 
+        expect(menu.addEventListener).toHaveBeenCalledWith("webkitTransitionEnd", jasmine.any(Function));
     });
 
     it("has a handleMouseDown function", function () {
@@ -97,9 +110,9 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.handleMouseDown(evt);
         expect(evt.preventDefault).toHaveBeenCalled();
     });
-    
+
     it("has a showContextMenu function", function () {
-        expect(contextmenu.showContextMenu).toBeDefined();    
+        expect(contextmenu.showContextMenu).toBeDefined();
     });
 
     it("allows showContextMenu to set menuVisible to true", function () {
@@ -109,7 +122,7 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.showContextMenu(evt);
         expect(contextmenu.isMenuVisible()).toEqual(true);
     });
-   
+
     it("allows showContextMenu to set peeked mode to false when already peeked", function () {
         var evt = {
             cancelBubble : false
@@ -127,13 +140,13 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.setHeadText(text);
         expect(headText.innerText).toEqual(text);
     });
-    
+
     it("can set the subheader text of the context menu", function () {
         var text = "So Awesome Subheader";
         contextmenu.setSubheadText(text);
         expect(subheadText.innerText).toEqual(text);
     });
-    
+
     it("can hide the context menu", function () {
         contextmenu.showContextMenu();
         contextmenu.hideContextMenu();
@@ -142,9 +155,9 @@ describe("ui-resources/contextmenu", function () {
         expect(contextmenu.isMenuVisible()).toEqual(false);
         expect(menu.className).toEqual('hideMenu');
         expect(qnx.callExtensionMethod).toHaveBeenCalledWith('webview.notifyContextMenuCancelled', 2);
-        expect(qnx.callExtensionMethod).toHaveBeenCalledWith('webview.setSensitivity', 3, 'SensitivityTest');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith( 1,'webview.setSensitivity', ['SensitivityTest']);
     });
-    
+
     it("can set transitionEnd logic when the context menu is hidden", function () {
         spyOn(contextmenu, 'setHeadText');
         spyOn(contextmenu, 'setSubheadText');
@@ -153,31 +166,49 @@ describe("ui-resources/contextmenu", function () {
         expect(contextmenu.setHeadText).toHaveBeenCalledWith('');
         expect(contextmenu.setSubheadText).toHaveBeenCalledWith('');
     });
-    
+
     it("can set transitionEnd logic when the context menu is peeked", function () {
         contextmenu.peekContextMenu(true);
         contextmenu.transitionEnd();
         expect(menu.addEventListener).toHaveBeenCalledWith('touchend', contextmenu.hideContextMenu, false);
         expect(menuHandle.addEventListener).toHaveBeenCalledWith('touchend', contextmenu.showContextMenu, false);
     });
-    
+
     it("can peek the context menu", function () {
         contextmenu.peekContextMenu(true);
-        expect(qnx.callExtensionMethod).toHaveBeenCalledWith('webview.setSensitivity', 3, 'SensitivityNoFocus');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith( 1, 'webview.setSensitivity', ['SensitivityNoFocus']);
         expect(menuHandle.className).toEqual('showContextMenuHandle');
         expect(contextmenu.isMenuVisible()).toEqual(true);
         expect(menu.className).toEqual('peekContextMenu');
     });
-    
+
     it("can set the context menu items", function () {
         var itemA = {
                 function: jasmine.createSpy(),
                 imageUrl: 'http://image.com/a.png',
                 name: 'OptionA'
-            }, 
+            },
             options = [itemA];
         contextmenu.setMenuOptions(options);
         expect(menuContent.appendChild).toHaveBeenCalledWith(jasmine.any(Object));
     });
+
+    it("Cause the Copy function to get called properly", function() {
+        contextmenu.contextMenuResponseHandler('Copy');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Copy']);
+    });
+    it("Cause the Paste function to get called properly", function() {
+        contextmenu.contextMenuResponseHandler('Paste');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Paste']);
+    });
+    it("Cause the Cut function to get called properly", function() {
+        contextmenu.contextMenuResponseHandler('Cut');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Cut']);
+    });
+    it("Cause the Select function to get called properly", function() {
+        contextmenu.contextMenuResponseHandler('Select');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Select']);
+    });
+
 
 });

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 describe("controllerWebView", function () {
     var controllerWebView = require('./../../../lib/controllerWebView'),
         mockedController;
