@@ -4,7 +4,8 @@
 
 var contextmenu,
     menuVisible,
-    menuPeeked;
+    menuPeeked,
+    currentContext;
 
 function init() {
     var menu = document.getElementById('contextMenu');
@@ -225,32 +226,15 @@ contextmenu = {
         return items;
     },
 
+    setCurrentContext: function (context) {
+        currentContext = context;
+    },
+
     getQueryTargets : function (type, errorMessage, dataCallback) {
-        /*var invocation = window.qnx.webplatform.getApplication().invocation,
-            request = {
-                action: 'bb.action.SHARE',
-                type: type,
-                target_type: invocation.TARGET_TYPE_ALL,
-                action_type: invocation.ACTION_TYPE_MENU
-            };
-
-        invocation.queryTargets(request, function (error, results) {
-            if (error || results.length === 0) {
-                //TODO: nice dialog
-                alert(errorMessage);
-            } else {
-                console.log(results);
-               // TODO: get an invocation list
-
-                //var invocationList = screenManager.loadScreen('invocationlist');
-                //dataCallback(request);
-                //invocationList.setContext({request: request, results: results[0]});
-                //screenManager.pushScreen(invocationList);
-
-            }
-        });*/
-        var code = JSON.stringify([type, errorMessage]);
-        qnx.callExtensionMethod('browser.rpc', code, 1);
+        var args = [type, errorMessage];
+        qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, false, function (results) {
+            console.log(results);
+        });
     },
 
     shareImage : function () {

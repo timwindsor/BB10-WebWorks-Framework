@@ -24,7 +24,8 @@ describe("controllerWebView", function () {
             enableCrossSiteXHR: null,
             visible: null,
             active: null,
-            setGeometry: jasmine.createSpy()       
+            setGeometry: jasmine.createSpy(),
+            publishRemoteFunction: jasmine.createSpy()
         };
         GLOBAL.window = {
             qnx: {
