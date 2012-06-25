@@ -67,7 +67,7 @@ contextmenu = {
         var subheadText = document.getElementById('contextMenuSubheadText');
         subheadText.innerText = text;
     },
-    
+
     showContextMenu: function (evt) {
         if (menuVisible) {
             return;
@@ -98,23 +98,21 @@ contextmenu = {
         menu.className = 'hideMenu';
         // TODO: 2 for client webview
         qnx.callExtensionMethod("webview.notifyContextMenuCancelled", 2);
-        
+
         /*tabs.getSelected(0, function (tab) {
             if (tab) {
                 qnx.callExtensionMethod("webview.notifyContextMenuCancelled", tab.id);
             }
         });*/
         // Reset sensitivity
-        // TODO: 3 for ui webview
-        qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityTest");
+        window.qnx.webplatform.getController().remoteExec(1, 'webview.setSensitivity', ['SensitivityTest']);
     },
 
     peekContextMenu: function (show, zIndex) {
         if (menuVisible || menuPeeked) {
             return;
         }
-        //TODO: 3 for ui webview
-        qnx.callExtensionMethod("webview.setSensitivity", 3, "SensitivityNoFocus");
+        window.qnx.webplatform.getController().remoteExec(1, 'webview.setSensitivity', ['SensitivityNoFocus']);
         var menu = document.getElementById('contextMenu'),
             handle = document.getElementById('contextMenuHandle');
         handle.className = 'showContextMenuHandle';
@@ -141,9 +139,16 @@ contextmenu = {
         }
     },
 
+    contextMenuResponseHandler: function(menuAction) {
+        if (!menuAction) {
+            return;
+        }
+        window.qnx.webplatform.getController().remoteExec(1, 'webview.handleContextMenuResponse', [menuAction]);
+    },
+
       // TODO: i18n
     generateContextMenuItems: function (value) {
-        var items = [], 
+        var items = [],
             i,
             // TODO: just for demo, should be replaced by a real function
             foo = function () {
@@ -159,19 +164,19 @@ contextmenu = {
             case 'Delete':
                 break;
             case 'Cancel':
-                items.push({'name': 'Cancel', 'function': foo, 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+                items.push({'name': 'Cancel', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Cancel'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'Cut':
-                items.push({'name': 'Cut', 'function': foo, 'imageUrl': 'assets/Browser_Cut.png'});
+                items.push({'name': 'Cut', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Cut'), 'imageUrl': 'assets/Browser_Cut.png'});
                 break;
             case 'Copy':
-                items.push({'name': 'Copy', 'function': foo, 'imageUrl': 'assets/Browser_Copy.png'});
+                items.push({'name': 'Copy', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Copy'), 'imageUrl': 'assets/Browser_Copy.png'});
                 break;
             case 'Paste':
-                items.push({'name': 'Paste', 'function': foo, 'imageUrl': 'assets/crosscutmenu_paste.png'});
+                items.push({'name': 'Paste', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Paste'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
                 break;
             case 'Select':
-                items.push({'name': 'Select', 'function': foo, 'imageUrl': 'assets/crosscutmenu_paste.png'});
+                items.push({'name': 'Select', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Select'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
                 break;
             case 'OpenLinkInNewTab':
                 items.push({'name': 'Open in New Tab', 'function': foo, 'imageUrl': 'assets/Browser_OpenLinkInNewTab.png'});
@@ -219,7 +224,7 @@ contextmenu = {
         */
         return items;
     },
-    
+
     getQueryTargets : function (type, errorMessage, dataCallback) {
         /*var invocation = window.qnx.webplatform.getApplication().invocation,
             request = {
@@ -235,13 +240,13 @@ contextmenu = {
                 alert(errorMessage);
             } else {
                 console.log(results);
-               // TODO: get an invocation list 
-                
+               // TODO: get an invocation list
+
                 //var invocationList = screenManager.loadScreen('invocationlist');
                 //dataCallback(request);
                 //invocationList.setContext({request: request, results: results[0]});
-                //screenManager.pushScreen(invocationList); 
-            
+                //screenManager.pushScreen(invocationList);
+
             }
         });*/
         var code = JSON.stringify([type, errorMessage]);
