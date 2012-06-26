@@ -33,10 +33,10 @@ describe("ui-resources/contextmenu", function () {
         GLOBAL.window = {
                 qnx : {
                     webplatform : {
-                            getController : function(){
-                                return mockedController;
-                            }
+                        getController : function () {
+                            return mockedController;
                         }
+                    }
                 }
             };
         GLOBAL.document = {
@@ -60,7 +60,7 @@ describe("ui-resources/contextmenu", function () {
                 } else if (id === "contextMenuHandle") {
                     menuHandle = {
                         addEventListener: jasmine.createSpy(),
-                        removeEventListener: jasmine.createSpy(),
+                        removeEventListener: jasmine.createSpy()
                     };
                     returnElement = menuHandle;
                 } else if (id === "contextMenuHeadText") {
@@ -155,7 +155,7 @@ describe("ui-resources/contextmenu", function () {
         expect(contextmenu.isMenuVisible()).toEqual(false);
         expect(menu.className).toEqual('hideMenu');
         expect(qnx.callExtensionMethod).toHaveBeenCalledWith('webview.notifyContextMenuCancelled', 2);
-        expect(mockedController.remoteExec).toHaveBeenCalledWith( 1,'webview.setSensitivity', ['SensitivityTest']);
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.setSensitivity', ['SensitivityTest']);
     });
 
     it("can set transitionEnd logic when the context menu is hidden", function () {
@@ -176,7 +176,7 @@ describe("ui-resources/contextmenu", function () {
 
     it("can peek the context menu", function () {
         contextmenu.peekContextMenu(true);
-        expect(mockedController.remoteExec).toHaveBeenCalledWith( 1, 'webview.setSensitivity', ['SensitivityNoFocus']);
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.setSensitivity', ['SensitivityNoFocus']);
         expect(menuHandle.className).toEqual('showContextMenuHandle');
         expect(contextmenu.isMenuVisible()).toEqual(true);
         expect(menu.className).toEqual('peekContextMenu');
@@ -193,21 +193,33 @@ describe("ui-resources/contextmenu", function () {
         expect(menuContent.appendChild).toHaveBeenCalledWith(jasmine.any(Object));
     });
 
-    it("Cause the Copy function to get called properly", function() {
+    it("Cause the Copy function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Copy');
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Copy']);
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Copy']);
     });
-    it("Cause the Paste function to get called properly", function() {
+    it("Cause the Paste function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Paste');
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Paste']);
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Paste']);
     });
-    it("Cause the Cut function to get called properly", function() {
+    it("Cause the Cut function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Cut');
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Cut']);
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Cut']);
     });
-    it("Cause the Select function to get called properly", function() {
+    it("Cause the Select function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Select');
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1,'webview.handleContextMenuResponse', ['Select']);
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Select']);
+    });
+    it("Cause the CopyLink function to get called properly", function () {
+        contextmenu.contextMenuResponseHandler('CopyLink');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['CopyLink']);
+    });
+    it("Cause the CopyImageLink function to get called properly", function () {
+        contextmenu.contextMenuResponseHandler('CopyImageLink');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['CopyImageLink']);
+    });
+    it("Cause the InspectElement function to get called properly", function () {
+        contextmenu.contextMenuResponseHandler('InspectElement');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['InspectElement']);
     });
 
 

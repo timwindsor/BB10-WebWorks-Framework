@@ -186,7 +186,7 @@ contextmenu = {
                 items.push({'name': 'Bookmark Link', 'function': foo, 'imageUrl': 'assets/Browser_BookmarkLink.png'});
                 break;
             case 'CopyLink':
-                items.push({'name': 'Copy Link', 'function': foo, 'imageUrl': 'assets/Browser_CopyLink.png'});
+                items.push({'name': 'Copy Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyLink'), 'imageUrl': 'assets/Browser_CopyLink.png'});
                 break;
             case 'OpenLink':
                 items.push({'name': 'Open', 'function': foo, 'imageUrl': 'assets/Browser_OpenLink.png'});
@@ -198,7 +198,7 @@ contextmenu = {
                 items.push({'name': 'Save Image', 'function': foo, 'imageUrl': 'assets/Browser_SaveImage.png'});
                 break;
             case 'CopyImageLink':
-                items.push({'name': 'Copy Image Link', 'function': foo, 'imageUrl': 'assets/Browser_CopyImageLink.png'});
+                items.push({'name': 'Copy Image Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyImageLink'), 'imageUrl': 'assets/Browser_CopyImageLink.png'});
                 break;
             case 'ViewImage':
                 items.push({'name': 'View Image', 'function': foo, 'imageUrl': 'assets/Browser_ViewImage.png'});
@@ -213,7 +213,7 @@ contextmenu = {
                 items.push({'name': 'Share Image', 'function': contextmenu.shareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
                 break;
             case 'InspectElement':
-                items.push({'name': 'Inspect Element', 'function': foo, 'imageUrl': 'assets/generic_81_81_placeholder.png'});
+                items.push({'name': 'Inspect Element', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'InspectElement'), 'imageUrl': 'assets/generic_81_81_placeholder.png'});
                 break;
             }
         }
