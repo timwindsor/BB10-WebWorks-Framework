@@ -16,7 +16,9 @@
 
 describe("controllerWebView", function () {
     var controllerWebView = require('./../../../lib/controllerWebView'),
-        mockedController;
+        mockedController,
+        mockedInvocation,
+        mockedApplication;
 
     beforeEach(function () {
         mockedController = {
@@ -27,11 +29,22 @@ describe("controllerWebView", function () {
             setGeometry: jasmine.createSpy(),
             publishRemoteFunction: jasmine.createSpy()
         };
+        mockedInvocation = {
+            queryTargets: function (request, callback) {
+                callback("error", "results");
+            }
+        };
+        mockedApplication = {
+            invocation: mockedInvocation
+        };
         GLOBAL.window = {
             qnx: {
                 webplatform: {
                     getController: function () {
                         return mockedController;
+                    },
+                    getApplication: function () {
+                        return mockedApplication;
                     }
                 }
             }

@@ -3,8 +3,7 @@
  */
 
 var listBuilder,
-    listItems,
-    invocation = window.qnx.webplatform.getApplication().invocation;
+    listItems;
 
 function init() {
     listItems = [];
@@ -18,7 +17,9 @@ function invokeApp(key) {
         action: listItems[key].action
     };
 
-    invocation.invoke(invokeRequest);
+    window.qnx.webplatform.getController().remoteExec(3, "invocation.invoke", invokeRequest, false, function (results) {
+        console.log(results);
+    });
     listBuilder.hide();
 }
 
@@ -38,10 +39,11 @@ listBuilder = {
             listItem,
             item; 
 
+        listContent.innerHTML = "";
         // create a bunch of subdivs
         for (item in itemArray) {
             listItem = document.createElement('div');
-            listItem.appendChild(document.createTextNode(itemArray[item].name));
+            listItem.appendChild(document.createTextNode(itemArray[item].label));
             listItem.setAttribute('class', 'listItem');
             listItem.addEventListener('mousedown', handleMouseDown, false);
             listItem.ontouchend = invokeApp.bind(this, itemArray[item].key);

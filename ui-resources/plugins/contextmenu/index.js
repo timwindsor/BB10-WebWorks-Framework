@@ -258,6 +258,11 @@ contextmenu = {
         var args = [type, errorMessage];
         qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, false, function (results) {
             console.log(results);
+            var list = require('listBuilder');
+            list.init();
+            list.setHeader(results[0].label);
+            list.populateList(results[0].targets);
+            list.show();
         });
     },
 
