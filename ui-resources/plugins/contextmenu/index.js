@@ -213,13 +213,13 @@ contextmenu = {
                 items.push({'name': 'Copy Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyLink'), 'imageUrl': 'assets/Browser_CopyLink.png'});
                 break;
             case 'OpenLink':
-                items.push({'name': 'Open', 'function': contextmenu.openLink(), 'imageUrl': 'assets/Browser_OpenLink.png'});
+                items.push({'name': 'Open', 'function': contextmenu.openLink, 'imageUrl': 'assets/Browser_OpenLink.png'});
                 break;
             case 'SaveLinkAs':
-                items.push({'name': 'Save Link as', 'function': contextmenu.saveLink(), 'imageUrl': 'assets/Browser_SaveLink.png'});
+                items.push({'name': 'Save Link as', 'function': contextmenu.saveLink, 'imageUrl': 'assets/Browser_SaveLink.png'});
                 break;
             case 'SaveImage':
-                items.push({'name': 'Save Image', 'function': contextmenu.saveImage(), 'imageUrl': 'assets/Browser_SaveImage.png'});
+                items.push({'name': 'Save Image', 'function': contextmenu.saveImage, 'imageUrl': 'assets/Browser_SaveImage.png'});
                 break;
             case 'CopyImageLink':
                 items.push({'name': 'Copy Image Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyImageLink'), 'imageUrl': 'assets/Browser_CopyImageLink.png'});
