@@ -24,12 +24,17 @@ describe("ui-resources/contextmenu", function () {
     headText,
     subheadText,
     header,
-    mockedController;
+    mockedController,
+    currentContext;
 
     beforeEach(function () {
         mockedController = {
             remoteExec : jasmine.createSpy()
         };
+        currentContext = {
+                url : 'testUrl',
+                src : 'testSrc'
+            };
         GLOBAL.window = {
                 qnx : {
                     webplatform : {
@@ -197,30 +202,48 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.contextMenuResponseHandler('Copy');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Copy']);
     });
+
     it("Cause the Paste function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Paste');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Paste']);
     });
+
     it("Cause the Cut function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Cut');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Cut']);
     });
+
     it("Cause the Select function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Select');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Select']);
     });
+
     it("Cause the CopyLink function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('CopyLink');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['CopyLink']);
     });
+
     it("Cause the CopyImageLink function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('CopyImageLink');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['CopyImageLink']);
+    });
+
+    it("Cause the OpenLink function to get called properly", function () {
+        contextmenu.openLink();
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.loadURL', 'testUrl');
+    });
+
+    it("Cause the SaveLinkAs function to get called properly", function () {
+        contextmenu.saveLink();
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', 'testUrl', '');
+    });
+
+    it("Cause the SaveImage function to get called properly", function () {
+        contextmenu.saveImage();
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', 'testSrc', '');
     });
     it("Cause the InspectElement function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('InspectElement');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['InspectElement']);
     });
-
-
 });
