@@ -24,17 +24,12 @@ describe("ui-resources/contextmenu", function () {
     headText,
     subheadText,
     header,
-    mockedController,
-    currentContext;
+    mockedController;
 
     beforeEach(function () {
         mockedController = {
-            remoteExec : jasmine.createSpy()
+            remoteExec: jasmine.createSpy()
         };
-        currentContext = {
-                url : 'testUrl',
-                src : 'testSrc'
-            };
         GLOBAL.window = {
                 qnx : {
                     webplatform : {
@@ -229,16 +224,32 @@ describe("ui-resources/contextmenu", function () {
     });
 
     it("Cause the OpenLink function to get called properly", function () {
+        var currentContext = {
+            url : 'testUrl',
+            src : 'testSrc'
+        };
+        contextmenu.setCurrentContext(currentContext);
         contextmenu.openLink();
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.loadURL', 'testUrl');
     });
 
     it("Cause the SaveLinkAs function to get called properly", function () {
+        var currentContext = {
+            url : 'testUrl',
+            src : 'testSrc'
+        };
+        contextmenu.setCurrentContext(currentContext);
         contextmenu.saveLink();
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', 'testUrl', '');
     });
 
     it("Cause the SaveImage function to get called properly", function () {
+        var currentContext = {
+            url : 'testUrl',
+            src : 'testSrc',
+            isImage : true
+        };
+        contextmenu.setCurrentContext(currentContext);
         contextmenu.saveImage();
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', 'testSrc', '');
     });
