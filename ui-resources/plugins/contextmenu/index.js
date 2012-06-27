@@ -186,8 +186,11 @@ contextmenu = {
                 items.push({'name': 'ClearField', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'SendLink':
+                break;
             case 'SendImageLink':
+                break;
             case 'FullMenu':
+                break;
             case 'Delete':
                 break;
             case 'Cancel':
@@ -205,14 +208,12 @@ contextmenu = {
             case 'Select':
                 items.push({'name': 'Select', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Select'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
                 break;
-            case 'OpenLinkInNewTab':
-                items.push({'name': 'Open in New Tab', 'function': foo, 'imageUrl': 'assets/Browser_OpenLinkInNewTab.png'});
-                break;
             case 'AddLinkToBookmarks':
-                items.push({'name': 'Bookmark Link', 'function': foo, 'imageUrl': 'assets/Browser_BookmarkLink.png'});
                 break;
             case 'CopyLink':
                 items.push({'name': 'Copy Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyLink'), 'imageUrl': 'assets/Browser_CopyLink.png'});
+                break;
+            case 'OpenLinkInNewTab':
                 break;
             case 'OpenLink':
                 items.push({'name': 'Open', 'function': contextmenu.openLink, 'imageUrl': 'assets/Browser_OpenLink.png'});
@@ -230,6 +231,7 @@ contextmenu = {
                 items.push({'name': 'View Image', 'function': foo, 'imageUrl': 'assets/Browser_ViewImage.png'});
                 break;
             case 'Search':
+                break;
             case 'ShareLink':
                 items.push({'name': 'Share Link', 'function': foo, 'imageUrl': 'assets/Browser_ShareLink.png'});
                 break;
