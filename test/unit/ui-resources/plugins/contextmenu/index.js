@@ -198,6 +198,11 @@ describe("ui-resources/contextmenu", function () {
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Copy']);
     });
 
+    it("Cause the Clear function to get called properly", function () {
+        contextmenu.contextMenuResponseHandler('Clear');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Clear']);
+    });
+
     it("Cause the Paste function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('Paste');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Paste']);

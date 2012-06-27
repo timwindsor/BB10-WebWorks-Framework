@@ -183,6 +183,8 @@ contextmenu = {
         for (i = 0; i < value.length; i++) {
             switch (value[i]) {
             case 'ClearField':
+                items.push({'name': 'ClearField', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+                break;
             case 'SendLink':
             case 'SendImageLink':
             case 'FullMenu':
@@ -228,8 +230,6 @@ contextmenu = {
                 items.push({'name': 'View Image', 'function': foo, 'imageUrl': 'assets/Browser_ViewImage.png'});
                 break;
             case 'Search':
-                items.push({'name': 'Search', 'function': foo, 'imageUrl': 'assets/Browser_Search.png'});
-                break;
             case 'ShareLink':
                 items.push({'name': 'Share Link', 'function': foo, 'imageUrl': 'assets/Browser_ShareLink.png'});
                 break;
