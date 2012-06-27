@@ -256,7 +256,7 @@ contextmenu = {
 
     getQueryTargets : function (type, errorMessage, dataCallback) {
         var args = [type, errorMessage];
-        qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, false, function (results) {
+        qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, function (results) {
             console.log(results);
             var list = require('listBuilder');
             list.init();
