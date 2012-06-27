@@ -244,11 +244,10 @@ contextmenu = {
             }
         }
 
-        /*
         if (currentContext && currentContext.url && currentContext.text) {
             items.push({'headText': currentContext.text, 'subheadText': currentContext.url});
         }
-        */
+
         return items;
     },
 
@@ -277,7 +276,5 @@ contextmenu = {
     }
 
 };
-
-//event.on('browser.plugins.init', init);
 
 module.exports = contextmenu;
