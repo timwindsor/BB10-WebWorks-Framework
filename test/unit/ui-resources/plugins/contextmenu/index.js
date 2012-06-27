@@ -230,7 +230,7 @@ describe("ui-resources/contextmenu", function () {
         };
         contextmenu.setCurrentContext(currentContext);
         contextmenu.openLink();
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.loadURL', 'testUrl');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.loadURL', ['testUrl']);
     });
 
     it("Cause the SaveLinkAs function to get called properly", function () {
@@ -240,7 +240,7 @@ describe("ui-resources/contextmenu", function () {
         };
         contextmenu.setCurrentContext(currentContext);
         contextmenu.saveLink();
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', 'testUrl', '');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testUrl', '']);
     });
 
     it("Cause the SaveImage function to get called properly", function () {
@@ -251,7 +251,7 @@ describe("ui-resources/contextmenu", function () {
         };
         contextmenu.setCurrentContext(currentContext);
         contextmenu.saveImage();
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', 'testSrc', '');
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testSrc', '']);
     });
     it("Cause the InspectElement function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('InspectElement');
