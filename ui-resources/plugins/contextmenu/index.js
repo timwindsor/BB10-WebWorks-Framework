@@ -145,7 +145,7 @@ contextmenu = {
             return;
         }
         var title = '';
-        window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', currentContext.url, title);
+        window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', [currentContext.url, title]);
     },
 
     openLink: function () {
@@ -153,7 +153,7 @@ contextmenu = {
             return;
         }
         //Update the content web view with the new URL
-        window.qnx.webplatform.getController().remoteExec(1, 'webview.loadURL', currentContext.url);
+        window.qnx.webplatform.getController().remoteExec(1, 'webview.loadURL', [currentContext.url]);
     },
 
     saveImage: function () {
@@ -161,7 +161,7 @@ contextmenu = {
             return;
         }
         var title = '';
-        window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', currentContext.src, title);
+        window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', [currentContext.src, title]);
     },
 
     contextMenuResponseHandler: function (menuAction) {
