@@ -65,8 +65,8 @@ describe("Overlay Webview", function () {
                 expect(mockedApplication.windowVisible).toEqual(true);
 
                 expect(mockedWebview.addEventListener).toHaveBeenCalledWith("ContextMenuRequestEvent", jasmine.any(Function));
-                expect(qnx.callExtensionMethod).toHaveBeenCalledWith("webview.setBackgroundColor", mockedWebview.id, "0x00FFFFFF");
-                expect(qnx.callExtensionMethod).toHaveBeenCalledWith("webview.setSensitivity", mockedWebview.id, "SensitivityTest");
+                expect(mockedWebview.backgroundColor).toEqual("0x00FFFFFF");
+                expect(mockedWebview.sensitivity).toEqual("SensitivityTest");
             });
         });
 
