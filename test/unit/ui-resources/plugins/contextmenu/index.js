@@ -279,7 +279,6 @@ describe("ui-resources/contextmenu", function () {
                 src : 'testSrc'
             },
             callback = jasmine.createSpy();
-            args = ["text/plain", "No link sharing applications installed", currentContext.src];
         contextmenu.setCurrentContext(currentContext);
         contextmenu.share("text/plain", 'No link sharing applications installed', callback);
         expect(callback).toHaveBeenCalled();
