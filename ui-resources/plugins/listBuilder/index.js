@@ -24,14 +24,10 @@ function init() {
 function invokeApp(key) {
     // invoke some app based on ID
     console.log("invoking");
-    var invokeRequest = {
-        target: listItems[key].target,
-        action: listItems[key].action
-    };
+    var invokeRequest = listItems[key],
+        args = [invokeRequest];
 
-    window.qnx.webplatform.getController().remoteExec(3, "invocation.invoke", invokeRequest, false, function (results) {
-        console.log(results);
-    });
+    window.qnx.webplatform.getController().remoteExec(3, "invocation.invoke", args);
     listBuilder.hide();
 }
 
@@ -46,22 +42,25 @@ listBuilder = {
         listHeader.innerHTML = "";
         listHeader.appendChild(document.createTextNode(headerText));
     },
-    populateList: function (itemArray) {
+    populateList: function (targets, request) {
         var listContent = document.getElementById('listContent'),
             listItem,
-            item; 
+            i;
 
+        // Reset listContent
         listContent.innerHTML = "";
         // create a bunch of subdivs
-        for (item in itemArray) {
+        for (i in targets) {
             listItem = document.createElement('div');
-            listItem.appendChild(document.createTextNode(itemArray[item].label));
+            listItem.appendChild(document.createTextNode(targets[i].label));
             listItem.setAttribute('class', 'listItem');
             listItem.addEventListener('mousedown', handleMouseDown, false);
-            listItem.ontouchend = invokeApp.bind(this, itemArray[item].key);
-            listItems[itemArray[item].key] = {
-                target: itemArray[item].key,
-                action: 'bb.action.SHARE'
+            listItem.ontouchend = invokeApp.bind(this, targets[i].key);
+            listItems[targets[i].key] = {
+                target: targets[i].key,
+                action: 'bb.action.SHARE',
+                uri: request.uri,
+                data: request.data
             };
             listContent.appendChild(listItem);
         }

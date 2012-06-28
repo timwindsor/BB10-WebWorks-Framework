@@ -31,14 +31,14 @@ describe("ui-resources/contextmenu", function () {
             remoteExec: jasmine.createSpy()
         };
         GLOBAL.window = {
-                qnx : {
-                    webplatform : {
-                        getController : function () {
-                            return mockedController;
-                        }
+            qnx : {
+                webplatform : {
+                    getController : function () {
+                        return mockedController;
                     }
                 }
-            };
+            }
+        };
         GLOBAL.document = {
             createTextNode: jasmine.createSpy(),
             createElement: jasmine.createSpy().andReturn({
@@ -83,7 +83,12 @@ describe("ui-resources/contextmenu", function () {
             }
         };
         GLOBAL.qnx = {
-            callExtensionMethod: jasmine.createSpy("bond")
+            callExtensionMethod: jasmine.createSpy("bond"),
+            webplatform : {
+                getController : function () {
+                    return mockedController;
+                }
+            }
         };
     });
 
@@ -261,5 +266,69 @@ describe("ui-resources/contextmenu", function () {
     it("Cause the InspectElement function to get called properly", function () {
         contextmenu.contextMenuResponseHandler('InspectElement');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['InspectElement']);
+    });
+
+    it("has a share function", function () {
+        expect(contextmenu.share).toBeDefined();
+    });
+
+    it("Cause the share function to get called properly", function () {
+        var id = 3,
+            invokeFunction = "invocation.queryTargets",
+            currentContext = {
+                src : 'testSrc'
+            },
+            callback = jasmine.createSpy();
+            args = ["text/plain", "No link sharing applications installed", currentContext.src];
+        contextmenu.setCurrentContext(currentContext);
+        contextmenu.share("text/plain", 'No link sharing applications installed', callback);
+        expect(callback).toHaveBeenCalled();
+        expect(mockedController.remoteExec).toHaveBeenCalledWith(id, invokeFunction, jasmine.any(Object), jasmine.any(Function));
+    });
+
+    it("has a ShareImage function", function () {
+        expect(contextmenu.contextMenuShareImage).toBeDefined();
+    });
+
+    it("Cause the ShareImage function to return undefine", function () {
+        var currentContext = {};
+        contextmenu.setCurrentContext(currentContext);
+        contextmenu.contextMenuShareImage();
+        contextmenu.share = jasmine.createSpy();
+        expect(contextmenu.share).not.toHaveBeenCalled();
+    });
+
+    it("Cause the ShareImage function to get called properly", function () {
+        var currentContext = {
+                url : 'testUrl',
+                src : 'testSrc',
+                isImage : true
+            };
+        contextmenu.setCurrentContext(currentContext);
+        contextmenu.contextMenuShareImage();
+        expect(contextmenu.share).toHaveBeenCalledWith("image/*", 'No image sharing applications installed', jasmine.any(Function));
+    });
+    
+    it("has a ShareLink function", function () {
+        expect(contextmenu.contextMenuShareLink).toBeDefined();
+    });
+
+    it("Cause the ShareLink function to return undefine", function () {
+        var currentContext = {};
+        contextmenu.setCurrentContext(currentContext);
+        contextmenu.contextMenuShareLink();
+        contextmenu.share = jasmine.createSpy();
+        expect(contextmenu.share).not.toHaveBeenCalled();
+    });
+
+    it("Cause the ShareLink function to get called properly", function () {
+        var currentContext = {
+                url : 'testUrl',
+                src : 'testSrc',
+                isImage : true
+            };
+        contextmenu.setCurrentContext(currentContext);
+        contextmenu.contextMenuShareLink();
+        expect(contextmenu.share).toHaveBeenCalledWith("text/plain", 'No link sharing applications installed', jasmine.any(Function));
     });
 });

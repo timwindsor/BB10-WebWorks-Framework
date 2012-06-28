@@ -245,10 +245,10 @@ contextmenu = {
             case 'Search':
                 break;
             case 'ShareLink':
-                items.push({'name': 'Share Link', 'function': foo, 'imageUrl': 'assets/Browser_ShareLink.png'});
+                items.push({'name': 'Share Link', 'function': contextmenu.contextMenuShareLink, 'imageUrl': 'assets/Browser_ShareLink.png'});
                 break;
             case 'ShareImage':
-                items.push({'name': 'Share Image', 'function': contextmenu.shareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
+                items.push({'name': 'Share Image', 'function': contextmenu.contextMenuShareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
                 break;
             case 'InspectElement':
                 items.push({'name': 'Inspect Element', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'InspectElement'), 'imageUrl': 'assets/generic_81_81_placeholder.png'});
@@ -267,23 +267,39 @@ contextmenu = {
         currentContext = context;
     },
 
-    getQueryTargets : function (type, errorMessage, dataCallback) {
-        var args = [type, errorMessage];
+    share : function (type, errorMessage, dataCallback) {
+        var args = [type, errorMessage, currentContext.src],
+            request = {};
+        dataCallback(request);
         qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, function (results) {
             console.log(results);
             var list = require('listBuilder');
             list.init();
             list.setHeader(results[0].label);
-            list.populateList(results[0].targets);
+            list.populateList(results[0].targets, request);
             list.show();
         });
     },
 
-    shareImage : function () {
-        contextmenu.getQueryTargets('image/*', 'No image sharing applications installed', function (request) {
-            //TODO: implement PropertyCurrentContextEvent
+    contextMenuShareImage : function () {
+        if (!currentContext || !currentContext.isImage || !currentContext.src) {
+            return;
+        }
+        contextmenu.share('image/*', 'No image sharing applications installed', function (request) {
             //request.uri = currentContext.src;
             console.log("set requres.uri here");
+        });
+    },
+
+    contextMenuShareLink : function () {
+        if (!currentContext || !currentContext.url) {
+            return;
+        }
+        // FIXME: Could probably come up with a custom type for links that would let us share the title as well.
+        contextmenu.share('text/plain', 'No link sharing applications installed', function (request) {
+            // FIXME: window.btoa doesn't handle all character sets.
+            request.uri = 'data://local';
+            request.data = window.btoa(currentContext.url);
         });
     }
 
