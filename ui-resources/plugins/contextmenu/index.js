@@ -240,7 +240,7 @@ contextmenu = {
                 items.push({'name': 'Copy Image Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyImageLink'), 'imageUrl': 'assets/Browser_CopyImageLink.png'});
                 break;
             case 'ViewImage':
-                items.push({'name': 'View Image', 'function': foo, 'imageUrl': 'assets/Browser_ViewImage.png'});
+                items.push({'name': 'View Image', 'function': contextmenu.viewImage, 'imageUrl': 'assets/Browser_ViewImage.png'});
                 break;
             case 'Search':
                 break;
@@ -267,39 +267,47 @@ contextmenu = {
         currentContext = context;
     },
 
-    share : function (type, errorMessage, dataCallback) {
-        var args = [type, errorMessage, currentContext.src],
-            request = {};
-        dataCallback(request);
+    getQueryTargets : function (request, errorMessage, dataCallback) {
+        var args = [request, errorMessage];
+
         qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, function (results) {
             console.log(results);
-            var list = require('listBuilder');
-            list.init();
-            list.setHeader(results[0].label);
-            list.populateList(results[0].targets, request);
-            list.show();
+            if(results[0]){
+                var list = require('listBuilder');
+                list.init();
+                list.setHeader(results[0].label);
+                list.populateList(results[0].targets);
+                list.show();
+            }
         });
     },
 
-    contextMenuShareImage : function () {
-        if (!currentContext || !currentContext.isImage || !currentContext.src) {
-            return;
-        }
-        contextmenu.share('image/*', 'No image sharing applications installed', function (request) {
-            //request.uri = currentContext.src;
+    shareImage : function () {
+
+        var request = {
+            action: 'bb.action.SHARE',
+            uri : currentContext.src,
+            target_type: invocation.TARGET_TYPE_ALL,
+            action_type: invocation.ACTION_TYPE_MENU
+        };
+
+        contextmenu.getQueryTargets(request, 'No image sharing applications installed', function (request) {
             console.log("set requres.uri here");
         });
     },
 
-    contextMenuShareLink : function () {
-        if (!currentContext || !currentContext.url) {
-            return;
-        }
-        // FIXME: Could probably come up with a custom type for links that would let us share the title as well.
-        contextmenu.share('text/plain', 'No link sharing applications installed', function (request) {
-            // FIXME: window.btoa doesn't handle all character sets.
-            request.uri = 'data://local';
-            request.data = window.btoa(currentContext.url);
+    viewImage : function () {
+
+        var request = {
+            action: 'bb.action.VIEW',
+            uri : currentContext.src,
+            target_type: invocation.TARGET_TYPE_ALL,
+            action_type: invocation.ACTION_TYPE_MENU
+        };
+
+        contextmenu.getQueryTargets(request, 'No image viewing applications installed', function (request) {
+        console.log("Triggered" + request);
+>>>>>>> 6888da1... Updating functions for save Image
         });
     }
 
