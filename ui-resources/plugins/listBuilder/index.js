@@ -17,7 +17,7 @@
 var listBuilder,
     listItems;
 
-function init() {
+function init(request) {
     listItems = [];
 }
 
@@ -58,7 +58,7 @@ listBuilder = {
             listItem.ontouchend = invokeApp.bind(this, targets[i].key);
             listItems[targets[i].key] = {
                 target: targets[i].key,
-                action: 'bb.action.SHARE',
+                action: request.action,
                 uri: request.uri,
                 data: request.data
             };
