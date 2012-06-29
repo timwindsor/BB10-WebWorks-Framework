@@ -176,7 +176,7 @@ contextmenu = {
         window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', [currentContext.src, title]);
     },
 
-    contextMenuResponseHandler: function (menuAction) {
+    responseHandler: function (menuAction) {
         if (!menuAction) {
             return;
         }
@@ -195,7 +195,7 @@ contextmenu = {
         for (i = 0; i < value.length; i++) {
             switch (value[i]) {
             case 'ClearField':
-                items.push({'name': 'ClearField', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+                items.push({'name': 'ClearField', 'function': contextmenu.responseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'SendLink':
                 break;
@@ -206,24 +206,24 @@ contextmenu = {
             case 'Delete':
                 break;
             case 'Cancel':
-                items.push({'name': 'Cancel', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Cancel'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+                items.push({'name': 'Cancel', 'function': contextmenu.responseHandler.bind(this, 'Cancel'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'Cut':
-                items.push({'name': 'Cut', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Cut'), 'imageUrl': 'assets/Browser_Cut.png'});
+                items.push({'name': 'Cut', 'function': contextmenu.responseHandler.bind(this, 'Cut'), 'imageUrl': 'assets/Browser_Cut.png'});
                 break;
             case 'Copy':
-                items.push({'name': 'Copy', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Copy'), 'imageUrl': 'assets/Browser_Copy.png'});
+                items.push({'name': 'Copy', 'function': contextmenu.responseHandler.bind(this, 'Copy'), 'imageUrl': 'assets/Browser_Copy.png'});
                 break;
             case 'Paste':
-                items.push({'name': 'Paste', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Paste'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
+                items.push({'name': 'Paste', 'function': contextmenu.responseHandler.bind(this, 'Paste'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
                 break;
             case 'Select':
-                items.push({'name': 'Select', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'Select'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
+                items.push({'name': 'Select', 'function': contextmenu.responseHandler.bind(this, 'Select'), 'imageUrl': 'assets/crosscutmenu_paste.png'});
                 break;
             case 'AddLinkToBookmarks':
                 break;
             case 'CopyLink':
-                items.push({'name': 'Copy Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyLink'), 'imageUrl': 'assets/Browser_CopyLink.png'});
+                items.push({'name': 'Copy Link', 'function': contextmenu.responseHandler.bind(this, 'CopyLink'), 'imageUrl': 'assets/Browser_CopyLink.png'});
                 break;
             case 'OpenLinkInNewTab':
                 break;
@@ -237,7 +237,7 @@ contextmenu = {
                 items.push({'name': 'Save Image', 'function': contextmenu.saveImage, 'imageUrl': 'assets/Browser_SaveImage.png'});
                 break;
             case 'CopyImageLink':
-                items.push({'name': 'Copy Image Link', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'CopyImageLink'), 'imageUrl': 'assets/Browser_CopyImageLink.png'});
+                items.push({'name': 'Copy Image Link', 'function': contextmenu.responseHandler.bind(this, 'CopyImageLink'), 'imageUrl': 'assets/Browser_CopyImageLink.png'});
                 break;
             case 'ViewImage':
                 items.push({'name': 'View Image', 'function': contextmenu.viewImage, 'imageUrl': 'assets/Browser_ViewImage.png'});
@@ -251,7 +251,7 @@ contextmenu = {
                 items.push({'name': 'Share Image', 'function': contextmenu.contextMenuShareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
                 break;
             case 'InspectElement':
-                items.push({'name': 'Inspect Element', 'function': contextmenu.contextMenuResponseHandler.bind(this, 'InspectElement'), 'imageUrl': 'assets/generic_81_81_placeholder.png'});
+                items.push({'name': 'Inspect Element', 'function': contextmenu.responseHandler.bind(this, 'InspectElement'), 'imageUrl': 'assets/generic_81_81_placeholder.png'});
                 break;
             }
         }
@@ -271,12 +271,11 @@ contextmenu = {
         var args = [request, errorMessage];
 
         qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, function (results) {
-            console.log(results);
-            if(results[0]){
+            if (results[0]) {
                 var list = require('listBuilder');
                 list.init();
                 list.setHeader(results[0].label);
-                list.populateList(results[0].targets);
+                list.populateList(results[0].targets, request);
                 list.show();
             }
         });
@@ -286,29 +285,46 @@ contextmenu = {
 
         var request = {
             action: 'bb.action.SHARE',
-            uri : currentContext.src,
+            type: 'image/*',
+            uri : 'file://',
             target_type: invocation.TARGET_TYPE_ALL,
             action_type: invocation.ACTION_TYPE_MENU
         };
 
-        contextmenu.getQueryTargets(request, 'No image sharing applications installed', function (request) {
-            console.log("set requres.uri here");
-        });
+        /* TODO i18 internationalization */
+        contextmenu.generateInvocationList(request, 'No image sharing applications installed');
     },
 
     viewImage : function () {
 
         var request = {
             action: 'bb.action.VIEW',
-            uri : currentContext.src,
+            type: 'image/jpeg',
+            uri : 'file://',
+            action_type: invocation.ACTION_TYPE_MENU,
+            target_type: invocation.TARGET_TYPE_ALL
+        };
+
+        /* TODO i18 internationalization */
+        contextmenu.generateInvocationList(request, 'No image viewing applications installed');
+    },
+
+    shareLink : function () {
+
+        if (!currentContext || !currentContext.url) {
+            return;
+        }
+
+        var request = {
+            action: 'bb.action.SHARE',
+            type : 'text/plain',
+            uri : 'file://',
             target_type: invocation.TARGET_TYPE_ALL,
             action_type: invocation.ACTION_TYPE_MENU
         };
 
-        contextmenu.getQueryTargets(request, 'No image viewing applications installed', function (request) {
-        console.log("Triggered" + request);
->>>>>>> 6888da1... Updating functions for save Image
-        });
+        /* TODO i18 internationlization */
+        contextmenu.generateInvocationList(request, 'No link sharing applications installed');
     }
 
 };

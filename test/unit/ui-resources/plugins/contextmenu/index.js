@@ -24,17 +24,32 @@ describe("ui-resources/contextmenu", function () {
     headText,
     subheadText,
     header,
-    mockedController;
+    mockedController,
+    mockedApplication,
+    invocation;
 
     beforeEach(function () {
+        invocation = {
+                TARGET_TYPE_ALL : '',
+                ACTION_TYPE_MENU : ''
+            };
         mockedController = {
             remoteExec: jasmine.createSpy()
+        };
+        mockedApplication = {
+            invocation : {
+                TARGET_TYPE_ALL : '',
+                ACTION_TYPE_MENU : ''
+            }
         };
         GLOBAL.window = {
             qnx : {
                 webplatform : {
                     getController : function () {
                         return mockedController;
+                    },
+                    getApplication : function () {
+                        return mockedApplication;
                     }
                 }
             }
@@ -199,37 +214,37 @@ describe("ui-resources/contextmenu", function () {
     });
 
     it("Cause the Copy function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('Copy');
+        contextmenu.responseHandler('Copy');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Copy']);
     });
 
     it("Cause the Clear function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('Clear');
+        contextmenu.responseHandler('Clear');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Clear']);
     });
 
     it("Cause the Paste function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('Paste');
+        contextmenu.responseHandler('Paste');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Paste']);
     });
 
     it("Cause the Cut function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('Cut');
+        contextmenu.responseHandler('Cut');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Cut']);
     });
 
     it("Cause the Select function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('Select');
+        contextmenu.responseHandler('Select');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['Select']);
     });
 
     it("Cause the CopyLink function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('CopyLink');
+        contextmenu.responseHandler('CopyLink');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['CopyLink']);
     });
 
     it("Cause the CopyImageLink function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('CopyImageLink');
+        contextmenu.responseHandler('CopyImageLink');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['CopyImageLink']);
     });
 
@@ -264,12 +279,12 @@ describe("ui-resources/contextmenu", function () {
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testSrc', '']);
     });
     it("Cause the InspectElement function to get called properly", function () {
-        contextmenu.contextMenuResponseHandler('InspectElement');
+        contextmenu.responseHandler('InspectElement');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['InspectElement']);
     });
 
     it("has a share function", function () {
-        expect(contextmenu.share).toBeDefined();
+        expect(contextmenu.generateInvocationList).toBeDefined();
     });
 
     it("Cause the share function to get called properly", function () {
@@ -278,56 +293,82 @@ describe("ui-resources/contextmenu", function () {
             currentContext = {
                 src : 'testSrc'
             },
-            callback = jasmine.createSpy();
+
+            request = {
+                action: 'bb.action.SHARE',
+                uri : currentContext.src,
+                target_type: invocation.TARGET_TYPE_ALL,
+                action_type: invocation.ACTION_TYPE_MENU,
+                type : 'text/plain'
+            };
+
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.share("text/plain", 'No link sharing applications installed', callback);
-        expect(callback).toHaveBeenCalled();
+        contextmenu.generateInvocationList(request, 'No link sharing applications installed');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(id, invokeFunction, jasmine.any(Object), jasmine.any(Function));
     });
 
     it("has a ShareImage function", function () {
-        expect(contextmenu.contextMenuShareImage).toBeDefined();
+        expect(contextmenu.shareImage).toBeDefined();
     });
 
     it("Cause the ShareImage function to return undefine", function () {
+
         var currentContext = {};
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.contextMenuShareImage();
-        contextmenu.share = jasmine.createSpy();
-        expect(contextmenu.share).not.toHaveBeenCalled();
+        contextmenu.shareImage();
+        contextmenu.generateInvocationList = jasmine.createSpy();
+        expect(contextmenu.generateInvocationList).not.toHaveBeenCalled();
     });
 
     it("Cause the ShareImage function to get called properly", function () {
+
         var currentContext = {
-                url : 'testUrl',
-                src : 'testSrc',
-                isImage : true
+            isImage : true,
+            src : 'testSrc'
+        },
+
+            request = {
+                action: 'bb.action.SHARE',
+                uri : currentContext.src,
+                target_type: invocation.TARGET_TYPE_ALL,
+                action_type: invocation.ACTION_TYPE_MENU,
+                type : 'image/*'
             };
+
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.contextMenuShareImage();
-        expect(contextmenu.share).toHaveBeenCalledWith("image/*", 'No image sharing applications installed', jasmine.any(Function));
+        contextmenu.shareImage();
+        expect(contextmenu.generateInvocationList).toHaveBeenCalledWith(request, 'No image sharing applications installed');
     });
-    
+
     it("has a ShareLink function", function () {
-        expect(contextmenu.contextMenuShareLink).toBeDefined();
+        expect(contextmenu.shareLink).toBeDefined();
     });
 
     it("Cause the ShareLink function to return undefine", function () {
         var currentContext = {};
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.contextMenuShareLink();
-        contextmenu.share = jasmine.createSpy();
-        expect(contextmenu.share).not.toHaveBeenCalled();
+        contextmenu.shareLink();
+        contextmenu.generateInvocationList = jasmine.createSpy();
+        expect(contextmenu.generateInvocationList).not.toHaveBeenCalled();
     });
 
     it("Cause the ShareLink function to get called properly", function () {
+
         var currentContext = {
-                url : 'testUrl',
-                src : 'testSrc',
-                isImage : true
+            text : true,
+            url : 'testUrl'
+        },
+
+            request = {
+                action: 'bb.action.SHARE',
+                uri : currentContext.url,
+                target_type: invocation.TARGET_TYPE_ALL,
+                action_type: invocation.ACTION_TYPE_MENU,
+                type: 'text/plain',
             };
+
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.contextMenuShareLink();
-        expect(contextmenu.share).toHaveBeenCalledWith("text/plain", 'No link sharing applications installed', jasmine.any(Function));
+        contextmenu.shareLink();
+        expect(contextmenu.generateInvocationList).toHaveBeenCalledWith(request, 'No link sharing applications installed');
     });
 });
