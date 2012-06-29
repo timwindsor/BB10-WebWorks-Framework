@@ -24,6 +24,7 @@ describe("webview", function () {
             url: undefined,
             setFileSystemSandbox: undefined,
             setGeometry: jasmine.createSpy(),
+            onContextMenuRequestEvent: undefined,
             onNetworkResourceRequested: undefined,
             destroy: jasmine.createSpy(),
             executeJavaScript: jasmine.createSpy(),
@@ -72,6 +73,9 @@ describe("webview", function () {
                 expect(mockedWebview.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
                 expect(mockedWebview.setFileSystemSandbox).toEqual(false);
                 expect(mockedApplication.windowVisible).toEqual(true);
+                expect(mockedWebview.enableWebEventRedirect.argsForCall[0]).toEqual(['ContextMenuRequestEvent', 3]);
+                expect(mockedWebview.enableWebEventRedirect.argsForCall[1]).toEqual(['ContextMenuCancelEvent', 3]);
+                expect(mockedWebview.enableWebEventRedirect.argsForCall[2]).toEqual(['PropertyCurrentContextEvent', 3]);
                 expect(request.init).toHaveBeenCalledWith(mockedWebview);
                 expect(mockedWebview.onNetworkResourceRequested).toEqual(request.init(mockedWebview).networkResourceRequestedHandler);
             });

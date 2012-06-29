@@ -15,6 +15,7 @@ describe("Overlay Webview", function () {
             zOrder: undefined,
             url: undefined,
             setGeometry: jasmine.createSpy(),
+            onContextMenuRequestEvent: undefined,
             onNetworkResourceRequested: undefined,
             destroy: jasmine.createSpy(),
             executeJavaScript: jasmine.createSpy(),
@@ -64,7 +65,7 @@ describe("Overlay Webview", function () {
 
                 expect(mockedApplication.windowVisible).toEqual(true);
 
-                expect(mockedWebview.addEventListener).toHaveBeenCalledWith("ContextMenuRequestEvent", jasmine.any(Function));
+                expect(mockedWebview.onContextMenuRequestEvent).toEqual(jasmine.any(Function));
                 expect(mockedWebview.backgroundColor).toEqual("0x00FFFFFF");
                 expect(mockedWebview.sensitivity).toEqual("SensitivityTest");
             });
