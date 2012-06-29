@@ -71,7 +71,6 @@ describe("webview", function () {
                 expect(mockedWebview.active).toEqual(true);
                 expect(mockedWebview.zOrder).toEqual(0);
                 expect(mockedWebview.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
-                expect(mockedWebview.setFileSystemSandbox).toEqual(false);
                 expect(mockedApplication.windowVisible).toEqual(true);
                 expect(mockedWebview.enableWebEventRedirect.argsForCall[0]).toEqual(['ContextMenuRequestEvent', 3]);
                 expect(mockedWebview.enableWebEventRedirect.argsForCall[1]).toEqual(['ContextMenuCancelEvent', 3]);
@@ -90,6 +89,20 @@ describe("webview", function () {
             });
         });
 
+    });
+
+    describe("file system sandbox", function () {
+        it("setSandbox", function () {
+            webview.create();
+            webview.setSandbox(false);
+            expect(mockedWebview.setFileSystemSandbox).toBeFalsy();
+        });
+
+        it("getSandbox", function () {
+            webview.create();
+            webview.setSandbox(false);
+            expect(webview.getSandbox()).toBeFalsy();
+        });
     });
 
     describe("methods other than create", function () {

@@ -1,5 +1,6 @@
 {
     "predef": [
+        "escape", "unescape",
         //Jasmine
         "jasmine", "it", "describe",
         "xit", "xdescribe",
@@ -11,6 +12,7 @@
         //Webworks
         "qnx", "chrome",
         "blackberry", "JNEXT",
+        "frameworkModules",
         //Node
         "__dirname", "GLOBAL",
         "process", "exports",
@@ -27,7 +29,7 @@
 
     "boss" : false,
     "curly": false,
-    "bitwise" : true,
+    "bitwise" : false,
     "white": true,
     "indent": 4,
     "evil": false,
