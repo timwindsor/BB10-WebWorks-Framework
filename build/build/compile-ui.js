@@ -47,7 +47,7 @@ module.exports = function (prev, baton) {
         outputHTML = "",
         outputCSS = "",
         outputJS = "",
-        thirdParty = path.join(_c.UI, 'thirdparty'),
+        thirdParty = [path.join(_c.DEPENDENCIES, 'almond/almond.js')],
         assets = [],
         asset,
         template = { locals: {} },
@@ -109,8 +109,11 @@ module.exports = function (prev, baton) {
     wrench.mkdirSyncRecursive(uiFolderDest, "0755");
     wrench.mkdirSyncRecursive(cssFolderDest, "0755");
     wrench.mkdirSyncRecursive(assetsDest, "0755");
-    wrench.copyDirSyncRecursive(thirdParty, thirdPartyDest);
-    
+    wrench.mkdirSyncRecursive(thirdPartyDest, "0755");
+    for (plugin in thirdParty) {
+        util.copyFile(thirdParty[plugin], thirdPartyDest);
+    }
+
     for (asset in assets) {
         eassets = fs.readdirSync(assets[asset]);
         for (easset in eassets) {

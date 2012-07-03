@@ -13,3 +13,6 @@
 [submodule "dependencies/webplatform"]
 	path = dependencies/webplatform
 	url = http://github.rim.net/webworks/webplatform.git
+[submodule "dependencies/almond"]
+	path = dependencies/almond
+	url = git://github.com/jrburke/almond.git
