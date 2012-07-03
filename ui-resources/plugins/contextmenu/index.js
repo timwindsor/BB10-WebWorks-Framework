@@ -176,7 +176,7 @@ contextmenu = {
         window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', [currentContext.src, title]);
     },
 
-     shareImage : function () {
+    shareImage : function () {
 
         var request = {
             action: 'bb.action.SHARE',
