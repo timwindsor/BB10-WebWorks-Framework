@@ -47,7 +47,7 @@ module.exports = function (prev, baton) {
         outputHTML = "",
         outputCSS = "",
         outputJS = "",
-        thirdParty = [path.join(_c.DEPENDENCIES, 'almond/almond.js')],
+        thirdParty = [path.join(_c.DEPENDENCIES, 'require/require.js')],
         assets = [],
         asset,
         template = { locals: {} },
