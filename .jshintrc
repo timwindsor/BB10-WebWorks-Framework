@@ -7,7 +7,6 @@
         "beforeEach", "afterEach",
         "runs", "waits", "waitsFor",
         "DOMElement",
-        "it", "describe",
         "spyOn", "expect", "global",
         //Webworks
         "qnx", "chrome",
