@@ -176,6 +176,20 @@ contextmenu = {
         window.qnx.webplatform.getController().remoteExec(1, 'webview.downloadURL', [currentContext.src, title]);
     },
 
+     shareImage : function () {
+
+        var request = {
+            action: 'bb.action.SHARE',
+            type: 'image/*',
+            uri : 'file://',
+            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL,
+            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU
+        };
+
+        /* TODO i18 internationalization */
+        contextmenu.generateInvocationList(request, 'No image sharing applications installed');
+    },
+
     responseHandler: function (menuAction) {
         if (!menuAction) {
             return;
@@ -186,11 +200,7 @@ contextmenu = {
       // TODO: i18n
     generateContextMenuItems: function (value) {
         var items = [],
-            i,
-            // TODO: just for demo, should be replaced by a real function
-            foo = function () {
-                alert("Menu");
-            };
+            i;
 
         for (i = 0; i < value.length; i++) {
             switch (value[i]) {
@@ -245,10 +255,10 @@ contextmenu = {
             case 'Search':
                 break;
             case 'ShareLink':
-                items.push({'name': 'Share Link', 'function': contextmenu.contextMenuShareLink, 'imageUrl': 'assets/Browser_ShareLink.png'});
+                items.push({'name': 'Share Link', 'function': contextmenu.shareLink, 'imageUrl': 'assets/Browser_ShareLink.png'});
                 break;
             case 'ShareImage':
-                items.push({'name': 'Share Image', 'function': contextmenu.contextMenuShareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
+                items.push({'name': 'Share Image', 'function': contextmenu.shareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
                 break;
             case 'InspectElement':
                 items.push({'name': 'Inspect Element', 'function': contextmenu.responseHandler.bind(this, 'InspectElement'), 'imageUrl': 'assets/generic_81_81_placeholder.png'});
@@ -281,19 +291,6 @@ contextmenu = {
         });
     },
 
-    shareImage : function () {
-
-        var request = {
-            action: 'bb.action.SHARE',
-            type: 'image/*',
-            uri : 'file://',
-            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL,
-            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU
-        };
-
-        /* TODO i18 internationalization */
-        contextmenu.generateInvocationList(request, 'No image sharing applications installed');
-    },
 
     viewImage : function () {
 
