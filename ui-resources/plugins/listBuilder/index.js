@@ -27,7 +27,7 @@ function invokeApp(key) {
     var invokeRequest = listItems[key],
         args = [invokeRequest];
 
-    window.qnx.webplatform.getController().remoteExec(3, "invocation.invoke", args);
+    window.qnx.webplatform.getController().remoteExec(1, "invocation.invoke", args);
     listBuilder.hide();
 }
 
@@ -59,6 +59,7 @@ listBuilder = {
             listItems[targets[i].key] = {
                 target: targets[i].key,
                 action: request.action,
+                type: request.type,
                 uri: request.uri,
                 data: request.data
             };

@@ -208,8 +208,10 @@ contextmenu = {
                 items.push({'name': 'ClearField', 'function': contextmenu.responseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'SendLink':
+                items.push({'name': 'Send Link', 'function': contextmenu.responseHandler.bind(this, 'SendLink'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'SendImageLink':
+                items.push({'name': 'Send Image Link', 'function': contextmenu.responseHandler.bind(this, 'SendImageLink'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'FullMenu':
                 break;
@@ -280,7 +282,7 @@ contextmenu = {
     generateInvocationList : function (request, errorMessage) {
 
         var args = [request, errorMessage];
-        qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, function (results) {
+        qnx.webplatform.getController().remoteExec(1, "invocation.queryTargets", args, function (results) {
             if (results[0]) {
                 var list = require('listBuilder');
                 list.init();
@@ -308,16 +310,18 @@ contextmenu = {
 
     shareLink : function () {
 
+        /*
         if (!currentContext || !currentContext.url) {
             return;
         }
+        */
 
         var request = {
             action: 'bb.action.SHARE',
             type : 'text/plain',
-            uri : 'file://',
-            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL,
-            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU
+            //uri : 'file://',
+            uri : currentContext.src,
+            data : currentContext.url,
         };
 
         /* TODO i18 internationlization */
