@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-//TODO: We currently dont have event or tabs plugins
-//var event = require('iris/event'),
-//    tabs = require('chrome/tabs'),
-var    self;
+// Warning: Dialog plugin will not work until it is ported from XUI
+var self;
 
 function hide(evt) {
     if (!x$('#dialog').hasClass('hidden')) {
@@ -135,8 +133,6 @@ function requestDialog(id, evt, evtId) {
         console.error("chrome shouldn't spawn dialogs. Doing nothing.");
         return;
     }
-    //TODO: Not set up in WebWorks Framework
-    //tabs.update(id, {selected: true});
 
     var res = show(evt);
     if (res) {
@@ -174,22 +170,7 @@ self = {
      */
     showDialog: function (description) {
         return show(description);
-    },
-
-    init: function () {
-        /*
-        * TODO: We this is not set up for WebWorks Framework
-        event.on('DialogRequested', requestDialog);
-        event.on('chrome.tabs.onCreated', function (tab) {
-            if (tab.id != iris.chromeId) {
-                qnx.callExtensionMethod('webview.setEnableDialogRequestedEvents', tab.id, true);
-            }
-        });
-        */
     }
 };
-
-//TODO: We currently do not have event plugins
-//event.on('browser.plugins.init', self.init);
 
 module.exports = self;
