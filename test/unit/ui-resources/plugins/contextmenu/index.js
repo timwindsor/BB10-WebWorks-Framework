@@ -291,7 +291,7 @@ describe("ui-resources/contextmenu", function () {
         var id = 3,
             invokeFunction = "invocation.queryTargets",
             currentContext = {
-                src : 'testSrc'
+                src : 'file://'
             },
 
             request = {
@@ -324,7 +324,7 @@ describe("ui-resources/contextmenu", function () {
 
         var currentContext = {
             isImage : true,
-            src : 'testSrc'
+            src : 'file://'
         },
 
             request = {
@@ -356,7 +356,7 @@ describe("ui-resources/contextmenu", function () {
 
         var currentContext = {
             text : true,
-            url : 'testUrl'
+            url : 'file://'
         },
 
             request = {
@@ -364,7 +364,7 @@ describe("ui-resources/contextmenu", function () {
                 uri : currentContext.url,
                 target_type: invocation.TARGET_TYPE_ALL,
                 action_type: invocation.ACTION_TYPE_MENU,
-                type: 'text/plain',
+                type: 'text/plain'
             };
 
         contextmenu.setCurrentContext(currentContext);

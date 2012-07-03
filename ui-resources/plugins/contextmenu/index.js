@@ -267,9 +267,9 @@ contextmenu = {
         currentContext = context;
     },
 
-    getQueryTargets : function (request, errorMessage, dataCallback) {
-        var args = [request, errorMessage];
+    generateInvocationList : function (request, errorMessage) {
 
+        var args = [request, errorMessage];
         qnx.webplatform.getController().remoteExec(3, "invocation.queryTargets", args, function (results) {
             if (results[0]) {
                 var list = require('listBuilder');
@@ -287,8 +287,8 @@ contextmenu = {
             action: 'bb.action.SHARE',
             type: 'image/*',
             uri : 'file://',
-            target_type: invocation.TARGET_TYPE_ALL,
-            action_type: invocation.ACTION_TYPE_MENU
+            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL,
+            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU
         };
 
         /* TODO i18 internationalization */
@@ -301,8 +301,8 @@ contextmenu = {
             action: 'bb.action.VIEW',
             type: 'image/jpeg',
             uri : 'file://',
-            action_type: invocation.ACTION_TYPE_MENU,
-            target_type: invocation.TARGET_TYPE_ALL
+            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU,
+            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL
         };
 
         /* TODO i18 internationalization */
@@ -319,8 +319,8 @@ contextmenu = {
             action: 'bb.action.SHARE',
             type : 'text/plain',
             uri : 'file://',
-            target_type: invocation.TARGET_TYPE_ALL,
-            action_type: invocation.ACTION_TYPE_MENU
+            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL,
+            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU
         };
 
         /* TODO i18 internationlization */
