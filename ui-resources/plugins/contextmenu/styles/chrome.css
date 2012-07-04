@@ -7,6 +7,10 @@ html {
     overflow: hidden;
 }
 
+body {
+   font-size: 40px;
+}
+
 #contextMenu {
     height: 100%;
     width: 563px;
