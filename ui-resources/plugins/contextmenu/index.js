@@ -283,12 +283,14 @@ contextmenu = {
 
         var args = [request, errorMessage];
         qnx.webplatform.getController().remoteExec(1, "invocation.queryTargets", args, function (results) {
-            if (results[0]) {
+            if (results.length > 0) {
                 var list = require('listBuilder');
                 list.init();
                 list.setHeader(results[0].label);
                 list.populateList(results[0].targets, request);
                 list.show();
+            } else {
+                alert(errorMessage);
             }
         });
     },
@@ -310,18 +312,16 @@ contextmenu = {
 
     shareLink : function () {
 
-        /*
         if (!currentContext || !currentContext.url) {
             return;
         }
-        */
 
         var request = {
             action: 'bb.action.SHARE',
             type : 'text/plain',
-            //uri : 'file://',
-            uri : currentContext.src,
             data : currentContext.url,
+            action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_ALL,
+            target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_APPLICATION
         };
 
         /* TODO i18 internationlization */

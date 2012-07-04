@@ -60,8 +60,7 @@ listBuilder = {
                 target: targets[i].key,
                 action: request.action,
                 type: request.type,
-                uri: request.uri,
-                data: request.data
+                data: window.btoa(request.data)
             };
             listContent.appendChild(listItem);
         }
