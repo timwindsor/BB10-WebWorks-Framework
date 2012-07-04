@@ -27,7 +27,14 @@ var _event = require("./../../lib/event"),
                     _event.trigger("invoked", onInvokedInfo);
                 }
             }
-        }
+        },
+        /*received: {
+            context: require,
+            event: "received",
+            trigger: function () {
+                _event.trigger("received", );
+            }
+        }*/
     };
 
 module.exports = {

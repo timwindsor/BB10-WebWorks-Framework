@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _event = require("../../lib/event");
+var _event = require("../../lib/event"),
+    viewers = {};
 
 module.exports = {
     invoke: function (success, fail, args) {
@@ -43,6 +44,66 @@ module.exports = {
         });
 
         window.qnx.webplatform.getApplication().invocation.invoke(request, callback);
+        success();
+    },
+
+    invokeViewer: function (success, fail, args) {
+        var argReq = JSON.parse(decodeURIComponent(args["request"])),
+            request = {},
+            expectedParams = [
+                "target",
+                "action",
+                "uri",
+                "type",
+                "data",
+                "width",
+                "height"
+            ],
+            callback = function (error, viewer) {
+                var response = { "error": error },
+                    _viewerCallbacksEventId = "blackberry.invoke.viewerCallbacksEventId";
+                if (viewer && viewer.viewerId && !viewers[viewer.viewerId]) {
+
+                    viewer.onClose = function () {
+                        _event.trigger(_viewerCallbacksEventId, {
+                            id: viewer.viewerId,
+                            method: "onClose"
+                        });
+                        delete viewers[viewer.viewerId];
+                    };
+
+                    viewer.onCancel = function () {
+                        _event.trigger(_viewerCallbacksEventId, {
+                            id: viewer.viewerId,
+                            method: "onCancel"
+                        });
+                        delete viewers[viewer.viewerId];
+                    };
+
+                    viewer.onReceive = function (name, message) {
+                        _event.trigger(_viewerCallbacksEventId, {
+                            id: viewer.viewerId,
+                            method: "onReceive",
+                            params: message
+                        });
+                    };
+
+                    viewers[viewer.viewerId] = viewer;
+                    response.viewerId = viewer.viewerId;
+                }
+
+                _event.trigger("blackberry.invoke.invokeViewerEventId", response);
+            };
+
+        expectedParams.forEach(function (key) {
+            var val = argReq[key];
+
+            if (val) {
+                request[key] = val;
+            }
+        });
+
+        window.qnx.webplatform.getApplication().invocation.invokeViewer(request, callback);
         success();
     },
 
@@ -103,7 +164,43 @@ module.exports = {
 
         window.qnx.webplatform.getApplication().invocation.queryTargets(request, callback);
         success();
-    }
+    },
 
+    viewerMethod: function (success, fail, args) {
+        var argReq = JSON.parse(decodeURIComponent(args["request"])),
+            viewer = viewers[argReq.id],
+            callback,
+            expectedMethods = [
+                "close",
+                "setSize",
+                "setPosition",
+                "setVisibility",
+                "setZOrder",
+                "send",
+                "update"
+            ],
+            isWhitelisted = expectedMethods.some(function (method) {
+                return argReq.method === method;
+            });
+
+        if (viewer && isWhitelisted) {
+            if (argReq.method === "send" && argReq.callback && Array.isArray(argReq.params)) {
+                callback = function (name, message) {
+                    _event.trigger("blackberry.invoke.relayViewerEventId", {name: message.msg, data: message.dat});
+                };
+
+                argReq.params.push(callback);
+            }
+
+            viewer[argReq.method].apply(viewer, argReq.params);
+            if (argReq.method === "close") {
+                delete viewers[argReq.id];
+            }
+
+            success();
+        } else {
+            fail();
+        }
+    }
 };
 
