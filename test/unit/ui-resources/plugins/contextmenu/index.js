@@ -283,12 +283,12 @@ describe("ui-resources/contextmenu", function () {
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['InspectElement']);
     });
 
-    it("has a share function", function () {
+    it("has a generateInvocationList function", function () {
         expect(contextmenu.generateInvocationList).toBeDefined();
     });
 
-    it("Cause the share function to get called properly", function () {
-        var id = 3,
+    it("Cause the generationInvocationList function to get called properly", function () {
+        var id = 1,
             invokeFunction = "invocation.queryTargets",
             currentContext = {
                 src : 'file://'
@@ -353,22 +353,13 @@ describe("ui-resources/contextmenu", function () {
     });
 
     it("Cause the ShareLink function to get called properly", function () {
-
         var currentContext = {
             text : true,
             url : 'file://'
-        },
-
-            request = {
-                action: 'bb.action.SHARE',
-                uri : currentContext.url,
-                target_type: invocation.TARGET_TYPE_ALL,
-                action_type: invocation.ACTION_TYPE_MENU,
-                type: 'text/plain'
-            };
+        };
 
         contextmenu.setCurrentContext(currentContext);
         contextmenu.shareLink();
-        expect(contextmenu.generateInvocationList).toHaveBeenCalledWith(request, 'No link sharing applications installed');
+        expect(contextmenu.generateInvocationList).toHaveBeenCalledWith(jasmine.any(Object), 'No link sharing applications installed');
     });
 });
