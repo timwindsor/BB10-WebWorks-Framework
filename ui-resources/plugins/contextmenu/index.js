@@ -205,13 +205,11 @@ contextmenu = {
         for (i = 0; i < value.length; i++) {
             switch (value[i]) {
             case 'ClearField':
-                items.push({'name': 'ClearField', 'function': contextmenu.responseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+                items.push({'name': 'Clear Field', 'function': contextmenu.responseHandler.bind(this, 'ClearField'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'SendLink':
-                items.push({'name': 'Send Link', 'function': contextmenu.responseHandler.bind(this, 'SendLink'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'SendImageLink':
-                items.push({'name': 'Send Image Link', 'function': contextmenu.responseHandler.bind(this, 'SendImageLink'), 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
                 break;
             case 'FullMenu':
                 break;
@@ -257,7 +255,10 @@ contextmenu = {
             case 'Search':
                 break;
             case 'ShareLink':
-                items.push({'name': 'Share Link', 'function': contextmenu.shareLink, 'imageUrl': 'assets/Browser_ShareLink.png'});
+                // local and file protocol won't have sharelink menuitem
+                if (!/^local|^file/.test(currentContext.url)) {
+                    items.push({'name': 'Share Link', 'function': contextmenu.shareLink, 'imageUrl': 'assets/Browser_ShareLink.png'});
+                }
                 break;
             case 'ShareImage':
                 items.push({'name': 'Share Image', 'function': contextmenu.shareImage, 'imageUrl': 'assets/Browser_ShareImage.png'});
