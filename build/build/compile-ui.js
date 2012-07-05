@@ -31,7 +31,7 @@ module.exports = function (prev, baton) {
         pluginsToLoad = [],
         pluginHTML,
         pluginHTMLPath,
-        cssFiles = [],
+        cssFiles = [path.join(_c.BUILD, 'FILE_LICENSE')],
         jsFiles = [],
         include = function (files, transform) {
             files = files.map ? files : [files];
@@ -100,6 +100,7 @@ module.exports = function (prev, baton) {
     });
    
     outputCSS = include(cssFiles);
+    outputJS += include([path.join(_c.BUILD, 'FILE_LICENSE'), ]);
     outputJS += include(jsFiles, function (file, path) {
         var pathSplit = path.split("\/");
         return "define('" + pathSplit[pathSplit.length - 2] +
