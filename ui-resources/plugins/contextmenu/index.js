@@ -112,11 +112,6 @@ contextmenu = {
         // TODO: 2 for client webview
         qnx.callExtensionMethod("webview.notifyContextMenuCancelled", 2);
 
-        /*tabs.getSelected(0, function (tab) {
-            if (tab) {
-                qnx.callExtensionMethod("webview.notifyContextMenuCancelled", tab.id);
-            }
-        });*/
         // Reset sensitivity
         window.qnx.webplatform.getController().remoteExec(1, 'webview.setSensitivity', ['SensitivityTest']);
     },
