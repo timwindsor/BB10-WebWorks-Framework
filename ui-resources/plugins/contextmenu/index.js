@@ -61,8 +61,6 @@ contextmenu = {
             menuItem.setAttribute("class", "menuItem");
             menuItem.ontouchend = callback.bind(this, menuItem);
             menuItem.addEventListener('mousedown', contextmenu.handleMouseDown, false);
-            // FIXME: need to make this work
-            //menuItem.onmousedown = function () { menuItem.attr("class", "menuItem click"); };
             menu.appendChild(menuItem);
         }
     },
@@ -109,7 +107,6 @@ contextmenu = {
         menuVisible = false;
         menuPeeked = false;
         menu.className = 'hideMenu';
-        // TODO: 2 for client webview
         qnx.callExtensionMethod("webview.notifyContextMenuCancelled", 2);
 
         // Reset sensitivity
@@ -178,14 +175,9 @@ contextmenu = {
         window.qnx.webplatform.getController().remoteExec(1, 'webview.handleContextMenuResponse', [menuAction]);
     },
 
-      // TODO: i18n
     generateContextMenuItems: function (value) {
         var items = [],
             i,
-            // TODO: just for demo, should be replaced by a real function
-            foo = function () {
-                alert("Menu");
-            };
 
         for (i = 0; i < value.length; i++) {
             switch (value[i]) {
@@ -290,9 +282,7 @@ contextmenu = {
         if (!currentContext || !currentContext.url) {
             return;
         }
-        // FIXME: Could probably come up with a custom type for links that would let us share the title as well.
         contextmenu.share('text/plain', 'No link sharing applications installed', function (request) {
-            // FIXME: window.btoa doesn't handle all character sets.
             request.uri = 'data://local';
             request.data = window.btoa(currentContext.url);
         });
