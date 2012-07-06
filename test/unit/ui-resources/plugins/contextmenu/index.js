@@ -26,7 +26,8 @@ describe("ui-resources/contextmenu", function () {
     header,
     mockedController,
     mockedApplication,
-    invocation;
+    invocation,
+    config = require(srcPath + './lib/config.js');
 
     beforeEach(function () {
         invocation = {
@@ -42,6 +43,8 @@ describe("ui-resources/contextmenu", function () {
                 ACTION_TYPE_MENU : ''
             }
         };
+
+        GLOBAL.alert = jasmine.createSpy();
         GLOBAL.window = {
             qnx : {
                 webplatform : {
@@ -268,19 +271,6 @@ describe("ui-resources/contextmenu", function () {
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testUrl', '']);
     });
 
-    it("Cause the SaveImage function to get called properly", function () {
-        var currentContext = {
-            url : 'testUrl',
-            src : 'testSrc',
-            isImage : true
-        };
-
-        contextmenu.setCurrentContext(currentContext);
-        contextmenu.saveImage();
-        expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testSrc', '']);
-    });
-
-
 
     it("Cause the InspectElement function to get called properly", function () {
         contextmenu.responseHandler('InspectElement');
@@ -311,37 +301,43 @@ describe("ui-resources/contextmenu", function () {
         expect(mockedController.remoteExec).toHaveBeenCalledWith(id, invokeFunction, jasmine.any(Object), jasmine.any(Function));
     });
 
-    xit("has a ShareImage function", function () {
-        expect(contextmenu.shareImage).toBeDefined();
+    it("has a SaveImage function", function () {
+        expect(contextmenu.saveImage).toBeDefined();
     });
 
-    xit("Cause the ShareImage function to return undefine", function () {
-
+    it("Causes the saveImage function to return", function () {
         var currentContext = {};
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.shareImage();
-        contextmenu.generateInvocationList = jasmine.createSpy();
-        expect(contextmenu.generateInvocationList).not.toHaveBeenCalled();
+        contextmenu.saveImage();
+        expect(mockedController.remoteExec).not.toHaveBeenCalled();
     });
 
-    xit("Cause the ShareImage function to get called properly", function () {
-
+    it("Cause the SaveImage to not be called, since access_shared is undefined", function () {
         var currentContext = {
-            isImage : true,
-            src : 'file://'
-        },
-
-            request = {
-                action: 'bb.action.SHARE',
-                uri : currentContext.src,
-                target_type: invocation.TARGET_TYPE_ALL,
-                action_type: invocation.ACTION_TYPE_MENU,
-                type : 'image/*'
-            };
+            url : 'testUrl',
+            src : 'testSrc',
+            isImage : true
+        };
 
         contextmenu.setCurrentContext(currentContext);
-        contextmenu.shareImage();
-        expect(contextmenu.generateInvocationList).toHaveBeenCalledWith(request, 'No image sharing applications installed');
+        contextmenu.saveImage();
+        expect(mockedController.remoteExec).not.toHaveBeenCalled();
+    });
+
+    it("Cause the SaveImage function to get called properly", function () {
+        var currentContext = {
+            url : 'testUrl',
+            src : 'testSrc',
+            isImage : true
+        };
+
+        // Set the access_shared permissions in a mocked way ;) //
+        spyOn(config, "permissions").andReturn(['access_shared']);
+        config.permissions.indexOf = function () { return 1;};
+
+        contextmenu.setCurrentContext(currentContext);
+        contextmenu.saveImage();
+        expect(mockedController.remoteExec).toHaveBeenCalledWith( 1, 'webview.downloadSharedFile', ['testSrc', 'photos'], jasmine.any(Function));
     });
 
     it("has a ShareLink function", function () {

@@ -19,13 +19,19 @@ var contextmenu,
     menuPeeked,
     currentContext,
     config,
-    utils;
+    utils,
+    includePath;
+
+
+function requireLocal(id) {
+        return require(!!require.resolve ? "../../" + id.replace(/\/chrome/, "") : id);
+}
 
 function init() {
     var menu = document.getElementById('contextMenu');
     menu.addEventListener('webkitTransitionEnd', contextmenu.transitionEnd.bind(contextmenu));
-    config = require('../chrome/lib/config.js');
-    utils = require('../chrome/lib/utils');
+    config = requireLocal("../chrome/lib/config.js");
+    utils = requireLocal("../chrome/lib/utils");
 }
 
 contextmenu = {
@@ -180,7 +186,8 @@ contextmenu = {
         }
 
         // Check that the proper access permissions have been enabled
-        if (config.permissions.indexOf("access_shared") === -1) {
+        if (!config.permissions || config.permissions.indexOf("access_shared") === -1) {
+            alert("Access shared permissions are not enabled");
             return;
         }
 
