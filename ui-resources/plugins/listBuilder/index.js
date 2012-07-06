@@ -57,10 +57,11 @@ listBuilder = {
             listItem.addEventListener('mousedown', handleMouseDown, false);
             listItem.ontouchend = invokeApp.bind(this, targets[i].key);
             listItems[targets[i].key] = {
-                target: targets[i].key,
-                action: request.action,
+                target : targets[i].key,
+                action : request.action,
                 type: request.type,
-                data: window.btoa(request.data)
+                uri : request.uri,
+                data : window.btoa(request.data)
             };
             listContent.appendChild(listItem);
         }

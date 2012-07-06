@@ -274,6 +274,7 @@ describe("ui-resources/contextmenu", function () {
             src : 'testSrc',
             isImage : true
         };
+
         contextmenu.setCurrentContext(currentContext);
         contextmenu.saveImage();
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testSrc', '']);
@@ -307,11 +308,11 @@ describe("ui-resources/contextmenu", function () {
         expect(mockedController.remoteExec).toHaveBeenCalledWith(id, invokeFunction, jasmine.any(Object), jasmine.any(Function));
     });
 
-    it("has a ShareImage function", function () {
+    xit("has a ShareImage function", function () {
         expect(contextmenu.shareImage).toBeDefined();
     });
 
-    it("Cause the ShareImage function to return undefine", function () {
+    xit("Cause the ShareImage function to return undefine", function () {
 
         var currentContext = {};
         contextmenu.setCurrentContext(currentContext);
@@ -320,7 +321,7 @@ describe("ui-resources/contextmenu", function () {
         expect(contextmenu.generateInvocationList).not.toHaveBeenCalled();
     });
 
-    it("Cause the ShareImage function to get called properly", function () {
+    xit("Cause the ShareImage function to get called properly", function () {
 
         var currentContext = {
             isImage : true,
