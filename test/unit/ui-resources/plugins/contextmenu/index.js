@@ -279,6 +279,9 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.saveImage();
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.downloadURL', ['testSrc', '']);
     });
+
+
+
     it("Cause the InspectElement function to get called properly", function () {
         contextmenu.responseHandler('InspectElement');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.handleContextMenuResponse', ['InspectElement']);

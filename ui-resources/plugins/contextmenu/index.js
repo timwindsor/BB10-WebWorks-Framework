@@ -18,12 +18,14 @@ var contextmenu,
     menuVisible,
     menuPeeked,
     currentContext,
-    config;
+    config,
+    utils;
 
 function init() {
     var menu = document.getElementById('contextMenu');
     menu.addEventListener('webkitTransitionEnd', contextmenu.transitionEnd.bind(contextmenu));
     config = require('../chrome/lib/config.js');
+    utils = require('../chrome/lib/utils');
 }
 
 contextmenu = {
@@ -188,11 +190,10 @@ contextmenu = {
         function onSaved(target) {
 
             if (target) {
-                var prePend = "/",
-                    request = {
+                var request = {
                     action: 'bb.action.VIEW',
-                    type: 'image/jpeg',
-                    uri : "file:" + prePend + target, //target comes back with double slash, change to triple
+                    type: utils.fileNameToMIME(target),
+                    uri : "file:/" + target, //target comes back with double slash, change to triple
                     action_type: window.qnx.webplatform.getApplication().invocation.ACTION_TYPE_MENU,
                     target_type: window.qnx.webplatform.getApplication().invocation.TARGET_TYPE_ALL
                 };
