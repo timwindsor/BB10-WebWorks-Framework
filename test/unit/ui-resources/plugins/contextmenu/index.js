@@ -366,4 +366,221 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.shareLink();
         expect(contextmenu.generateInvocationList).toHaveBeenCalledWith(jasmine.any(Object), 'No link sharing applications installed');
     });
+
+    it("has a generateContextMenuItems function", function () {
+        expect(contextmenu.generateContextMenuItems).toBeDefined();
+    });
+
+    it("Cause the generateContextMenuItems function to return Clear Field", function () {
+        var items = ['ClearField'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Clear Field', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return empty array for SendLink", function () {
+        var items = ['SendLink'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to return empty array for SendImageLink", function () {
+        var items = ['SendImageLink'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to empty array for FullMenu", function () {
+        var items = ['FullMenu'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to empty array for Delete", function () {
+        var items = ['Delete'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Cancel", function () {
+        var items = ['Cancel'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Cancel', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Cut", function () {
+        var items = ['Cut'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Cut', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Copy", function () {
+        var items = ['Copy'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Copy', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Paste", function () {
+        var items = ['Paste'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Paste', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Select", function () {
+        var items = ['Select'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Select', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to empty array for AddLinkToBookmarks", function () {
+        var items = ['AddLinkToBookmarks'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Copy Link", function () {
+        var items = ['CopyLink'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Copy Link', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to empty array for OpenLinkInNewTab", function () {
+        var items = ['OpenLinkInNewTab'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Open Link", function () {
+        var items = ['OpenLink'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Open', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Save Link as", function () {
+        var items = ['SaveLinkAs'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Save Link as', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Save Image", function () {
+        var items = ['SaveImage'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Save Image', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return Copy Image Link", function () {
+        var items = ['CopyImageLink'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Copy Image Link', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to return View Image", function () {
+        var items = ['ViewImage'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'View Image', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function to empty array for Search", function () {
+        var items = ['Search'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual([]);
+    });
+
+    it("Cause the generateContextMenuItems function to return InspectElement", function () {
+        var items = ['InspectElement'],
+            currentContext = {
+                url : 'http://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Inspect Element', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function not return ShareLink menuitem when the protocol is file://", function () {
+        var items = ['ShareLink', 'ShareImage'],
+            currentContext = {
+                url : 'file://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Share Image', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
+
+    it("Cause the generateContextMenuItems function not return ShareLink menuitem when the protocol is local://", function () {
+        var items = ['ShareLink', 'ShareImage'],
+            currentContext = {
+                url : 'local://www.rim.com'
+            };
+        contextmenu.setCurrentContext(currentContext);
+        expect(contextmenu.generateContextMenuItems(items)).toEqual(
+            [{'name': 'Share Image', 'function': jasmine.any(Function), 'imageUrl': jasmine.any(String)}]);
+    });
 });
