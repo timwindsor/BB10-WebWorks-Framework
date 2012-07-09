@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-describe("ui-resources/contextmenu", function () {
+xdescribe("ui-resources/contextmenu", function () {
 
     var srcPath = '../../../../../',
     contextmenu = require(srcPath + 'ui-resources/plugins/contextmenu/index'),

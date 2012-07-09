@@ -17,10 +17,12 @@
 var _overlayWebView = require('./../../lib/overlayWebView'),
     _utils = require('./../../lib/utils'),
     _config = require('./../../lib/config.js'),
+    _event = require('./../../lib/event'),
     _menuItems,
     _currentContext,
     _invocation = window.qnx.webplatform.getApplication().invocation,
     _application = window.qnx.webplatform.getApplication(),
+    _customHandlers = {},
     menuActions;
 
 
@@ -177,23 +179,53 @@ function responseHandler(menuAction) {
     handleContextMenuResponse([menuAction]);
 }
 
+function customItemHandler(actionId) {
+    _event.trigger('contextmenu.executeMenuAction', actionId);    
+}
+
+function addCustomItem(actionId) {
+    if (_customHandlers[actionId]) {
+        return false;
+    } else {
+        _customHandlers[actionId] = customItemHandler.bind(this, actionId);
+        return true;
+    }
+}
+
+function removeCustomItem(actionId) {
+    if (_customHandlers[actionId]) {
+        delete _customHandlers[actionId];
+    }
+}
+
+function clearCustomHandlers() {
+    _customHandlers = {};
+}
+
 menuActions = {
 
-    'SaveLink'       : saveLink,
-    'Cancel'         : responseHandler,
-    'ClearField'     : responseHandler,
-    'Cut'            : responseHandler,
-    'Copy'           : responseHandler,
-    'Paste'          : responseHandler,
-    'Select'         : responseHandler,
-    'CopyLink'       : responseHandler,
-    'OpenLink'       : openLink,
-    'SaveLinkAs'     : saveLink,
-    'CopyImageLink'  : responseHandler,
-    'SaveImage'      : saveImage,
-    'ShareLink'      : shareLink,
-    'InspectElement' : responseHandler,
+    handlers: {
+        'SaveLink'       : saveLink,
+        'Cancel'         : responseHandler,
+        'ClearField'     : responseHandler,
+        'Cut'            : responseHandler,
+        'Copy'           : responseHandler,
+        'Paste'          : responseHandler,
+        'Select'         : responseHandler,
+        'CopyLink'       : responseHandler,
+        'OpenLink'       : openLink,
+        'SaveLinkAs'     : saveLink,
+        'CopyImageLink'  : responseHandler,
+        'SaveImage'      : saveImage,
+        'ShareLink'      : shareLink,
+        'InspectElement' : responseHandler
+    },
+    customHandlers: _customHandlers,
+    clearCustomHandlers: clearCustomHandlers,
     setCurrentContext: setCurrentContext,
+    customItemHandler: customItemHandler,
+    addCustomItem: addCustomItem,
+    removeCustomItem: removeCustomItem
 };
 
 module.exports = menuActions;
