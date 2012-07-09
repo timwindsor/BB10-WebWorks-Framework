@@ -106,7 +106,7 @@ var define,
                 //If the module to be loaded starts with local:// go over the bridge
                 //Else If the module to be loaded is a relative load it may not have .js extension which is needed
                 if (/^local:\/\//.test(name)) {
-                    url = "http://localhost:8472/blackberry/extensions/load/" + normalizedName.replace(/(?:^ext\/)(.+)(?:\/client$)/, "$1");
+                    url = "http://localhost:8472/extensions/load/" + normalizedName.replace(/(?:^ext\/)(.+)(?:\/client$)/, "$1");
                 } else if (baseName) {
                     url = normalizedName;
                     if (!/\.js$/.test(url)) {
