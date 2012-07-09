@@ -21,15 +21,9 @@ module.exports = {
         if (event) {
             switch (event) {
             case "pause":
-                framework.setOnPause(trigger);
-                break;
-
             case "resume":
-                framework.setOnResume(trigger);
-                break;
-                
             case "swipedown":
-                framework.setOnSwipeDown(trigger);
+                window.qnx.webplatform.getApplication().application.addEventListener(event, trigger);
                 break;
 
             default:
@@ -38,19 +32,14 @@ module.exports = {
             }
         }
     },
-    removeEventListener: function (event) {
+
+    removeEventListener: function (event, trigger) {
         if (event) {
             switch (event) {
             case "pause":
-                framework.setOnPause(null);
-                break;
-
             case "resume":
-                framework.setOnResume(null);
-                break;
-                
             case "swipedown":
-                framework.setOnSwipeDown(null);
+                window.qnx.webplatform.getApplication().application.removeEventListener(event, trigger);
                 break;
 
             default:
