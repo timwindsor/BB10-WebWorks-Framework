@@ -100,7 +100,7 @@ describe("webworks require", function () {
 
         it("will go across the bridge when the module name starts with local:// and ends with .js", function () {
             var moduleURI = "local://ext/blackberry.system/client.js",
-                url = "http://localhost:8472/blackberry/extensions/load/blackberry.system",
+                url = "http://localhost:8472/extensions/load/blackberry.system",
                 appClient;
             mockRequest.responseText = "module.exports = { test: 'TEST'}";
             //spyOn(webworksRequire, "define").andCallThrough();

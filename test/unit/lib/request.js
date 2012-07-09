@@ -47,7 +47,7 @@ describe("requestination ", function () {
 
     it("can call the server handler when certain urls are detected", function () {
         spyOn(server, "handle");
-        var url = "http://localhost:8472/blackberry/roomService/kungfuAction/customExt/crystalMethod?blargs=yes",
+        var url = "http://localhost:8472/roomService/kungfuAction/customExt/crystalMethod?blargs=yes",
             requestObj = request.init(mockedWebview),
             returnValue = requestObj.networkResourceRequestedHandler(JSON.stringify({url: url})),
             expectedRequest = {

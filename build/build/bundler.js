@@ -44,7 +44,6 @@ module.exports = {
             clientFilesPath,
             wwVersion = fs.readFileSync("version", "utf-8").trim(),
             wwHash,
-            wwUriPrefix = fs.readFileSync("uriPrefix", "utf-8").trim(),
             wwInfoModule,
             
             //output sections
@@ -79,8 +78,7 @@ module.exports = {
         
         wwInfoModule = "module.exports = {\n" +
             "\thash: \"" + wwHash + "\",\n" +
-            "\tversion: \"" + wwVersion + "\",\n" +
-            "\turiPrefix: \"" + wwUriPrefix + "\"\n" +
+            "\tversion: \"" + wwVersion + "\"\n" +
             "};";
         
         //Create webworks-info to be placed in bar and respresent the framework version[hash].
