@@ -7,7 +7,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/JsonCpp/js
 set(filetransfer_srcs
     filetransfer_curl.cpp
     filetransfer_js.cpp
-    ../../blackberry.ui.dialog/native/dialog_bps.cpp
+    ../../ui.dialog/native/dialog_bps.cpp
     ../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/src/lib_json/json_reader.cpp
     ../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/src/lib_json/json_value.cpp
     ../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/src/lib_json/json_writer.cpp
