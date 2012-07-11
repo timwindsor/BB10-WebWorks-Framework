@@ -19,22 +19,23 @@ var fs = require('fs'),
 function buildGiantManifest() {
     var allManifest = {},
         extDir = __dirname.replace(/\\/g, '/') + "/../../ext/",
+        files = fs.readdirSync(extDir),
         giantManifestPath = __dirname.replace(/\\/g, '/') + "/../../lib/public/manifest.js";
 
-    fs.readdir(extDir, function (err, files) {
-        files.forEach(function (dir) {
+    files.forEach(function (dir) {
+        if (!dir.match(/^\./)) {
             var manifest = require(path.join(path.resolve(extDir, dir), "manifest.json")),
                 extBasename = path.relative(extDir, path.resolve(extDir, dir));
 
             allManifest[extBasename] = manifest;
-        });
-
-        if (path.existsSync(giantManifestPath)) {
-            fs.unlinkSync(giantManifestPath);
         }
-
-        fs.writeFileSync(giantManifestPath, "module.exports = " + JSON.stringify(allManifest, null, "    ") + ";");
     });
+
+    if (path.existsSync(giantManifestPath)) {
+        fs.unlinkSync(giantManifestPath);
+    }
+
+    fs.writeFileSync(giantManifestPath, "module.exports = " + JSON.stringify(allManifest, null, "    ") + ";");
 }
 
 module.exports = {
