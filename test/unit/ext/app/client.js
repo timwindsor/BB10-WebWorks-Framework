@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _ID = "blackberry.app",
+var _ID = "app",
     _extDir = __dirname + "./../../../../ext",
     _apiDir = _extDir + "/app",
     client,
@@ -50,8 +50,8 @@ afterEach(function () {
     client = null;
 });
 
-describe("blackberry.app client", function () {
-    it("execSync should have been called once for each blackberry.app field", function () {
+describe("app client", function () {
+    it("execSync should have been called once for each app field", function () {
         expect(mockedWebworks.execSync.callCount).toEqual(fields.length + 1); // +1 to account for the call to execSync for events
     });
 
@@ -120,7 +120,7 @@ describe("blackberry.app client", function () {
             mockedWebworks.execSync = jasmine.createSpy();
             GLOBAL.window.webworks = mockedWebworks;
             client.exit();
-            expect(mockedWebworks.execSync).toHaveBeenCalledWith("blackberry.app", "exit");
+            expect(mockedWebworks.execSync).toHaveBeenCalledWith(_ID, "exit");
         });
     });
 });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var _self = {},
-    ID = "blackberry.app";
+    ID = "app";
 
 _self.exit = function () {
     return window.webworks.execSync(ID, "exit");

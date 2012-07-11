@@ -20,10 +20,21 @@ describe("server", function () {
         extensionPlugin = require("../../../lib/plugins/extensions"),
         Whitelist = require("../../../lib/policy/whitelist").Whitelist,
         applicationAPIServer = require("../../../ext/app/index"),
+        utils = require("../../../lib/utils"),
         DEFAULT_SERVICE = "exec";
 
     beforeEach(function () {
         spyOn(console, "log");
+        spyOn(utils, "loadModule").andCallFake(function (module) {
+            if (module.indexOf("ext/") >= 0) {
+                // on device, "ext/blackberry.app/index.js" would exist since packager would
+                // name the extension folder with feature id in compilation time,
+                // but in unit test environment, it's the real extension folder being used
+                return require("../../" + module.replace("blackberry.", ""));
+            } else {
+                return require("../../../lib/" + module);
+            }
+        });
     });
 
     describe("when handling requests", function () {
@@ -40,7 +51,7 @@ describe("server", function () {
             res = {
                 send: jasmine.createSpy()
             };
-            GLOBAL.frameworkModules = ['ext/app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
+            GLOBAL.frameworkModules = ['ext/blackberry.app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
         });
 
         afterEach(function () {
@@ -129,7 +140,7 @@ describe("server", function () {
             res = {
                 send: jasmine.createSpy()
             };
-            GLOBAL.frameworkModules = ['ext/app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
+            GLOBAL.frameworkModules = ['ext/blackberry.app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
         });
 
         afterEach(function () {

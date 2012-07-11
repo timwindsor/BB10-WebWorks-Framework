@@ -17,10 +17,18 @@
 describe("default plugin", function () {
     var bridge = require('../../../../lib/plugins/default'),
         Whitelist = require('../../../../lib/policy/whitelist').Whitelist,
-        testExtension = require("../../../../ext/app/index");
+        testExtension = require("../../../../ext/app/index"),
+        utils = require("../../../../lib/utils");
 
     beforeEach(function () {
         spyOn(console, "log");
+        spyOn(utils, "loadModule").andCallFake(function (module) {
+            // on device, "ext/blackberry.app/index.js" would exist since packager would
+            // name the extension folder with feature id in compilation time,
+            // but in unit test environment, it's the real extension folder being used
+            module = "../../../" + module.replace("blackberry.", "");
+            return require(module);
+        });
     });
 
     describe("when handling requests", function () {
@@ -37,7 +45,8 @@ describe("default plugin", function () {
             succ = jasmine.createSpy();
             fail = jasmine.createSpy();
             args = {};
-            GLOBAL.frameworkModules = ["ext/app/index.js"];
+
+            GLOBAL.frameworkModules = ["ext/blackberry.app/index.js"];
         });
 
         afterEach(function () {
@@ -51,7 +60,7 @@ describe("default plugin", function () {
         });
 
         it("returns 404 if the method is not found", function () {
-            req.params.ext = "blackberry.app";
+            req.params.ext = "app";
             req.params.method = "NotAMethod";
             bridge.exec(req, succ, fail, args);
             expect(fail).toHaveBeenCalledWith(-1, jasmine.any(String), 404);
