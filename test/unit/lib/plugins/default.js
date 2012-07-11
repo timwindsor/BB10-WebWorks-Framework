@@ -17,7 +17,7 @@
 describe("default plugin", function () {
     var bridge = require('../../../../lib/plugins/default'),
         Whitelist = require('../../../../lib/policy/whitelist').Whitelist,
-        testExtension = require("../../../../ext/blackberry.app/index");
+        testExtension = require("../../../../ext/app/index");
 
     beforeEach(function () {
         spyOn(console, "log");
@@ -37,7 +37,7 @@ describe("default plugin", function () {
             succ = jasmine.createSpy();
             fail = jasmine.createSpy();
             args = {};
-            GLOBAL.frameworkModules = ["ext/blackberry.app/index.js"];
+            GLOBAL.frameworkModules = ["ext/app/index.js"];
         });
 
         afterEach(function () {

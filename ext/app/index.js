@@ -15,7 +15,7 @@
  */
 var _config = require("./../../lib/config"),
     _event = require("./../../lib/event"),
-    _eventExt = require("./../blackberry.event/index"),
+    _eventExt = require("./../event/index"),
     _actionMap = {
         swipedown: {
             context: require("./navEvents"),

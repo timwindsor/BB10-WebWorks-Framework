@@ -16,7 +16,7 @@
 
 var connection = require("./connectionJNEXT").connection,
     _event = require("../../lib/event"),
-    _eventExt = require("../blackberry.event/index"),
+    _eventExt = require("../event/index"),
     _actionMap = {
         connectionchange: {
             context: require("./connectionEvents"),

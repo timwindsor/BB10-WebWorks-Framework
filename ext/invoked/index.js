@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var _event = require("./../../lib/event"),
-    _eventExt = require("./../blackberry.event/index"),
+    _eventExt = require("./../event/index"),
     _actionMap = {
         invoked: {
             context: require("./invocationEvents"),

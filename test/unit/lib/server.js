@@ -19,7 +19,7 @@ describe("server", function () {
         plugin = require("../../../lib/plugins/default"),
         extensionPlugin = require("../../../lib/plugins/extensions"),
         Whitelist = require("../../../lib/policy/whitelist").Whitelist,
-        applicationAPIServer = require("../../../ext/blackberry.app/index"),
+        applicationAPIServer = require("../../../ext/app/index"),
         DEFAULT_SERVICE = "exec";
 
     beforeEach(function () {
@@ -40,7 +40,7 @@ describe("server", function () {
             res = {
                 send: jasmine.createSpy()
             };
-            GLOBAL.frameworkModules = ['ext/blackberry.app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
+            GLOBAL.frameworkModules = ['ext/app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
         });
 
         afterEach(function () {
@@ -129,7 +129,7 @@ describe("server", function () {
             res = {
                 send: jasmine.createSpy()
             };
-            GLOBAL.frameworkModules = ['ext/blackberry.app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
+            GLOBAL.frameworkModules = ['ext/app/index.js', 'lib/plugins/extensions.js', 'lib/plugins/default.js'];
         });
 
         afterEach(function () {

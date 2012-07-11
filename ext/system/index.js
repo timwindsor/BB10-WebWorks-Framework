@@ -16,7 +16,7 @@
 var Whitelist = require("../../lib/policy/whitelist").Whitelist,
     _whitelist = new Whitelist(),
     _event = require("../../lib/event"),
-    _eventExt = require("../blackberry.event/index"),
+    _eventExt = require("../event/index"),
     _ppsUtils = require("../../lib/pps/ppsUtils"),
     _ppsEvents = require("../../lib/pps/ppsEvents"),
     // This object is used by action map and contains links between pps object fields monitored for change in that object helper methods
