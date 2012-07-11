@@ -6,7 +6,7 @@ endif ()
 set(srcs
     test_main.cpp
     ../filetransfer_curl.cpp
-    ../../../blackberry.ui.dialog/native/dialog_bps.cpp
+    ../../../ui.dialog/native/dialog_bps.cpp
     ../../../../dependencies/gtest/src/gmock-gtest-all.cc
 )
 
