@@ -37,6 +37,62 @@ var _config = require("./../../lib/config"),
             trigger: function () {
                 _event.trigger("resume");
             }
+        },
+        exit: {
+            context: require("./navEvents"),
+            event: "exit",
+            trigger: function () {
+                _event.trigger("exit");
+            }
+        },
+        lowMemory: {
+            context: require("./navEvents"),
+            event: "lowMemory",
+            trigger: function () {
+                _event.trigger("lowMemory");
+            }
+        },
+        rotate: {
+            context: require("./navEvents"),
+            event: "rotate",
+            trigger: function () {
+                _event.trigger("rotate");
+            }
+        },
+        rotateDone: {
+            context: require("./navEvents"),
+            event: "rotateDone",
+            trigger: function () {
+                _event.trigger("rotateDone");
+            }
+        },
+        keyboardOpening: {
+            context: require("./navEvents"),
+            event: "keyboardOpening",
+            trigger: function () {
+                _event.trigger("keyboardOpening");
+            }
+        },
+        keyboardOpened: {
+            context: require("./navEvents"),
+            event: "keyboardOpened",
+            trigger: function () {
+                _event.trigger("keyboardOpened");
+            }
+        },
+        keyboardClosing: {
+            context: require("./navEvents"),
+            event: "keyboardClosing",
+            trigger: function () {
+                _event.trigger("keyboardClosing");
+            }
+        },
+        keyboardClosed: {
+            context: require("./navEvents"),
+            event: "keyboardClosed",
+            trigger: function () {
+                _event.trigger("keyboardClosed");
+            }
         }
     };
 
