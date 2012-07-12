@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 var _self = {},
-    _ID = "blackberry.connection",
+    _ID = "connection",
     UNKNOWN = "unknown";
 
 Object.defineProperty(_self, "type", {

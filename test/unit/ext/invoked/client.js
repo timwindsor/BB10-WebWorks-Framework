@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var _ID = "blackberry.invoked",
+var _ID = "invoked",
     _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/invoked",
+    _apiDir = _extDir + "/" + _ID,
     client,
     mockedWebworks = {
         execSync: jasmine.createSpy()

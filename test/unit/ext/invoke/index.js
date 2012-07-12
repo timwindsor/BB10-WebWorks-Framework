@@ -18,7 +18,7 @@ var _apiDir = __dirname + "./../../../../ext/invoke/",
     mockedInvocation,
     index;
 
-describe("blackberry.invoke index", function () {
+describe("invoke index", function () {
 
     beforeEach(function () {
         mockedInvocation = {

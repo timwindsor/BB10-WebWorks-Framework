@@ -19,7 +19,7 @@ function getFieldValue(field) {
     var value = null;
 
     try {
-        value = window.webworks.execSync("blackberry.identity", field, null);
+        value = window.webworks.execSync("identity", field, null);
     } catch (e) {
         console.error(e);
     }

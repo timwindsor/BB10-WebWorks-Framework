@@ -15,7 +15,7 @@
  */
 
 var io = {},
-    ID = "blackberry.io";
+    ID = "io";
 
 function getFieldValue(field) {
     var value;

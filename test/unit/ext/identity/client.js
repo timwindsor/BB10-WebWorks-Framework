@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _ID = "blackberry.identity",
+var _ID = "identity",
     _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/identity",
+    _apiDir = _extDir + "/" + _ID,
     client,
     mockedWebworks = {},
     fields = [

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-var _apiDir = __dirname + "./../../../../ext/event/",
+var _ID = "event",
+    _apiDir = __dirname + "./../../../../ext/" + _ID + "/",
     _libDir = __dirname + "./../../../../lib/",
     client,
     mockedWebworks = {
@@ -41,14 +42,14 @@ describe("Event Listener", function () {
         var eventType = "GoldenEye",
             JamesBond = jasmine.createSpy();
         client.addEventListener(eventType, JamesBond);
-        expect(mockedWebworks.event.add).toHaveBeenCalledWith("blackberry.event", eventType, JamesBond);
+        expect(mockedWebworks.event.add).toHaveBeenCalledWith(_ID, eventType, JamesBond);
     });
 
     it("removes event listeners", function () {
         var eventType = "GoldenEyeHijack",
             JamesBond = jasmine.createSpy();
         client.removeEventListener(eventType, JamesBond);
-        expect(mockedWebworks.event.remove).toHaveBeenCalledWith("blackberry.event", eventType, JamesBond);
+        expect(mockedWebworks.event.remove).toHaveBeenCalledWith(_ID, eventType, JamesBond);
     });
 
 });

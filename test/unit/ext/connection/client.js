@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _ID = "blackberry.connection",
+var _ID = "connection",
     _extDir = __dirname + "./../../../../ext",
     _apiDir = _extDir + "/connection",
     client,

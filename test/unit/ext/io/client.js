@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _ID = "blackberry.io",
+var _ID = "io",
     _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/io",
+    _apiDir = _extDir + "/" + _ID,
     client = require(_apiDir + "/client"),
     sandbox,
     mockedWebworks = {

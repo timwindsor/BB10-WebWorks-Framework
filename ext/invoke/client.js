@@ -15,9 +15,9 @@
  */
 
 var _self = {},
-    _ID = "blackberry.invoke",
-    _invokeEventId = "blackberry.invoke.invokeEventId",
-    _queryEventId = "blackberry.invoke.queryEventId";
+    _ID = "invoke",
+    _invokeEventId = "invoke.invokeEventId",
+    _queryEventId = "invoke.queryEventId";
 
 _self.invoke = function (request, onSuccess, onError) {
     var data,

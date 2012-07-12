@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var _ID = "blackberry.invoke",
+var _ID = "invoke",
     _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/invoke",
+    _apiDir = _extDir + "/" + _ID,
     client,
     mockedWebworks = {
         execAsync: jasmine.createSpy("webworks.execAsync"),
@@ -27,7 +27,7 @@ var _ID = "blackberry.invoke",
         }
     };
 
-describe("blackberry.invoke client", function () {
+describe("invoke client", function () {
     beforeEach(function () {
         GLOBAL.window = GLOBAL;
         GLOBAL.window.btoa = jasmine.createSpy("window.btoa").andReturn("base64 string");
@@ -58,7 +58,7 @@ describe("blackberry.invoke client", function () {
 
             client.invoke(request, callback);
 
-            expect(mockedWebworks.event.once).toHaveBeenCalledWith(_ID, "blackberry.invoke.invokeEventId", jasmine.any(Function));
+            expect(mockedWebworks.event.once).toHaveBeenCalledWith(_ID, "invoke.invokeEventId", jasmine.any(Function));
             expect(mockedWebworks.execAsync).toHaveBeenCalledWith(_ID, "invoke", {"request": request});
         });
 
@@ -129,8 +129,8 @@ describe("blackberry.invoke client", function () {
 
             mockedWebworks.execAsync.andCallFake(function (id, action, args) {
 
-                if (id && id === "blackberry.invoke" && action && action === "query") {
-                    var _queryEventId = "blackberry.invoke.queryEventId";
+                if (id && id === "invoke" && action && action === "query") {
+                    var _queryEventId = "invoke.queryEventId";
 
                     //Valid the args
                     if (args && args.request && (args.request["type"] || args.request["uri"]) &&
@@ -161,8 +161,8 @@ describe("blackberry.invoke client", function () {
                 onError = jasmine.createSpy("client onError");
 
             client.query(request, onSuccess, onError);
-            expect(mockedWebworks.event.once).toHaveBeenCalledWith("blackberry.invoke", "blackberry.invoke.queryEventId", jasmine.any(Function));
-            expect(mockedWebworks.execAsync).toHaveBeenCalledWith("blackberry.invoke", "query", {"request": request });
+            expect(mockedWebworks.event.once).toHaveBeenCalledWith(_ID, "invoke.queryEventId", jasmine.any(Function));
+            expect(mockedWebworks.execAsync).toHaveBeenCalledWith(_ID, "query", {"request": request });
         });
 
         it("should call success callback if the invocation is successfull", function () {
@@ -175,7 +175,7 @@ describe("blackberry.invoke client", function () {
                 onError = jasmine.createSpy("client onError");
 
             client.query(request, onSuccess, onError);
-            expect(window.webworks.execAsync).toHaveBeenCalledWith("blackberry.invoke", "query", {"request": request});
+            expect(window.webworks.execAsync).toHaveBeenCalledWith(_ID, "query", {"request": request});
             expect(onSuccess).toHaveBeenCalledWith(jasmine.any(Object));
             expect(onError).not.toHaveBeenCalled();
         });

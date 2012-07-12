@@ -31,7 +31,7 @@ module.exports = {
             callback;
 
         callback = function (error) {
-            _event.trigger("blackberry.invoke.invokeEventId", error);
+            _event.trigger("invoke.invokeEventId", error);
         };
 
         expectedParams.forEach(function (key) {
@@ -60,7 +60,7 @@ module.exports = {
             expectedTypes = ["APPLICATION", "VIEWER"],
             request = {},
             callback = function (error, response) {
-                _event.trigger("blackberry.invoke.queryEventId", {"error": error, "response": response});
+                _event.trigger("invoke.queryEventId", {"error": error, "response": response});
             };
 
         expectedParams.forEach(function (key) {

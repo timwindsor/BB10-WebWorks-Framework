@@ -15,7 +15,7 @@
  */
 var _ID = "app",
     _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/app",
+    _apiDir = _extDir + "/" + _ID,
     client,
     mockedWebworks = {
         execSync: jasmine.createSpy()

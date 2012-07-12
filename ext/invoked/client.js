@@ -15,7 +15,7 @@
  */
 
 var _self = {},
-    _ID = "blackberry.invoked";
+    _ID = "invoked";
 
 window.webworks.execSync(_ID, "registerEvents", null);
 
