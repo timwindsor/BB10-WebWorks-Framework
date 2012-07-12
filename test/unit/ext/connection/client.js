@@ -15,7 +15,7 @@
  */
 var _ID = "connection",
     _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/connection",
+    _apiDir = _extDir + "/" + _ID,
     client,
     mockedWebworks = {},
     fields = [
@@ -60,7 +60,7 @@ function unloadClient() {
     client = null;
 }
 
-describe("blackberry.connection", function () {
+describe("connection", function () {
     beforeEach(function () {
         mockedWebworks.execSync = jasmine.createSpy().andReturn("wifi");
         mockedWebworks.defineReadOnlyField = jasmine.createSpy();
@@ -78,7 +78,7 @@ describe("blackberry.connection", function () {
         defineROFieldArgs = [];
     });
 
-    describe("blackberry.connection constants", function () {
+    describe("connection constants", function () {
         it("call defineReadOnlyField for each constant", function () {
             expect(mockedWebworks.defineReadOnlyField.callCount).toEqual(fields.length);
         });
@@ -98,7 +98,7 @@ describe("blackberry.connection", function () {
         });
     });
 
-    describe("blackberry.connection.type", function () {
+    describe("connection.type", function () {
         it("calls execSync and equals to execSync return value", function () {
             expect(client.type).toEqual("wifi");
             expect(mockedWebworks.execSync).toHaveBeenCalledWith(_ID, "type");

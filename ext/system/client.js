@@ -15,7 +15,7 @@
  */
 
 var _self = {},
-    ID = "blackberry.system";
+    ID = "system";
 
 function getFieldValue(field) {
     var value = null;

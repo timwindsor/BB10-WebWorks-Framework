@@ -13,13 +13,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-function requireLocal(id) {
-    return !!require.resolve ? require("../../" + id) : window.require(id);
-}
-
 var _push,
     _methods = ["startService", "createChannel", "destroyChannel", "extractPushPayload", "launchApplicationOnPush", "acknowledge"],
-    _event = requireLocal("lib/event"),
+    _event = require("../../lib/event"),
     _exports = {};
 
 module.exports = {
@@ -124,22 +120,22 @@ JNEXT.Push = function () {
             info = {};
 
         // Trigger the event handler of specific Push events
-        if (strEventId === "blackberry.push.create.callback") {
-            _event.trigger("blackberry.push.create.callback", JSON.parse(args));
+        if (strEventId === "push.create.callback") {
+            _event.trigger("push.create.callback", JSON.parse(args));
 
-        } else if (strEventId === "blackberry.push.create.simChangeCallback") {
-            _event.trigger("blackberry.push.create.simChangeCallback");
+        } else if (strEventId === "push.create.simChangeCallback") {
+            _event.trigger("push.create.simChangeCallback");
 
-        } else if (strEventId === "blackberry.push.createChannel.callback") {
+        } else if (strEventId === "push.createChannel.callback") {
             info.result = JSON.parse(arData[1]);
             info.token = arData[2];
-            _event.trigger("blackberry.push.createChannel.callback", info);
+            _event.trigger("push.createChannel.callback", info);
 
-        } else if (strEventId === "blackberry.push.destroyChannel.callback") {
-            _event.trigger("blackberry.push.destroyChannel.callback", JSON.parse(args));
+        } else if (strEventId === "push.destroyChannel.callback") {
+            _event.trigger("push.destroyChannel.callback", JSON.parse(args));
 
-        } else if (strEventId === "blackberry.push.launchApplicationOnPush.callback") {
-            _event.trigger("blackberry.push.launchApplicationOnPush.callback", JSON.parse(args));
+        } else if (strEventId === "push.launchApplicationOnPush.callback") {
+            _event.trigger("push.launchApplicationOnPush.callback", JSON.parse(args));
 
         }
     };

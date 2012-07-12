@@ -43,7 +43,7 @@ function getConnectionTypeString(type) {
 }
 
 ///////////////////////////////////////////////////////////////////
-// JavaScript wrapper for JNEXT plugin for blackberry.connection
+// JavaScript wrapper for JNEXT plugin for connection
 ///////////////////////////////////////////////////////////////////
 
 JNEXT.Connection = function () {

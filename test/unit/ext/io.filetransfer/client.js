@@ -15,7 +15,7 @@
  */
 
 var root = __dirname + "/../../../../",
-    _ID = "blackberry.io.filetransfer",
+    _ID = "io.filetransfer",
     client,
     mockedWebworks = {},
     constants = {
@@ -65,7 +65,7 @@ describe("io.filetransfer client", function () {
         it("should create a once event handler", function () {
             client.upload(filePath, server, callback, callback, options);
             expect(mockedWebworks.event.isOn).toHaveBeenCalledWith(jasmine.any(String));
-            expect(mockedWebworks.event.once).toHaveBeenCalledWith("blackberry.io.filetransfer", jasmine.any(String), jasmine.any(Function));
+            expect(mockedWebworks.event.once).toHaveBeenCalledWith(_ID, jasmine.any(String), jasmine.any(Function));
         });
 
         it("should call webworks.execAsync", function () {
@@ -125,7 +125,7 @@ describe("io.filetransfer client", function () {
         });
     });
 
-    describe("blackberry.io.filetransfer download", function () {
+    describe("io.filetransfer download", function () {
         var source = "a",
             target = "b",
             callback = function () {};
@@ -133,7 +133,7 @@ describe("io.filetransfer client", function () {
         it("should create a once event handler", function () {
             client.download(source, target, callback, callback);
             expect(mockedWebworks.event.isOn).toHaveBeenCalledWith(jasmine.any(String));
-            expect(mockedWebworks.event.once).toHaveBeenCalledWith("blackberry.io.filetransfer", jasmine.any(String), jasmine.any(Function));
+            expect(mockedWebworks.event.once).toHaveBeenCalledWith(_ID, jasmine.any(String), jasmine.any(Function));
         });
 
         it("should call webworks.execAsync", function () {

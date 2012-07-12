@@ -15,8 +15,8 @@
  */
  
 var _self = {},
-    _ID = "blackberry.ui.dialog",
-    _eventId = "blackberry.ui.dialogEventId";
+    _ID = "ui.dialog",
+    _eventId = "ui.dialogEventId";
 
 function createEventHandler(callback) {
     if (!window.webworks.event.isOn(_eventId)) {

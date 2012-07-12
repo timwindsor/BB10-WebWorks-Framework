@@ -19,7 +19,7 @@ var _apiDir = __dirname + "./../../../../ext/connection/",
     eventExt = require(__dirname + "./../../../../ext/event/index"),
     index;
 
-describe("blackberry.connection index", function () {
+describe("connection index", function () {
     beforeEach(function () {
         GLOBAL.JNEXT = {
             require: jasmine.createSpy().andReturn(true),
@@ -36,7 +36,7 @@ describe("blackberry.connection index", function () {
         index = null;
     });
 
-    describe("blackberry.connection", function () {
+    describe("connection", function () {
         describe("type", function () {
             it("can call success", function () {
                 var success = jasmine.createSpy();

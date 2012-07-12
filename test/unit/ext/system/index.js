@@ -16,7 +16,8 @@
 
 var libDir = __dirname + "./../../../../lib/",
     extDir = __dirname + "./../../../../ext/",
-    apiDir = extDir + "system/",
+    ID = "system",
+    apiDir = extDir + ID + "/",
     Whitelist = require(libDir + "policy/whitelist").Whitelist,
     events = require(libDir + "event"),
     eventExt = require(extDir + "event/index"),
@@ -34,7 +35,7 @@ afterEach(function () {
     sysIndex = null;
 });
 
-describe("blackberry.system index", function () {
+describe("system index", function () {
     it("hasPermission", function () {
         var success = jasmine.createSpy(),
             env = {

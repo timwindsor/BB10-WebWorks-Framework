@@ -183,7 +183,7 @@ void PushNDK::onCreateSessionComplete(const PushStatus& status)
     std::stringstream ss;
     ss << status.getCode();
 
-    m_parent->NotifyEvent("blackberry.push.create.callback", ss.str());
+    m_parent->NotifyEvent("push.create.callback", ss.str());
 }
 
 void PushNDK::onCreateChannelComplete(const PushStatus& status, const std::string& token)
@@ -194,9 +194,9 @@ void PushNDK::onCreateChannelComplete(const PushStatus& status, const std::strin
 
     if (status.getCode() == bb::communications::push::PUSH_NO_ERR) {
         ss << token;
-        m_parent->NotifyEvent("blackberry.push.createChannel.callback", ss.str());
+        m_parent->NotifyEvent("push.createChannel.callback", ss.str());
     } else {
-        m_parent->NotifyEvent("blackberry.push.createChannel.callback", ss.str());
+        m_parent->NotifyEvent("push.createChannel.callback", ss.str());
     }
 }
 
@@ -204,26 +204,26 @@ void PushNDK::onDestroyChannelComplete(const PushStatus& status)
 {
     std::stringstream ss;
     ss << status.getCode();
-    m_parent->NotifyEvent("blackberry.push.destroyChannel.callback", ss.str());
+    m_parent->NotifyEvent("push.destroyChannel.callback", ss.str());
 }
 
 void PushNDK::onRegisterToLaunchComplete(const PushStatus& status)
 {
     std::stringstream ss;
     ss << status.getCode();
-    m_parent->NotifyEvent("blackberry.push.launchApplicationOnPush.callback", ss.str());
+    m_parent->NotifyEvent("push.launchApplicationOnPush.callback", ss.str());
 }
 
 void PushNDK::onUnregisterFromLaunchComplete(const PushStatus& status)
 {
     std::stringstream ss;
     ss << status.getCode();
-    m_parent->NotifyEvent("blackberry.push.launchApplicationOnPush.callback", ss.str());
+    m_parent->NotifyEvent("push.launchApplicationOnPush.callback", ss.str());
 }
 
 void PushNDK::onSimChange()
 {
-    m_parent->NotifyEvent("blackberry.push.create.simChangeCallback", "{}");
+    m_parent->NotifyEvent("push.create.simChangeCallback", "{}");
 }
 
 void PushNDK::MonitorMessages()

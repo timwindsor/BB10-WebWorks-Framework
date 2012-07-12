@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var ID = "blackberry.system",
+var ID = "system",
     extDir = __dirname + "./../../../../ext",
-    apiDir = extDir + "/system",
+    apiDir = extDir + "/" + ID,
     sysClient = null,
     mockedWebworks = {
         exec : function () {},
@@ -41,7 +41,7 @@ describe("system client", function () {
 
         result = sysClient.hasPermission("blackberry.app");
 
-        expect(mockedWebworks.execSync).toHaveBeenCalledWith("blackberry.system", "hasPermission", {"module": "blackberry.app"});
+        expect(mockedWebworks.execSync).toHaveBeenCalledWith(ID, "hasPermission", {"module": "blackberry.app"});
         expect(result).toEqual(0);
     });
 
@@ -52,7 +52,7 @@ describe("system client", function () {
 
         result = sysClient.hasCapability("abc.def");
 
-        expect(mockedWebworks.execSync).toHaveBeenCalledWith("blackberry.system", "hasCapability", {"capability": "abc.def"});
+        expect(mockedWebworks.execSync).toHaveBeenCalledWith(ID, "hasCapability", {"capability": "abc.def"});
         expect(result).toBeTruthy();
     });
 
@@ -91,7 +91,7 @@ describe("system client", function () {
             delete GLOBAL.window;
         });
 
-        it("execSync should have been called once for each blackberry.device field", function () {
+        it("execSync should have been called once for each system field", function () {
             expect(mockedWebworks.execSync.callCount).toEqual(fields.length + 1); // the extra call is for registerEvents
         });
 
