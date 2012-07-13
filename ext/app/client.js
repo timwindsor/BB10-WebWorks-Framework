@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var _self = {},
-    ID = "app";
+    ID = require("./manifest.json").namespace;
 
 _self.exit = function () {
     return window.webworks.execSync(ID, "exit");

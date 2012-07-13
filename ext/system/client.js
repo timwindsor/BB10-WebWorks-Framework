@@ -15,7 +15,7 @@
  */
 
 var _self = {},
-    ID = "system";
+    ID = require("./manifest.json").namespace;
 
 function getFieldValue(field) {
     var value = null;

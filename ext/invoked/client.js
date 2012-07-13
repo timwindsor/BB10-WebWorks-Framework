@@ -15,7 +15,7 @@
  */
 
 var _self = {},
-    _ID = "invoked";
+    _ID = require("./manifest.json").namespace;
 
 window.webworks.execSync(_ID, "registerEvents", null);
 

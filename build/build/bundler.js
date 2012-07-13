@@ -16,28 +16,6 @@
 var fs = require('fs'),
     path = require('path');
 
-function buildGiantManifest() {
-    var allManifest = {},
-        extDir = __dirname.replace(/\\/g, '/') + "/../../ext/",
-        files = fs.readdirSync(extDir),
-        giantManifestPath = __dirname.replace(/\\/g, '/') + "/../../lib/public/manifest.js";
-
-    files.forEach(function (dir) {
-        if (!dir.match(/^\./)) {
-            var manifest = require(path.join(path.resolve(extDir, dir), "manifest.json")),
-                extBasename = path.relative(extDir, path.resolve(extDir, dir));
-
-            allManifest[extBasename] = manifest;
-        }
-    });
-
-    if (path.existsSync(giantManifestPath)) {
-        fs.unlinkSync(giantManifestPath);
-    }
-
-    fs.writeFileSync(giantManifestPath, "module.exports = " + JSON.stringify(allManifest, null, "    ") + ";");
-}
-
 module.exports = {
     bundle: function () {
         var fs = require('fs'),
@@ -48,8 +26,7 @@ module.exports = {
                 "lib/public/window.js",
                 "lib/public/event.js",
                 "lib/utils.js",
-                "lib/exception.js",
-                "lib/public/manifest.js"
+                "lib/exception.js"
             ],
             include = function (files, transform) {
                 files = files.map ? files : [files];
@@ -73,9 +50,7 @@ module.exports = {
             pre_injection,
             hash_injection,
             post_injection;
-
-        //create a cnosolidated manifest file that contains manifest.json of all extensions
-        buildGiantManifest();
+            
 
         //include LICENSE
         pre_injection = include("LICENSE", function (file) {

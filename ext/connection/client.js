@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 var _self = {},
-    _ID = "connection",
+    _ID = require("./manifest.json").namespace,
     UNKNOWN = "unknown";
 
 Object.defineProperty(_self, "type", {

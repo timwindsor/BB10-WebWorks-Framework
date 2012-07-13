@@ -15,7 +15,7 @@
  */
 
 var _self = {},
-    _ID = "io.filetransfer";
+    _ID = require("./manifest.json").namespace;
 
 function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);

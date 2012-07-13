@@ -15,8 +15,9 @@
  */
 
 var root = __dirname + "/../../../../",
+    apiDir = root + "ext/ui.dialog/",
     client = null,
-    ID = "ui.dialog",
+    ID = require(apiDir + "/manifest").namespace,
     mockedWebworks = {
         execAsync: jasmine.createSpy(),
         defineReadOnlyField: jasmine.createSpy(),
@@ -45,7 +46,7 @@ describe("ui.dialog", function () {
         //Set up mocking, no need to "spyOn" since spies are included in mock
         GLOBAL.window = GLOBAL;
         GLOBAL.window.webworks = mockedWebworks;
-        client = require(root + "ext/ui.dialog/client");
+        client = require(apiDir + "/client");
     });
 
     it("should return constant for appropriate dialog styles", function () {

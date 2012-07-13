@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var _ID = "event",
-    _apiDir = __dirname + "./../../../../ext/" + _ID + "/",
+var _apiDir = __dirname + "./../../../../ext/event/",
     _libDir = __dirname + "./../../../../lib/",
+    _ID = require(_apiDir + "/manifest").namespace,
     client,
     mockedWebworks = {
         event : {

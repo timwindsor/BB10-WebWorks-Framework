@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var ID = "system",
-    extDir = __dirname + "./../../../../ext",
-    apiDir = extDir + "/" + ID,
+var extDir = __dirname + "./../../../../ext",
+    apiDir = extDir + "/system",
+    ID = require(apiDir + "/manifest").namespace,
     sysClient = null,
     mockedWebworks = {
         exec : function () {},

@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var _self = {};
+var _self = {},
+	_ID = require("./manifest.json").namespace;
 
 function getFieldValue(field) {
     var value = null;
 
     try {
-        value = window.webworks.execSync("identity", field, null);
+        value = window.webworks.execSync(_ID, field, null);
     } catch (e) {
         console.error(e);
     }

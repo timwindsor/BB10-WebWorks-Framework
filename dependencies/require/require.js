@@ -140,8 +140,6 @@ var define,
                             }
 
                             /*jshint evil:true */
-                            console.log("About to Create a dependency through evaling - ");
-                            console.log(depEvalString);
                             eval(depEvalString);
                             /*jshint evil:false */
                             

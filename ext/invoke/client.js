@@ -15,7 +15,7 @@
  */
 
 var _self = {},
-    _ID = "invoke",
+    _ID = require("./manifest.json").namespace,
     _invokeEventId = "invoke.invokeEventId",
     _queryEventId = "invoke.queryEventId";
 

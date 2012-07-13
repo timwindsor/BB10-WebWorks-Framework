@@ -15,7 +15,7 @@
  */
  
 var _self = {},
-    _ID = "ui.dialog",
+    _ID = require("./manifest.json").namespace,
     _eventId = "ui.dialogEventId";
 
 function createEventHandler(callback) {

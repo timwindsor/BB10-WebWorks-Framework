@@ -15,7 +15,8 @@
  */
 
 var root = __dirname + "/../../../../",
-    _ID = "io.filetransfer",
+    _apiDir = root + "ext/io.filetransfer/",
+    _ID = require(_apiDir + "/manifest").namespace,
     client,
     mockedWebworks = {},
     constants = {
@@ -37,7 +38,7 @@ describe("io.filetransfer client", function () {
         GLOBAL.window = GLOBAL;
         GLOBAL.window.webworks = mockedWebworks;
 
-        client = require(root + "ext/io.filetransfer/client");
+        client = require(_apiDir + "client");
     });
 
     afterEach(function () {

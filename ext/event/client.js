@@ -15,7 +15,7 @@
  */
 
 var _self = {}, 
-    _ID = "event";
+    _ID = require("./manifest.json").namespace;
 
 _self.addEventListener = function (eventType, cb) {
     window.webworks.event.add(_ID, eventType, cb);

@@ -15,7 +15,7 @@
  */
 
 var io = {},
-    ID = "io";
+    ID = require("./manifest.json").namespace;
 
 function getFieldValue(field) {
     var value;

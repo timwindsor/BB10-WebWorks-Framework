@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var _ID = "invoke",
-    _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/" + _ID,
+var _extDir = __dirname + "./../../../../ext",
+    _apiDir = _extDir + "/invoke",
+    _ID = require(_apiDir + "/manifest").namespace,
     client,
     mockedWebworks = {
         execAsync: jasmine.createSpy("webworks.execAsync"),
@@ -129,7 +129,7 @@ describe("invoke client", function () {
 
             mockedWebworks.execAsync.andCallFake(function (id, action, args) {
 
-                if (id && id === "invoke" && action && action === "query") {
+                if (id && id === _ID && action && action === "query") {
                     var _queryEventId = "invoke.queryEventId";
 
                     //Valid the args

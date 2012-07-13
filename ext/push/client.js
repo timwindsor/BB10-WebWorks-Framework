@@ -15,7 +15,7 @@
 */
 
 var _self = {},
-    _ID = "push",
+    _ID = require("./manifest.json").namespace,
     PushService,
     PushPayload,
     onCreateSuccess = null,

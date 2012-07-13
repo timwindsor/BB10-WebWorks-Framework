@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-var _ID = "invoked",
-    _extDir = __dirname + "./../../../../ext",
-    _apiDir = _extDir + "/" + _ID,
+var _extDir = __dirname + "./../../../../ext",
+    _apiDir = _extDir + "/invoked",
+    _ID = require(_apiDir + "/manifest").namespace,
     client,
     mockedWebworks = {
         execSync: jasmine.createSpy()
