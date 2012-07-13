@@ -3,7 +3,15 @@ var define,
 
 (function () {
     var unpreparedModules = {},
-        readyModules = {};
+        readyModules = {},
+        ACCEPTABLE_EXTENSIONS = [".js", ".json"],
+        DEFAULT_EXTENSION = ".js";
+
+    function hasValidExtension(moduleName) {
+        return ACCEPTABLE_EXTENSIONS.some(function (element, index, array) {
+            return moduleName.match("\\" + element + "$");
+        });
+    }
 
 
     function normalizeName(originalName, baseName) {
@@ -11,7 +19,7 @@ var define,
             name = originalName.slice(0);
         //remove ^local:// (if it exists) and .js$
         //This will not work for local:// without a trailing js
-        name = name.replace(/(?:^local:\/\/)?(.+?)(?:\.js$)/, "$1");
+        name = name.replace(/(?:^local:\/\/)/, "");
         if (name.charAt(0) === '.' && baseName) {
             //Split the baseName and remove the final part (the module name)
             nameParts = baseName.split('/');
@@ -50,6 +58,12 @@ var define,
             });
 
         }
+        
+        //If there is no acceptable extension tack on a .js
+        if (!hasValidExtension(name)) {
+            name = name + DEFAULT_EXTENSION;
+        }
+
         return name;
     }
 
@@ -103,13 +117,13 @@ var define,
         if (!readyModules[normalizedName]) {
             //If the module to be loaded ends in .js then we will define it
             //Also if baseName exists than we have a local require situation
-            if (/\.js$/.test(name) || baseName) {
+            if (hasValidExtension(name) || baseName) {
                 xhr = new XMLHttpRequest();
                 url = name;
                 //If the module to be loaded starts with local:// go over the bridge
                 //Else If the module to be loaded is a relative load it may not have .js extension which is needed
                 if (/^local:\/\//.test(name)) {
-                    url = "http://localhost:8472/extensions/load/" + normalizedName.replace(/(?:^ext\/)(.+)(?:\/client$)/, "$1");
+                    url = "http://localhost:8472/extensions/load/" + normalizedName.replace(/(?:^ext\/)(.+)(?:\/client.js$)/, "$1");
 
                     xhr.open("GET", url, false);
                     xhr.send(null);
@@ -117,12 +131,20 @@ var define,
                         loadResult = JSON.parse(xhr.responseText);
 
                         loadResult.dependencies.forEach(function (dep) {
-                            var depEvalString = 'define("' + dep.moduleName + '", function (require, exports, module) {' + dep.body.replace(/^\s+|\s+$/g, '') + '});';
+                            var depEvalString;
+
+                            if (/\.json$/.test(dep.moduleName)) {
+                                depEvalString = 'define("' + dep.moduleName + '", function (require, exports, module) { module.exports = ' + dep.body.replace(/^\s+|\s+$/g, '') + '; });';
+                            } else {
+                                depEvalString = 'define("' + dep.moduleName + '", function (require, exports, module) {' + dep.body.replace(/^\s+|\s+$/g, '') + '});';
+                            }
+
                             /*jshint evil:true */
                             console.log("About to Create a dependency through evaling - ");
                             console.log(depEvalString);
                             eval(depEvalString);
                             /*jshint evil:false */
+                            
                         });
 
                         //Trimming responseText to remove EOF chars
@@ -137,9 +159,6 @@ var define,
                 } else {
                     if (baseName) {
                         url = normalizedName;
-                        if (!/\.js$/.test(url)) {
-                            url += ".js";
-                        }
                     }
 
                     xhr.open("GET", url, false);
