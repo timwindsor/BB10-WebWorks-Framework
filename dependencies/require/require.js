@@ -59,7 +59,9 @@ var define,
                 return require(moduleName, name);
             },
             args = [];
-
+        localRequire.toUrl = function (moduleName, baseName) {
+            return require.toUrl(moduleName, baseName || name);
+        };
         dependencies.forEach(function (dependency) {
             if (dependency === 'require') {
                 args.push(localRequire);
@@ -87,7 +89,8 @@ var define,
         var normalizedName = normalizeName(name, baseName),
             url,
             xhr,
-            evalString;
+            evalString,
+            loadResult;
         //Always check undefined first, this allows the user to redefine modules
         //(Not used in WebWorks, although it is used in our unit tests)
         if (unpreparedModules[normalizedName]) {
@@ -107,23 +110,50 @@ var define,
                 //Else If the module to be loaded is a relative load it may not have .js extension which is needed
                 if (/^local:\/\//.test(name)) {
                     url = "http://localhost:8472/extensions/load/" + normalizedName.replace(/(?:^ext\/)(.+)(?:\/client$)/, "$1");
-                } else if (baseName) {
-                    url = normalizedName;
-                    if (!/\.js$/.test(url)) {
-                        url += ".js";
+
+                    xhr.open("GET", url, false);
+                    xhr.send(null);
+                    try {
+                        loadResult = JSON.parse(xhr.responseText);
+
+                        loadResult.dependencies.forEach(function (dep) {
+                            var depEvalString = 'define("' + dep.moduleName + '", function (require, exports, module) {' + dep.body.replace(/^\s+|\s+$/g, '') + '});';
+                            /*jshint evil:true */
+                            console.log("About to Create a dependency through evaling - ");
+                            console.log(depEvalString);
+                            eval(depEvalString);
+                            /*jshint evil:false */
+                        });
+
+                        //Trimming responseText to remove EOF chars
+                        evalString = 'define("' + normalizedName + '", function (require, exports, module) {' + loadResult.client.replace(/^\s+|\s+$/g, '') + '});';
+                        /*jshint evil:true */
+                        eval(evalString);
+                        /*jshint evil:false */
+                    } catch (err1) {
+                        err1.message += ' in ' + url;
+                        throw err1;
                     }
-                }
-                xhr.open("GET", url, false);
-                xhr.send(null);
-                try {
-                    //Trimming responseText to remove EOF chars
-                    evalString = 'define("' + normalizedName + '", function (require, exports, module) {' + xhr.responseText.replace(/^\s+|\s+$/g, '') + '});';
-                    /*jshint evil:true */
-                    eval(evalString);
-                    /*jshint evil:false */
-                } catch (err) {
-                    err.message += ' in ' + url;
-                    throw err;
+                } else {
+                    if (baseName) {
+                        url = normalizedName;
+                        if (!/\.js$/.test(url)) {
+                            url += ".js";
+                        }
+                    }
+
+                    xhr.open("GET", url, false);
+                    xhr.send(null);
+                    try {
+                        //Trimming responseText to remove EOF chars
+                        evalString = 'define("' + normalizedName + '", function (require, exports, module) {' + xhr.responseText.replace(/^\s+|\s+$/g, '') + '});';
+                        /*jshint evil:true */
+                        eval(evalString);
+                        /*jshint evil:false */
+                    } catch (err) {
+                        err.message += ' in ' + url;
+                        throw err;
+                    }
                 }
 
                 if (unpreparedModules[normalizedName]) {
@@ -155,6 +185,9 @@ var define,
         }
     }; 
 
+    require.toUrl = function (originalName, baseName) {
+        return normalizeName(originalName, baseName);
+    };
 
     //Use the AMD signature incase we ever want to change.
     //For now webworks will only be using (name, factory) signature.
