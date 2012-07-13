@@ -24,7 +24,8 @@ var contextmenu,
     _invocation = window.qnx.webplatform.getApplication().invocation,
     _controller = window.qnx.webplatform.getController(),
     _application = window.qnx.webplatform.getApplication(),
-    menuActions;
+    menuActions,
+    isFullMenu = false;
 
 
 function enabled(success, fail, args, env) {
@@ -164,7 +165,7 @@ function init() {
 }
 
 function generateInvocationList(request, errorMessage) {
-    _invocation.queryTargets(request, function (errorMessage, results){
+    _invocation.queryTargets(request, function (errorMessage, results) {
         if (results.length > 0) {
             var listArgs = JSON.stringify([results[0], request]);
             _overlayWebView.executeJavaScript("window.showTargets(" + listArgs + ")");
@@ -310,7 +311,6 @@ function responseHandler(menuAction) {
     console.log("Calling native with the action: " + menuAction + " on the client webview");
     handleContextMenuResponse([menuAction]);
 }
-
 
 menuActions = {
 
