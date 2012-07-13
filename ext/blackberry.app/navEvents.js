@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-var framework = require("../../lib/framework");
-
 module.exports = {
     addEventListener: function (event, trigger) {
         if (event) {
@@ -23,15 +21,7 @@ module.exports = {
             case "pause":
             case "resume":
             case "swipedown":
-            case "exit":
             case "lowMemory":
-            case "rotate":
-            case "rotateDone":
-            case "keyboardOpening":
-            case "keyboardOpened":
-            case "keyboardClosing":
-            case "keyboardClosed":
-            case "keyboardPosition":
                 event = "application." + event;
                 window.qnx.webplatform.getApplication().addEventListener(event, trigger);
                 break;
@@ -49,15 +39,7 @@ module.exports = {
             case "pause":
             case "resume":
             case "swipedown":
-            case "exit":
             case "lowMemory":
-            case "rotate":
-            case "rotateDone":
-            case "keyboardOpening":
-            case "keyboardOpened":
-            case "keyboardClosing":
-            case "keyboardClosed":
-            case "keyboardPosition":
                 event = "application." + event;
                 window.qnx.webplatform.getApplication().removeEventListener(event, trigger);
                 break;
