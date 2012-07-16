@@ -58,12 +58,18 @@ describe("invoked index", function () {
     it("can register for 'invoked' event", function () {
         var evts = ["invoked"],
             args,
-            success = jasmine.createSpy();
+            success = jasmine.createSpy(),
+            utils = require(_libDir + "utils");
 
         spyOn(events, "add");
 
         evts.forEach(function (e) {
             args = {eventName : encodeURIComponent(e)};
+
+            spyOn(utils, "loadExtensionModule").andCallFake(function () {
+                return eventExt;
+            });
+
             index.registerEvents(success);
             eventExt.add(null, null, args);
             expect(success).toHaveBeenCalled();

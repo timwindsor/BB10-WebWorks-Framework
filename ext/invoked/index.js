@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var _event = require("./../../lib/event"),
-    _eventExt = require("./../event/index"),
+    _utils = require("./../../lib/utils"),
     _actionMap = {
         invoked: {
             context: require("./invocationEvents"),
@@ -33,12 +33,12 @@ var _event = require("./../../lib/event"),
 module.exports = {
     registerEvents: function (success, fail, args, env) {
         try {
+            var _eventExt = _utils.loadExtensionModule("event", "index");
             _eventExt.registerEvents(_actionMap);
             success();
         } catch (e) {
             fail(-1, e);
         }
-    },
-
+    }
 };
 

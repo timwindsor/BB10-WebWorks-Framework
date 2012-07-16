@@ -16,7 +16,7 @@
 
 var connection = require("./connectionJNEXT").connection,
     _event = require("../../lib/event"),
-    _eventExt = require("../event/index"),
+    _utils = require("../../lib/utils"),
     _actionMap = {
         connectionchange: {
             context: require("./connectionEvents"),
@@ -30,6 +30,7 @@ var connection = require("./connectionJNEXT").connection,
 module.exports = {
     registerEvents: function (success, fail, args, env) {
         try {
+            var _eventExt = _utils.loadExtensionModule("event", "index");
             _eventExt.registerEvents(_actionMap);
             success();
         } catch (e) {

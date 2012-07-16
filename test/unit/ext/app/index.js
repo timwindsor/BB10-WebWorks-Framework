@@ -23,8 +23,13 @@ var _apiDir = __dirname + "./../../../../ext/app/",
 
 function testRegisterEvent(e) {
     var args = {eventName : encodeURIComponent(e)},
-        success = jasmine.createSpy();
-        
+        success = jasmine.createSpy(),
+        utils = require(_libDir + "utils");
+
+    spyOn(utils, "loadExtensionModule").andCallFake(function () {
+        return eventExt;
+    });
+
     index.registerEvents(success);
     eventExt.add(null, null, args);
     expect(success).toHaveBeenCalled();
@@ -41,7 +46,7 @@ function testUnRegisterEvent(e) {
     expect(events.remove.mostRecentCall.args[0].event).toEqual(e);
     expect(events.remove.mostRecentCall.args[0].trigger).toEqual(jasmine.any(Function));
 }
-    
+
 describe("app index", function () {
 
     beforeEach(function () {

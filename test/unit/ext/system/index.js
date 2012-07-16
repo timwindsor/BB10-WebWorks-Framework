@@ -21,6 +21,7 @@ var libDir = __dirname + "./../../../../lib/",
     Whitelist = require(libDir + "policy/whitelist").Whitelist,
     events = require(libDir + "event"),
     eventExt = require(extDir + "event/index"),
+    utils = require(libDir + "utils"),
     sysIndex,
     successCB,
     failCB;
@@ -66,6 +67,9 @@ describe("system index", function () {
         beforeEach(function () {
             successCB = jasmine.createSpy("Success Callback");
             failCB = jasmine.createSpy("Fail Callback");
+            spyOn(utils, "loadExtensionModule").andCallFake(function () {
+                return eventExt;
+            });
         });
 
         afterEach(function () {

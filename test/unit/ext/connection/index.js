@@ -63,7 +63,12 @@ describe("connection index", function () {
             it("can register the 'connectionchange' event", function () {
                 var eventName = "connectionchange",
                     args = {eventName : encodeURIComponent(eventName)},
-                    success = jasmine.createSpy();
+                    success = jasmine.createSpy(),
+                    utils = require(_libDir + "utils");
+
+                spyOn(utils, "loadExtensionModule").andCallFake(function () {
+                    return eventExt;
+                });
 
                 spyOn(events, "add");
                 index.registerEvents(success);

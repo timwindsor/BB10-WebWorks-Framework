@@ -16,7 +16,7 @@
 var Whitelist = require("../../lib/policy/whitelist").Whitelist,
     _whitelist = new Whitelist(),
     _event = require("../../lib/event"),
-    _eventExt = require("../event/index"),
+    _utils = require("../../lib/utils"),
     _ppsUtils = require("../../lib/pps/ppsUtils"),
     _ppsEvents = require("../../lib/pps/ppsEvents"),
     // This object is used by action map and contains links between pps object fields monitored for change in that object helper methods
@@ -182,6 +182,7 @@ function getDeviceProperty(prop, success, fail) {
 module.exports = {
     registerEvents: function (success, fail, args, env) {
         try {
+            var _eventExt = _utils.loadExtensionModule("event", "index");
             _eventExt.registerEvents(_actionMap);
             success();
         } catch (e) {

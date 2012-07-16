@@ -15,7 +15,7 @@
  */
 var _config = require("./../../lib/config"),
     _event = require("./../../lib/event"),
-    _eventExt = require("./../event/index"),
+    _utils = require("./../../lib/utils"),
     _actionMap = {
         swipedown: {
             context: require("./navEvents"),
@@ -43,6 +43,7 @@ var _config = require("./../../lib/config"),
 module.exports = {
     registerEvents: function (success, fail, args, env) {
         try {
+            var _eventExt = _utils.loadExtensionModule("event", "index");
             _eventExt.registerEvents(_actionMap);
             success();
         } catch (e) {
