@@ -16,49 +16,78 @@
 
 var _apiDir = __dirname + "./../../../../ext/blackberry.app/",
     _libDir = __dirname + "./../../../../lib/",
-    navEvents = require(_apiDir + "navEvents"),
-    framework = require(_libDir + "framework");
+    navEvents,
+    mockedApplication;
 
 describe("blackberry.app navEvents", function () {
+    beforeEach(function () {
+        mockedApplication = {
+            addEventListener: jasmine.createSpy("application addEventListener"),
+            removeEventListener: jasmine.createSpy("application removeEventListener")
+        };
+        GLOBAL.window.qnx = {
+            webplatform: {
+                getApplication: function () {
+                    return mockedApplication;
+                }
+            }
+        };
+
+        var name = require.resolve(_apiDir + "navEvents");
+        delete require.cache[name];
+        navEvents = require(_apiDir + "navEvents");
+    });
+
+    afterEach(function () {
+        mockedApplication = null;
+        GLOBAL.window.qnx = null;
+    });
+
     describe("addEventListener", function () {
-        var trigger = function () {};
+        var trigger = jasmine.createSpy("trigger");
 
-        it("calls framework setOnPause for 'pause' event", function () {
-            spyOn(framework, "setOnPause");
+        it("should be called in webplatform.getApplication for 'pause' events", function () {
             navEvents.addEventListener("pause", trigger);
-            expect(framework.setOnPause).toHaveBeenCalledWith(trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.pause', trigger);
         });
 
-        it("calls framework setOnResume for 'resume' event", function () {
-            spyOn(framework, "setOnResume");
+        it("should be called in webplatform.getApplication for 'resume' events", function () {
             navEvents.addEventListener("resume", trigger);
-            expect(framework.setOnResume).toHaveBeenCalledWith(trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.resume', trigger);
         });
-        
-        it("calls framework setOnSwipeDown for 'swipedown' event", function () {
-            spyOn(framework, "setOnSwipeDown");
+
+        it("should be called in webplatform.getApplication for 'swipedown' events", function () {
             navEvents.addEventListener("swipedown", trigger);
-            expect(framework.setOnSwipeDown).toHaveBeenCalledWith(trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.swipedown', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'lowMemory' events", function () {
+            navEvents.addEventListener("lowMemory", trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.lowMemory', trigger);
         });
     });
 
     describe("removeEventListener", function () {
-        it("calls framework setOnPause for 'pause' event", function () {
-            spyOn(framework, "setOnPause");
-            navEvents.removeEventListener("pause");
-            expect(framework.setOnPause).toHaveBeenCalledWith(null);
+        var trigger = jasmine.createSpy("trigger");
+        
+        it("should be called in webplatform.getApplication for 'pause' events", function () {
+            navEvents.removeEventListener("pause", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.pause', trigger);
         });
 
-        it("calls framework setOnResume for 'resume' event", function () {
-            spyOn(framework, "setOnResume");
-            navEvents.removeEventListener("resume");
-            expect(framework.setOnResume).toHaveBeenCalledWith(null);
+        it("should be called in webplatform.getApplication for 'resume' events", function () {
+            navEvents.removeEventListener("resume", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.resume', trigger);
         });
-        
-        it("calls framework setOnSwipeDown for 'swipedown' event", function () {
-            spyOn(framework, "setOnSwipeDown");
-            navEvents.removeEventListener("swipedown");
-            expect(framework.setOnSwipeDown).toHaveBeenCalledWith(null);
+
+        it("should be called in webplatform.getApplication for 'swipedown' events", function () {
+            navEvents.removeEventListener("swipedown", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.swipedown', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'lowMemory' events", function () {
+            navEvents.removeEventListener("lowMemory", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.lowMemory', trigger);
         });
     });
 });
