@@ -25,7 +25,7 @@ describe("blackberry.push.PushService", function () {
                       "DEVICE_PIN_NOT_FOUND" : 10007,
                       "EXPIRED_AUTHENTICATION_TOKEN_PROVIDED_TO_PPG" : 10008,
                       "INVALID_AUTHENTICATION_TOKEN_PROVIDED_TO_PPG" : 10009,
-                      "TOO_MANY_DEVICES_WITH_ACTIVE_CREATE_CHANNELS" : 10010,
+                      "PPG_SUBSCRIBER_LIMIT_REACHED" : 10010,
                       "INVALID_OS_VERSION_OR_DEVICE_MODEL_NUMBER" : 10011,
                       "CHANNEL_SUSPENDED_BY_PROVIDER" : 10012,
                       "CREATE_SESSION_NOT_DONE" : 10100,
@@ -99,7 +99,7 @@ describe("blackberry.push.PushService", function () {
             onSimChange;
 
         runs(function () {
-            var options = { invokeTargetId : "net.rim.blackberry.pushtest.target1", 
+            var options = { invokeTargetId : "com.webworks.test.functional.push.target",
                             appId : "1-RDce63it6363", 
                             ppgUrl : "http://pushapi.eval.blackberry.com" };
 
