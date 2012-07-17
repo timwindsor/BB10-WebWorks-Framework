@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 var _self = {},
-	_ID = require("./manifest.json").namespace;
+    _ID = require("./manifest.json").namespace;
 
 function getFieldValue(field) {
     var value = null;

@@ -115,11 +115,22 @@ var define,
 
     }
 
+    function getDefineString(moduleName, body) {
+        var evalString = 'define("' + moduleName + '", function (require, exports, module) {',
+            isJson = /\.json$/.test(moduleName);
+
+        evalString += isJson ? ' module.exports = ' : '';
+        evalString += body.replace(/^\s+|\s+$/g, '');
+        evalString += isJson ? ' ;' : '';
+        evalString += '});';
+
+        return evalString;
+    }
+
     function loadModule(name, baseName) {
         var normalizedName = normalizeName(name, baseName),
             url,
             xhr,
-            evalString,
             loadResult;
         //Always check undefined first, this allows the user to redefine modules
         //(Not used in WebWorks, although it is used in our unit tests)
@@ -147,24 +158,14 @@ var define,
                         loadResult = JSON.parse(xhr.responseText);
 
                         loadResult.dependencies.forEach(function (dep) {
-                            var depEvalString;
-
-                            if (/\.json$/.test(dep.moduleName)) {
-                                depEvalString = 'define("' + dep.moduleName + '", function (require, exports, module) { module.exports = ' + dep.body.replace(/^\s+|\s+$/g, '') + '; });';
-                            } else {
-                                depEvalString = 'define("' + dep.moduleName + '", function (require, exports, module) {' + dep.body.replace(/^\s+|\s+$/g, '') + '});';
-                            }
-
                             /*jshint evil:true */
-                            eval(depEvalString);
+                            eval(getDefineString(dep.moduleName, dep.body));
                             /*jshint evil:false */
-                            
                         });
 
                         //Trimming responseText to remove EOF chars
-                        evalString = 'define("' + normalizedName + '", function (require, exports, module) {' + loadResult.client.replace(/^\s+|\s+$/g, '') + '});';
                         /*jshint evil:true */
-                        eval(evalString);
+                        eval(getDefineString(normalizedName, loadResult.client));
                         /*jshint evil:false */
                     } catch (err1) {
                         err1.message += ' in ' + url;
@@ -179,9 +180,8 @@ var define,
                     xhr.send(null);
                     try {
                         //Trimming responseText to remove EOF chars
-                        evalString = 'define("' + normalizedName + '", function (require, exports, module) {' + xhr.responseText.replace(/^\s+|\s+$/g, '') + '});';
                         /*jshint evil:true */
-                        eval(evalString);
+                        eval(getDefineString(normalizedName, xhr.responseText));
                         /*jshint evil:false */
                     } catch (err) {
                         err.message += ' in ' + url;
