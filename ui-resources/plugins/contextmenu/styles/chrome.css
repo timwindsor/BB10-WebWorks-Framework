@@ -71,6 +71,7 @@ body {
     height: 119px;
     width: 121px;
     background-image: url('../assets/ActionOverflowMenu.png');
+    background-repeat: no-repeat;
 }
 
 /* Show and hid the menu items themselves */
