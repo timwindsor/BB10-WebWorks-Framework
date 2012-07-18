@@ -65,6 +65,31 @@ describe("blackberry.app navEvents", function () {
             navEvents.addEventListener("lowMemory", trigger);
             expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.lowMemory', trigger);
         });
+
+        it("should be called in webplatform.getApplication for 'keyboardOpening' events", function () {
+            navEvents.addEventListener("keyboardOpening", trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.keyboardOpening', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardOpened' events", function () {
+            navEvents.addEventListener("keyboardOpened", trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.keyboardOpened', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardClosing' events", function () {
+            navEvents.addEventListener("keyboardClosing", trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.keyboardClosing', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardClosed' events", function () {
+            navEvents.addEventListener("keyboardClosed", trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.keyboardClosed', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardPosition' events", function () {
+            navEvents.addEventListener("keyboardPosition", trigger);
+            expect(mockedApplication.addEventListener).toHaveBeenCalledWith('application.keyboardPosition', trigger);
+        });
     });
 
     describe("removeEventListener", function () {
@@ -88,6 +113,31 @@ describe("blackberry.app navEvents", function () {
         it("should be called in webplatform.getApplication for 'lowMemory' events", function () {
             navEvents.removeEventListener("lowMemory", trigger);
             expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.lowMemory', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardOpening' events", function () {
+            navEvents.removeEventListener("keyboardOpening", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.keyboardOpening', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardOpened' events", function () {
+            navEvents.removeEventListener("keyboardOpened", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.keyboardOpened', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardClosing' events", function () {
+            navEvents.removeEventListener("keyboardClosing", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.keyboardClosing', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardClosed' events", function () {
+            navEvents.removeEventListener("keyboardClosed", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.keyboardClosed', trigger);
+        });
+
+        it("should be called in webplatform.getApplication for 'keyboardPosition' events", function () {
+            navEvents.removeEventListener("keyboardPosition", trigger);
+            expect(mockedApplication.removeEventListener).toHaveBeenCalledWith('application.keyboardPosition', trigger);
         });
     });
 });

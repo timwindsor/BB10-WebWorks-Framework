@@ -22,6 +22,11 @@ module.exports = {
             case "resume":
             case "swipedown":
             case "lowMemory":
+            case "keyboardOpening":
+            case "keyboardOpened":
+            case "keyboardClosing":
+            case "keyboardClosed":
+            case "keyboardPosition":
                 event = "application." + event;
                 window.qnx.webplatform.getApplication().addEventListener(event, trigger);
                 break;
@@ -40,6 +45,11 @@ module.exports = {
             case "resume":
             case "swipedown":
             case "lowMemory":
+            case "keyboardOpening":
+            case "keyboardOpened":
+            case "keyboardClosing":
+            case "keyboardClosed":
+            case "keyboardPosition":
                 event = "application." + event;
                 window.qnx.webplatform.getApplication().removeEventListener(event, trigger);
                 break;

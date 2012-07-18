@@ -24,7 +24,7 @@ var _apiDir = __dirname + "./../../../../ext/blackberry.app/",
 function testRegisterEvent(e) {
     var args = {eventName : encodeURIComponent(e)},
         success = jasmine.createSpy();
-        
+
     index.registerEvents(success);
     eventExt.add(null, null, args);
     expect(success).toHaveBeenCalled();
@@ -35,13 +35,13 @@ function testRegisterEvent(e) {
 
 function testUnRegisterEvent(e) {
     var args = {eventName : encodeURIComponent(e)};
-    
+
     eventExt.remove(null, null, args);
     expect(events.remove).toHaveBeenCalled();
     expect(events.remove.mostRecentCall.args[0].event).toEqual(e);
     expect(events.remove.mostRecentCall.args[0].trigger).toEqual(jasmine.any(Function));
 }
-    
+
 describe("blackberry.app index", function () {
 
     beforeEach(function () {
@@ -153,35 +153,75 @@ describe("blackberry.app index", function () {
             expect(mockedExit).toHaveBeenCalled();
         });
     });
-    
+
     describe("events", function () {
         beforeEach(function () {
             spyOn(events, "add");
             spyOn(events, "remove");
         });
-        
+
         it("can register 'pause' event", function () {
             testRegisterEvent("pause");
         });
-        
+
         it("can register 'resume' event", function () {
             testRegisterEvent("resume");
         });
-        
+
         it("can register 'swipedown' event", function () {
             testRegisterEvent("swipedown");
+        });
+
+        it("can register 'keyboardOpening' event", function () {
+            testRegisterEvent("keyboardOpening");
+        });
+
+        it("can register 'keyboardOpened' event", function () {
+            testRegisterEvent("keyboardOpened");
+        });
+
+        it("can register 'keyboardClosing' event", function () {
+            testRegisterEvent("keyboardClosing");
+        });
+
+        it("can register 'keyboardClosed' event", function () {
+            testRegisterEvent("keyboardClosed");
+        });
+
+        it("can register 'keyboardPosition' event", function () {
+            testRegisterEvent("keyboardPosition");
         });
 
         it("can un-register 'pause' event", function () {
             testUnRegisterEvent("pause");
         });
-        
+
         it("can un-register 'resume' event", function () {
             testUnRegisterEvent("resume");
         });
-        
+
         it("can un-register 'swipedown' event", function () {
             testUnRegisterEvent("swipedown");
+        });
+
+        it("can un-register 'keyboardOpening' event", function () {
+            testUnRegisterEvent("keyboardOpening");
+        });
+
+        it("can un-register 'keyboardOpened' event", function () {
+            testUnRegisterEvent("keyboardOpened");
+        });
+
+        it("can un-register 'keyboardClosing' event", function () {
+            testUnRegisterEvent("keyboardClosing");
+        });
+
+        it("can un-register 'keyboardClosed' event", function () {
+            testUnRegisterEvent("keyboardClosed");
+        });
+
+        it("can un-register 'keyboardPosition' event", function () {
+            testUnRegisterEvent("keyboardPosition");
         });
     });
 });

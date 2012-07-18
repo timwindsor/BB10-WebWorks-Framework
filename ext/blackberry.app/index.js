@@ -44,6 +44,42 @@ var _config = require("./../../lib/config"),
             trigger: function () {
                 _event.trigger("lowMemory");
             }
+        },
+        keyboardOpening: {
+            context: require("./navEvents"),
+            event: "keyboardOpening",
+            trigger: function () {
+                _event.trigger("keyboardOpening");
+            }
+        },
+        keyboardOpened: {
+            context: require("./navEvents"),
+            event: "keyboardOpened",
+            trigger: function () {
+                _event.trigger("keyboardOpened");
+            }
+        },
+        keyboardClosing: {
+            context: require("./navEvents"),
+            event: "keyboardClosing",
+            trigger: function () {
+                _event.trigger("keyboardClosing");
+            }
+        },
+        keyboardClosed: {
+            context: require("./navEvents"),
+            event: "keyboardClosed",
+            trigger: function () {
+                _event.trigger("keyboardClosed");
+            }
+        },
+        keyboardPosition: {
+            context: require("./navEvents"),
+            event: "keyboardPosition",
+            trigger: function (yPosition) {
+                var _yPosition = JSON.parse(yPosition);
+                _event.trigger("keyboardPosition", _yPosition);
+            }
         }
     };
 
