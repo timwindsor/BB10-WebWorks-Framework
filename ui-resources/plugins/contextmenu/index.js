@@ -39,6 +39,7 @@ function handleTouchEnd(actionId, menuItem) {
         menuItem.className = 'menuItem peekItem';
     }
     window.qnx.webplatform.getController().remoteExec(1, 'executeMenuAction', [actionId]);
+    return true;
 }
 
 function handleTouchStart(menuItem) {
@@ -46,6 +47,7 @@ function handleTouchStart(menuItem) {
         return;
     }
     menuItem.className = 'menuItem showItem';
+    return true;
 }
 
 contextmenu = {
@@ -84,6 +86,8 @@ contextmenu = {
             menuItem.ontouchstart = handleTouchStart.bind(this, menuItem);
             menuItem.ontouchend = handleTouchEnd.bind(this, options[i].actionId, menuItem);
             menuItem.addEventListener('mousedown', contextmenu.handleMouseDown, false);
+            menuItem.addEventListener('mousedown', handleTouchStart.bind(this, menuItem), false)
+            menuItem.addEventListener('mouseup', handleTouchEnd.bind(this, menuItem), false)
             menu.appendChild(menuItem);
         }
     },
