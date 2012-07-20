@@ -172,8 +172,13 @@ describe("ui-resources/contextmenu", function () {
     it("can hide the context menu", function () {
         contextmenu.showContextMenu();
         contextmenu.hideContextMenu();
-        expect(menu.removeEventListener).toHaveBeenCalledWith('touchend', contextmenu.hideContextMenu, false);
-        expect(menuHandle.removeEventListener).toHaveBeenCalledWith('touchend', contextmenu.showContextMenu, false);
+
+        expect(menu.ontouchend).toEqual(null);
+        expect(menuHandle.ontouchend).toEqual(null);
+
+        expect(menu.onmouseup).toEqual(null);
+        expect(menuHandle.onmouseup).toEqual(null);
+
         expect(contextmenu.isMenuVisible()).toEqual(false);
         expect(menu.className).toEqual('hideMenu');
         expect(mockedController.remoteExec).toHaveBeenCalledWith(1, 'webview.setSensitivity', ['SensitivityTest']);
@@ -191,8 +196,11 @@ describe("ui-resources/contextmenu", function () {
     it("can set transitionEnd logic when the context menu is peeked", function () {
         contextmenu.peekContextMenu(true);
         contextmenu.transitionEnd();
-        expect(menu.addEventListener).toHaveBeenCalledWith('touchend', contextmenu.hideContextMenu, false);
-        expect(menuHandle.addEventListener).toHaveBeenCalledWith('touchend', contextmenu.showContextMenu, false);
+
+        expect(menu.ontouchend).toEqual(jasmine.any(Function));
+        expect(menuHandle.ontouchend).toEqual(jasmine.any(Function));
+        expect(menu.onmouseup).toEqual(jasmine.any(Function));
+        expect(menuHandle.onmouseup).toEqual(jasmine.any(Function));
     });
 
     it("can peek the context menu", function () {

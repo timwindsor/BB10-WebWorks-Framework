@@ -148,7 +148,9 @@ contextmenu = {
         var menu = document.getElementById('contextMenu'),
             handle = document.getElementById('contextMenuHandle');
 
+        menu.ontouchend = null;
         handle.ontouchend = null;
+        menu.onmouseup = null;
         handle.onmouseup = null;
 
         menuVisible = false;
