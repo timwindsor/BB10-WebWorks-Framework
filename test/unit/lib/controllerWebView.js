@@ -23,7 +23,6 @@ describe("controllerWebView", function () {
     beforeEach(function () {
         mockedController = {
             enableWebInspector: null,
-            enableCrossSiteXHR: null,
             visible: null,
             active: null,
             setGeometry: jasmine.createSpy(),
@@ -37,18 +36,21 @@ describe("controllerWebView", function () {
         mockedApplication = {
             invocation: mockedInvocation
         };
-        GLOBAL.window = {
-            qnx: {
-                webplatform: {
-                    getController: function () {
-                        return mockedController;
-                    },
-                    getApplication: function () {
-                        return mockedApplication;
-                    }
+        GLOBAL.qnx = {
+            webplatform: {
+                getController: function () {
+                    return mockedController;
+                },
+                getApplication: function () {
+                    return mockedApplication;
                 }
-            }
+            },
+            callExtensionMethod: jasmine.createSpy()
         };
+        GLOBAL.window = {
+            qnx: GLOBAL.qnx
+        };
+
         GLOBAL.screen = {
             width : 1024,
             height: 768
@@ -59,10 +61,17 @@ describe("controllerWebView", function () {
         it("sets up the controllerWebview", function () {
             controllerWebView.init({debugEnabled: true});
             expect(mockedController.enableWebInspector).toEqual(true);
-            expect(mockedController.enableCrossSiteXHR).toEqual(true);
             expect(mockedController.visible).toEqual(false);
             expect(mockedController.active).toEqual(false);
             expect(mockedController.setGeometry).toHaveBeenCalledWith(0, 0, screen.width, screen.height);
+        });
+
+        //The default config.xml only has access to WIDGET_LOCAL
+        //and has permission for two apis
+        it("sets up whitelisting", function () {
+            controllerWebView.init({debugEnabled: true});
+            expect(qnx.callExtensionMethod).toHaveBeenCalledWith('webview.addOriginAccessWhitelistEntry', 1, '*', 'local:///*', false); 
+            expect(qnx.callExtensionMethod).toHaveBeenCalledWith('webview.addOriginAccessWhitelistEntry', 1, 'local:///*', 'http://localhost:8472/', true); 
         });
     });
 });
