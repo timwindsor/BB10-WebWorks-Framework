@@ -34,7 +34,7 @@ function init() {
     utils = requireLocal("../chrome/lib/utils");
 }
 
-function handleTouchEnd(actionId, menuItem) {
+function actionEnd(actionId, menuItem) {
     if (menuItem) {
         menuItem.className = 'menuItem peekItem';
     }
@@ -42,13 +42,26 @@ function handleTouchEnd(actionId, menuItem) {
     return true;
 }
 
-function handleTouchStart(menuItem) {
+function actionStart(menuItem) {
     if (!menuItem || !menuPeeked) {
         return;
     }
     menuItem.className = 'menuItem showItem';
     return true;
 }
+
+function handleTouchStart(menuItem) {
+    menuItem.onmousedown = function (evt) {
+        evt.preventDefault();
+    };
+    actionStart(menuItem);
+}
+
+function handleTouchEnd(actionId, menuItem) {
+    menuItem.onmouseup = null;
+    actionEnd(actionId, menuItem);
+}
+
 
 contextmenu = {
     init: init,
@@ -83,11 +96,14 @@ contextmenu = {
             menuItem.appendChild(menuImage);
             menuItem.appendChild(document.createTextNode(options[i].name));
             menuItem.setAttribute("class", "menuItem");
+
+            menuItem.addEventListener('mousedown', contextmenu.handleMouseDown, false);
+            menuItem.addEventListener('mousedown', actionStart.bind(this, options[i].actionId, menuItem), false);
+            menuItem.addEventListener('mouseup', actionEnd.bind(this, menuItem), false);
+
             menuItem.ontouchstart = handleTouchStart.bind(this, menuItem);
             menuItem.ontouchend = handleTouchEnd.bind(this, options[i].actionId, menuItem);
-            menuItem.addEventListener('mousedown', contextmenu.handleMouseDown, false);
-            menuItem.addEventListener('mousedown', handleTouchStart.bind(this, menuItem), false)
-            menuItem.addEventListener('mouseup', handleTouchEnd.bind(this, menuItem), false)
+
             menu.appendChild(menuItem);
         }
     },
@@ -107,6 +123,7 @@ contextmenu = {
     },
 
     showContextMenu: function (evt) {
+        console.log("Showing Context Menu");
         if (menuVisible) {
             return;
         }
@@ -117,6 +134,7 @@ contextmenu = {
             evt.cancelBubble = true;
             menuPeeked = false;
         }
+
     },
 
     isMenuVisible: function () {
@@ -129,8 +147,10 @@ contextmenu = {
         }
         var menu = document.getElementById('contextMenu'),
             handle = document.getElementById('contextMenuHandle');
-        menu.removeEventListener('touchend', contextmenu.hideContextMenu, false);
-        handle.removeEventListener('touchend', contextmenu.showContextMenu, false);
+
+        handle.ontouchend = null;
+        handle.onmouseup = null;
+
         menuVisible = false;
         menuPeeked = false;
         menu.className = 'hideMenu';
@@ -139,7 +159,7 @@ contextmenu = {
     },
 
     peekContextMenu: function (show, zIndex) {
-        if (menuVisible || menuPeeked) {
+        if (menuPeeked) {
             return;
         }
         window.qnx.webplatform.getController().remoteExec(1, 'webview.setSensitivity', ['SensitivityNoFocus']);
@@ -156,11 +176,33 @@ contextmenu = {
             handle = document.getElementById('contextMenuHandle'),
             header;
         if (menuVisible) {
-            menu.addEventListener('touchend', contextmenu.hideContextMenu, false);
-            handle.removeEventListener('touchend', contextmenu.showContextMenu, false);
+            // Add the mouse event listeners first, then if we get a touch
+            // remove them and handle the touch properly
+            menu.onmouseup = contextmenu.peekContextMenu;
+            menu.ontouchend = function (show, zIndex) {
+                menu.onmouseup = null;
+                contextmenu.hideContextMenu();
+            };
+
+            handle.onmouseup = contextmenu.peekContextMenu;
+            handle.ontouchend = function (show, zIndex) {
+                handle.onmouseup = null;
+                contextmenu.peekContextMenu(show, zIndex);
+            };
+
         } else if (menuPeeked) {
-            handle.addEventListener('touchend', contextmenu.showContextMenu, false);
-            menu.addEventListener('touchend', contextmenu.hideContextMenu, false);
+            handle.onmouseup = contextmenu.showContextMenu;
+            handle.ontouchend = function (evt) {
+                handle.onmouseup = null;
+                contextmenu.showContextMenu(evt);
+            };
+
+            menu.onmouseup = contextmenu.showContextMenu;
+            menu.ontouchend = function (evt) {
+                menu.onmouseup = null;
+                contextmenu.hideContextMenu();
+            };
+
         } else {
             header = document.getElementById('contextMenuHeader');
             header.className = '';
