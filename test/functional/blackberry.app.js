@@ -186,4 +186,74 @@ describe("blackberry.app", function () {
             });
         });
     });
+
+    describe("onKeyboard Events", function () {
+        var onKeyboardOpening,
+            onKeyboardOpened,
+            onKeyboardClosing,
+            onKeyboardClosed;
+
+        beforeEach(function () {
+            onKeyboardOpening = jasmine.createSpy();
+            onKeyboardOpened = jasmine.createSpy();
+            onKeyboardClosing = jasmine.createSpy();
+            onKeyboardClosed = jasmine.createSpy();
+            blackberry.event.addEventListener("keyboardOpening", onKeyboardOpening);
+            blackberry.event.addEventListener("keyboardOpened", onKeyboardOpened);
+            blackberry.event.addEventListener("keyboardClosing", onKeyboardClosing);
+            blackberry.event.addEventListener("keyboardClosed", onKeyboardClosed);
+        });
+
+        afterEach(function () {
+            blackberry.event.removeEventListener("keyboardOpening", onKeyboardOpening);
+            blackberry.event.removeEventListener("keyboardOpened", onKeyboardOpened);
+            blackberry.event.removeEventListener("keyboardClosing", onKeyboardClosing);
+            blackberry.event.removeEventListener("keyboardClosed", onKeyboardClosed);
+            onKeyboardOpening = null;
+            onKeyboardOpened = null;
+            onKeyboardClosing = null;
+            onKeyboardClosed = null;
+        });
+
+        it("should invoke callback when user swipes down from within application", function () {
+            window.confirm("Open and close the keyboard by swiping diagonally away from the bottom left-hand corner of the application");
+
+            waitsFor(function () {
+                return onKeyboardOpening.callCount && onKeyboardOpened.callCount && onKeyboardClosing.callCount && onKeyboardClosed.callCount;
+            }, "event never fired", waitForTimeout);
+
+            runs(function () {
+                expect(onKeyboardOpening).toHaveBeenCalled();
+                expect(onKeyboardOpened).toHaveBeenCalled();
+                expect(onKeyboardClosing).toHaveBeenCalled();
+                expect(onKeyboardClosed).toHaveBeenCalled();
+            });
+        });
+    });
+
+    describe("onKeyboard Position Event", function () {
+        var onKeyboardPosition;
+
+        beforeEach(function () {
+            onKeyboardPosition = jasmine.createSpy();
+            blackberry.event.addEventListener("keyboardPosition", onKeyboardPosition);
+        });
+
+        afterEach(function () {
+            blackberry.event.removeEventListener("keyboardPosition", onKeyboardPosition);
+            onKeyboardPosition = null;
+        });
+
+        it("should invoke callback when user swipes down from within application", function () {
+            window.confirm("Open the keyboard");
+
+            waitsFor(function () {
+                return onKeyboardPosition.callCount;
+            }, "event never fired", waitForTimeout);
+
+            runs(function () {
+                expect(onKeyboardPosition).toHaveBeenCalled();
+            });
+        });
+    });
 });
