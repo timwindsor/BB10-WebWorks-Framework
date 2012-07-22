@@ -39,6 +39,22 @@ task('test', [], function () {
     require('./build/test')(null, process.argv.length >= 4 ? process.argv[3] : null);
 });
 
+/*
+ * Expected syntax is
+ * jake native-test[<device|simulator>,<IP Address of device>,<comma seperated extensions to ignore>..]
+ * eg.
+ * To run tests on device with ip 192.10.235.20 and ignoring io.filetransfer extension use
+ * jake native-test[device,192.10.235.20,io.filetransfer]
+ * The default params are [device,169.254.0.1]
+ * To run with default params use-
+ * jake native-test
+ *
+ */
+desc("run all native tests on device or sim - jake test [path,path2]");
+task('native-test', [], function () {
+    require('./build/native-test')(Array.prototype.slice.call(arguments));
+});
+
 desc("runs jshint + csslint - jake lint [path1] [path2]");
 task('lint', [], function () {
     require('./build/lint')(Array.prototype.slice.call(arguments));
