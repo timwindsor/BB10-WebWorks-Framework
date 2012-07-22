@@ -19,29 +19,40 @@ var childProcess = require('child_process'),
     jWorkflow = require("jWorkflow"),
     fs = require('fs');
 
+function _done(error) {
+    if (error) {
+        util.puts("LINT FAILED:\n" + error);
+        process.exit(1);
+    } else {
+        util.puts("LINT SUCCESS");
+        process.exit();
+    }
+}
+
 function _exec(cmdExpr, prev, baton) {
     baton.take();
-    var proc = childProcess.exec(cmdExpr, function (error, stdout, stderr) {
+    childProcess.exec(cmdExpr, function (error, stdout, stderr) {
         util.print(stdout);
         util.print(stderr);
-    });
-
-    proc.on("exit", function (code) {
-        if (code) {
-            util.puts("Lint FAILED");
-            process.exit(code);
+        if (error) {
+            _done("LINT ERRORS");
         }
-        baton.pass(prev);
     });
 }
-function _done() {
-    util.puts("Lint SUCCESS");
-    process.exit();
+
+function _handle(func) {
+    return function () {
+        try {
+            func.apply(func, Array.prototype.slice.call(arguments));
+        } catch (e) {
+            _done(e.message + "\n" + e.stack);
+        }
+    };
 }
 
 function _lintJS(prev, baton) {
     var options = ["--reporter", "build/lint/reporter.js", "--show-non-errors"],
-        files = ["."];        
+        files = ["."];
     _exec('jshint ' + files.concat(options).join(' '), prev, baton);
 }
 
@@ -61,7 +72,7 @@ function _lintCPP(prev, baton) {
     }
 }
 
-module.exports = function (files) {
+module.exports = _handle(function (files) {
     var lint = jWorkflow.order(_lintJS)
                     .andThen(_lintCSS)
                     .andThen(_lintCPP);
@@ -69,4 +80,4 @@ module.exports = function (files) {
     lint.start(function () {
         _done();
     });
-};
+});

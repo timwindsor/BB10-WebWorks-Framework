@@ -19,7 +19,6 @@ module.exports = {
             len = results.length,
             str = '',
             file, error;
-
         results.forEach(function (result) {
             file = result.file;
             error = result.error;
