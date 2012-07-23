@@ -21,6 +21,11 @@ var _apiDir = __dirname + "./../../../../ext/ui.contextmenu",
     invocation,
     actions,
     success,
+    mockedWebWorks = {
+        execAsync: jasmine.createSpy(),
+        event: { once : jasmine.createSpy(),
+                 isOn : jasmine.createSpy() }
+    },
     mockedController = {
         remoteExec: jasmine.createSpy(),
         addEventListener : jasmine.createSpy()
@@ -45,6 +50,7 @@ var _apiDir = __dirname + "./../../../../ext/ui.contextmenu",
 describe("blackberry.ui.actions.handlers index", function () {
     beforeEach(function () {
         GLOBAL.window.qnx.webplatform = mockedWebPlatform;
+        GLOBAL.window.webworks = mockedWebWorks;
         GLOBAL.qnx = {
             callExtensionMethod: jasmine.createSpy("bond"),
             webplatform : {
@@ -182,6 +188,7 @@ describe("blackberry.ui.actions.handlers index", function () {
         actions.removeCustomItem(actionId);
         actions.runHandler(actionId);
         expect(libEvent.trigger).not.toHaveBeenCalled();
+        expect(actions.ShareLink).toBeDefined();
     });
 
 });

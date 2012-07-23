@@ -153,6 +153,5 @@ describe("blackberry.ui.contextmenu index", function () {
 
         expect(success).toHaveBeenCalled();
     });
-
 });
 
