@@ -20,7 +20,9 @@ var contextmenu,
     currentContext,
     config,
     utils,
-    includePath;
+    includePath,
+    elementToExecute,
+    previousIndex;
 
 
 function requireLocal(id) {
@@ -34,11 +36,62 @@ function init() {
     utils = requireLocal("../chrome/lib/utils");
 }
 
-function handleTouchEnd(actionId, menuItem) {
-    if (menuItem) {
-        menuItem.className = 'menuItem peekItem';
+function getNewElementSelection(elements, currentYPosition, elementHeight) {
+    var screenHeight = window.screen.availHeight,
+        middle = screenHeight / 2,
+        diff = currentYPosition - middle,
+        elementIndex;
+
+    if ((elements.length % 2) === 0) {
+        elementIndex = (elements.length / 2)  + Math.floor(diff / elementHeight);
+    } else {
+        // Base case that we have just a single one, so index that one on touchend
+        if (elements.length === 1) {
+            elementIndex = 0;
+        }
+        else {
+            elementIndex = Math.ceil(elements.length / 2) + Math.floor(diff / elementHeight);
+        }
     }
-    window.qnx.webplatform.getController().remoteExec(1, 'executeMenuAction', [actionId]);
+
+    //Check if the index is greater then the number of elems or less then
+    //if so, let's reset the elements and hide all elements
+    if(elementIndex > elements.length || elementIndex < 0) {
+        previousIndex = null;
+        elementToExecute = null;
+        return;
+    }
+
+    // Check if we are still on the same element? then return nothing
+    // or if we somehow get an off calculation don't do anything
+    if (previousIndex === elementIndex)
+        return;
+
+    // Else continue and set our values for next time
+    // while returning the new element to be shown
+    previousIndex = elementIndex;
+    elementToExecute = elements[elementIndex];
+    return elementToExecute;
+}
+
+function handleTouchMove(eve) {
+    var elements = document.getElementsByClassName("menuItem"),
+        menuItem = elements[0],
+        currentYPosition = eve.touches[0].clientY,
+        elementHeight = menuItem.clientHeight,
+        elementToShow,
+        previousToHideIndex = previousIndex;
+
+    //Base on our current Y position let's calculate which
+    // element this touch point belongs to
+    elementToShow = getNewElementSelection(elements, currentYPosition, elementHeight);
+
+    if (elementToShow) {
+        if ((typeof previousToHideIndex !== "undefined") && elements[previousToHideIndex]) {
+            elements[previousToHideIndex].className = "menuItem peekItem";
+        }
+        elementToShow.className = 'menuItem showItem';
+    }
 }
 
 function handleTouchStart(menuItem) {
@@ -46,6 +99,20 @@ function handleTouchStart(menuItem) {
         return;
     }
     menuItem.className = 'menuItem showItem';
+}
+
+function handleTouchEnd(actionId, menuItem) {
+    if (menuItem) {
+        menuItem.className = 'menuItem peekItem';
+    }
+    if (elementToExecute) {
+        window.qnx.webplatform.getController().remoteExec(1, 'executeMenuAction', [elementToExecute.attributes["actionId"].value]);
+    } else {
+        window.qnx.webplatform.getController().remoteExec(1, 'executeMenuAction', [actionId]);
+    }
+
+    elementToExecute = null;
+    previousIndex = null;
 }
 
 contextmenu = {
@@ -81,8 +148,10 @@ contextmenu = {
             menuItem.appendChild(menuImage);
             menuItem.appendChild(document.createTextNode(options[i].name));
             menuItem.setAttribute("class", "menuItem");
+            menuItem.setAttribute("actionId", options[i].actionId);
             menuItem.ontouchstart = handleTouchStart.bind(this, menuItem);
             menuItem.ontouchend = handleTouchEnd.bind(this, options[i].actionId, menuItem);
+            menuItem.ontouchmove = handleTouchMove.bind(this);
             menuItem.addEventListener('mousedown', contextmenu.handleMouseDown, false);
             menu.appendChild(menuItem);
         }
@@ -124,12 +193,17 @@ contextmenu = {
             return;
         }
         var menu = document.getElementById('contextMenu'),
-            handle = document.getElementById('contextMenuHandle');
+            handle = document.getElementById('contextMenuHandle'),
+            elements = document.getElementsByClassName("menuItem"),
+            i;
         menu.removeEventListener('touchend', contextmenu.hideContextMenu, false);
         handle.removeEventListener('touchend', contextmenu.showContextMenu, false);
         menuVisible = false;
         menuPeeked = false;
         menu.className = 'hideMenu';
+        for (i = 0; i < elements.length; i++) {
+            elements[i].className = "menuItem peekItem";
+        }
         // Reset sensitivity
         window.qnx.webplatform.getController().remoteExec(1, 'webview.setSensitivity', ['SensitivityTest']);
     },
