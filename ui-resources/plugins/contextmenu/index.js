@@ -96,13 +96,6 @@ function handleTouchMove(touchEvent) {
     }
 }
 
-/*function handleTouchStart(menuItem) {
-    /*if (!menuItem || !menuPeeked) {
-        return;
-    }
-    menuItem.className = 'menuItem showItem';
-}*/
-
 function handleTouchEnd(actionId, menuItem) {
     if (menuItem) {
         menuItem.className = 'menuItem peekItem';
@@ -174,10 +167,13 @@ contextmenu = {
     },
 
     showContextMenu: function (evt) {
+        var menu = document.getElementById('contextMenu'),
+        i;
+
         if (menuVisible) {
             return;
         }
-        var menu = document.getElementById('contextMenu');
+
         menu.className = 'showMenu';
         menuVisible = true;
         if (menuPeeked) {

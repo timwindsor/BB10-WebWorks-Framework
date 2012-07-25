@@ -26,6 +26,8 @@ describe("ui-resources/contextmenu", function () {
     header,
     mockedController,
     mockedApplication,
+    elements,
+    elementsLength,
     invocation;
 
     beforeEach(function () {
@@ -43,6 +45,11 @@ describe("ui-resources/contextmenu", function () {
             }
         };
 
+        elements = {
+                length : 5
+            };
+        elementsLength = 5;
+
         GLOBAL.alert = jasmine.createSpy();
         GLOBAL.window = {
             qnx : {
@@ -54,6 +61,10 @@ describe("ui-resources/contextmenu", function () {
                         return mockedApplication;
                     }
                 }
+            },
+
+            screen : {
+                avalHeight : "1280"
             }
         };
         GLOBAL.document = {
@@ -63,6 +74,22 @@ describe("ui-resources/contextmenu", function () {
                 setAttribute: jasmine.createSpy(),
                 addEventListener: jasmine.createSpy()
             }),
+
+            getElementsByClassName: function (id) {
+                var returnElements = [],
+                    i;
+                if (id === "menuItem") {
+                    for (i = 0; i < 5; i++) {
+                        returnElements[i] = {
+                            ontouchmove : jasmine.any(Function),
+                            className : "menuItem",
+                            clientHeight : 108
+                        };
+                    }
+                }
+                return returnElements;
+            },
+
             getElementById: function (id) {
                 var returnElement;
                 if (id === "contextMenu") {
@@ -141,6 +168,8 @@ describe("ui-resources/contextmenu", function () {
         var evt = {
             cancelBubble : false
         };
+        contextmenu.hideContextMenu();
+        contextmenu.peekContextMenu(true);
         contextmenu.showContextMenu(evt);
         expect(contextmenu.isMenuVisible()).toEqual(true);
     });
@@ -213,5 +242,4 @@ describe("ui-resources/contextmenu", function () {
         contextmenu.setMenuOptions(options);
         expect(menuContent.appendChild).toHaveBeenCalledWith(jasmine.any(Object));
     });
-
 });
