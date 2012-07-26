@@ -63,7 +63,10 @@ COMP_PATHS=" \
     -L$STAGE_USR_LIB \
     -L$QNX_LIB \
     -L$QNX_USR_LIB \
-    -I$QNX_INCLUDE"
+    -I$QNX_INCLUDE \
+    -I$QNX_INCLUDE/qt4 \
+    -I$QNX_INCLUDE/qt4/Qt \
+    -I$QNX_INCLUDE/qt4/QtCore"
 
 if [ "$CCWRAP" ] ; then
     CMAKE_EXTRA_OPTIONS=" \
