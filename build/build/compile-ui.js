@@ -23,6 +23,7 @@ var wrench = require("../../node_modules/wrench"),
     JS_FILE = "/index.js",
     HTML_UI = "/ui.html",
     ASSETS = "/assets",
+    THEMES = "/themes",
     tmpl = require("./tmpl");
 
 module.exports = function (prev, baton) {
@@ -50,6 +51,7 @@ module.exports = function (prev, baton) {
         thirdParty = [path.join(_c.DEPENDENCIES, 'require/require.js')],
         assets = [],
         asset,
+        themes = [],
         template = { locals: {} },
         setupTemplate,
         uiFolderDest = path.join(_c.DEPLOY, 'ui-resources'),
@@ -59,6 +61,7 @@ module.exports = function (prev, baton) {
         jsDest = path.join(_c.DEPLOY_UI, 'index.js'),
         thirdPartyDest = path.join(_c.DEPLOY_UI, 'thirdparty'),
         assetsDest = path.join(_c.DEPLOY_UI, 'assets'),
+        themesDest = path.join(_c.DEPLOY_UI, 'themes'),
         easset,
         eassets;
 
@@ -93,9 +96,13 @@ module.exports = function (prev, baton) {
         // JS/CSS files are each compiled into a single file
         cssFiles.push(path.normalize(_c.UI_PLUGINS + "/" + plugin + CSS_FILE));
         jsFiles.push(path.normalize(_c.UI_PLUGINS + "/" + plugin + JS_FILE));
-        var assetPath = path.normalize(_c.UI_PLUGINS + "/" + plugin + ASSETS);
+        var assetPath = path.normalize(_c.UI_PLUGINS + "/" + plugin + ASSETS),
+            themesPath = path.normalize(_c.UI_PLUGINS + "/" + plugin + THEMES);
         if (path.existsSync(assetPath)) {
             assets.push(assetPath);
+        }
+        if (path.existsSync(themesPath)) {
+            themes.push(themesPath);
         }
     });
    
@@ -111,6 +118,7 @@ module.exports = function (prev, baton) {
     wrench.mkdirSyncRecursive(cssFolderDest, "0755");
     wrench.mkdirSyncRecursive(assetsDest, "0755");
     wrench.mkdirSyncRecursive(thirdPartyDest, "0755");
+    wrench.copyDirSyncRecursive(themes[0], themesDest);
     for (plugin in thirdParty) {
         util.copyFile(thirdParty[plugin], thirdPartyDest);
     }

@@ -37,4 +37,24 @@ Object.defineProperty(contextmenu, "enabled", {
     }
 });
 
+// Define the theme property that a developer can set and get the theme of context menu
+Object.defineProperty(contextmenu, "theme", {
+    get : function () {
+        var theme;
+        try {
+            theme = window.webworks.execAsync(ID, "theme");
+        } catch (error) {
+            console.log(error);
+        }
+        return theme;
+    },
+    set: function (value) {
+        try {
+            window.webworks.execAsync(ID, "theme", {"theme": value});
+        } catch (error) {
+            console.error(error);
+        }
+    }
+});
+
 module.exports = contextmenu;

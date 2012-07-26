@@ -14,7 +14,6 @@ body {
 #contextMenu {
     height: 100%;
     width: 563px;
-    border-image: url('../assets/core_crosscutmenu_bg.png') 1 1 1 15 fill / 0 0 0 0 repeat;
     -webkit-box-shadow: -10px 0px 25px #121212;
     -webkit-transition-duration: 0.25s;
     -webkit-animation-timing-function: ease-out;
@@ -30,7 +29,6 @@ body {
 
 #contextMenuContent {
     font-size: 1.35em;
-    color: #fafafa;
 }
 
 .contextMenuHeader {
@@ -38,7 +36,6 @@ body {
     top: 0;
     height: 120px;
     width: 100%;
-    background-color: #292929;
     white-space: nowrap;
     -webkit-box-orient: vertical;
     -webkit-box-pack: center;
@@ -48,13 +45,12 @@ body {
 #contextMenuHeadText {
     height: 60px;
     font-size: 1em;
-    color: #fafafa;
 }
 
 #contextMenuSubheadText {
     height: 60px;
     font-size: 0.75em;
-    color: #cecece;
+    color: #CECECE;
 }
 
 .peekContextMenu {
@@ -96,8 +92,6 @@ body {
     -webkit-transition-duration: 0.25s;
     -webkit-animation-timing-function: ease-out;
     white-space: nowrap;
-    color: #FAFAFA;
-    background-color: #000000;
 }
 
 .menuItem:first-child {
@@ -118,3 +112,12 @@ body {
     height: 81px;
 }
 
+.darkTheme {
+    background-color: #000000;
+    color: #FAFAFA;
+}
+
+.lightTheme {
+    background-color: #9A9A9A;
+    color: #212121
+}

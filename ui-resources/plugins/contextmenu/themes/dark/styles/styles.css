@@ -1,0 +1,42 @@
+#contextMenu {
+    background-color: #000000;
+}
+
+#contextMenuContent {
+    color: #FAFAFA;
+}
+
+.contextMenuHeader {
+    background-color: #292929;
+}
+
+#contextMenuHeadText {
+    color: #FAFAFA;
+}
+
+#contextMenuSubheadText {
+    color: #CECECE;
+}
+
+.showContextMenuHandle {
+    background-image: url('../assets/drag_bar.png');
+}
+
+.showMoreActionsHandle {
+    background-image: url('../assets/ActionOverflowMenu.png');
+    background-repeat: no-repeat;
+}
+
+.menuItem {
+    border-bottom: 2px solid #414141;
+    color: #FAFAFA;
+    background-color: #000000;
+}
+
+.menuItem:first-child {
+    border-top: 2px solid #414141;
+}
+
+.menuItem:active {
+    border-image: url('../assets/core_crosscutmenu_selected.png') 2 1 2 13 / 1 1 1 1;
+}

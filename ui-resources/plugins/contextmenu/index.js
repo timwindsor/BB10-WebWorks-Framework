@@ -20,8 +20,8 @@ var contextmenu,
     currentContext,
     config,
     utils,
-    includePath;
-
+    includePath,
+    currentThemeDir;
 
 function requireLocal(id) {
     return require(!!require.resolve ? "../../" + id.replace(/\/chrome/, "") : id);
@@ -32,6 +32,7 @@ function init() {
     menu.addEventListener('webkitTransitionEnd', contextmenu.transitionEnd.bind(contextmenu));
     config = requireLocal("../chrome/lib/config.js");
     utils = requireLocal("../chrome/lib/utils");
+    currentThemeDir = ".";
 }
 
 function handleTouchEnd(actionId, menuItem) {
@@ -48,14 +49,25 @@ function handleTouchStart(menuItem) {
     menuItem.className = 'menuItem showItem';
 }
 
+function setActiveStyleSheet(title) {
+    var i,
+        a;
+    for (i = 0; (a = document.getElementsByTagName("link")[i]); i++) {
+        if (a.getAttribute("rel").indexOf("style") !== -1 && a.getAttribute("title")) {
+            a.disabled = true;
+            if (a.getAttribute("title") === title) a.disabled = false;
+        }
+    }
+}
+
 contextmenu = {
     init: init,
     setMenuOptions: function (options) {
         var menu = document.getElementById("contextMenuContent"),
-            i,
-            header,
-            menuItem,
-            menuImage;
+        i,
+        header,
+        menuItem,
+        menuImage;
 
         while (menu.childNodes.length >= 1) {
             menu.removeChild(menu.firstChild);
@@ -77,7 +89,7 @@ contextmenu = {
             }
             menuItem = document.createElement('div');
             menuImage = document.createElement('img');
-            menuImage.src = options[i].imageUrl ? options[i].imageUrl : 'assets/generic_81_81_placeholder.png';
+            menuImage.src = options[i].imageUrl ? currentThemeDir + '/' + options[i].imageUrl : currentThemeDir + '/assets/generic_81_81_placeholder.png';
             menuItem.appendChild(menuImage);
             menuItem.appendChild(document.createTextNode(options[i].name));
             menuItem.setAttribute("class", "menuItem");
@@ -106,9 +118,13 @@ contextmenu = {
         if (menuVisible) {
             return;
         }
-        var menu = document.getElementById('contextMenu');
+        var menu = document.getElementById('contextMenu'),
+            menuContent = document.getElementById('contextMenuContent');
         menu.className = 'showMenu';
         menuVisible = true;
+        menu.style.overflowY = 'scroll';
+        menuContent.style.height = '';
+        menuContent.style.overflowY = '';
         if (menuPeeked) {
             evt.cancelBubble = true;
             menuPeeked = false;
@@ -140,8 +156,17 @@ contextmenu = {
         }
         window.qnx.webplatform.getController().remoteExec(1, 'webview.setSensitivity', ['SensitivityNoFocus']);
         var menu = document.getElementById('contextMenu'),
-            handle = document.getElementById('contextMenuHandle');
-        handle.className = 'showContextMenuHandle';
+            handle = document.getElementById('contextMenuHandle'),
+            menuContent = document.getElementById('contextMenuContent'),
+            menuItems = document.getElementsByClassName('menuItem');
+        menu.style.overflowY = 'hidden';
+        menuContent.style.overflowY = 'hidden';
+        menuContent.style.height = '67%';
+        if (menuItems.length > 7) {
+            handle.className = 'showMoreActionsHandle';
+        } else {
+            handle.className = 'showContextMenuHandle';
+        }
         menuVisible = false;
         menuPeeked = true;
         menu.className = 'peekContextMenu';
@@ -167,6 +192,26 @@ contextmenu = {
 
     setCurrentContext: function (context) {
         currentContext = context;
+    },
+
+    setTheme: function (theme) {
+        var menu = document.getElementById('contextMenu'),
+            menuContent = document.getElementById('contextMenuContent'),
+            menuHeader = document.getElementById('contextMenuHeader'),
+            subheadText = document.getElementById('contextMenuSubheadText');
+
+        currentThemeDir = "themes/" + theme.toLowerCase();
+        setActiveStyleSheet(theme.toLowerCase());
+        switch (theme) {
+        case 'DARK':
+            menu.className += ' darkTheme';
+            break;
+        case 'LIGHT':
+            menu.className += ' lightTheme';
+            break;
+        default:
+            break;
+        }
     }
 };
 

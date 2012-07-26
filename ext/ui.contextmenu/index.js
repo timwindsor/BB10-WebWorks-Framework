@@ -25,6 +25,8 @@ var contextmenu,
     _invocation = window.qnx.webplatform.getApplication().invocation,
     _controller = window.qnx.webplatform.getController(),
     _application = window.qnx.webplatform.getApplication(),
+    themes = ['DARK', 'LIGHT'],
+    _theme = themes[0],
     menuActions,
     contextMenuEnabled = true;
 
@@ -38,13 +40,22 @@ function enabled(success, fail, args, env) {
     }
 }
 
+function theme(success, fail, args, env) {
+    if (args && themes.indexOf(args["theme"]) !== -1) {
+        _theme = JSON.parse(decodeURIComponent(args["theme"]));
+        success('theme property has been set to ' + _theme);
+    } else {
+        fail('theme property can only be set to DARK or LIGHT');
+    }
+}
+
 function setMenuOptions(options) {
     _menuItems = options;
 }
 
 function generateMenuItems(menuItems) {
     var items = [],
-    i;
+        i;
 
     for (i = 0; i < menuItems.length; i++) {
         switch (menuItems[i]) {
@@ -128,18 +139,8 @@ function init() {
         var menu = JSON.parse(value),
             menuItems = generateMenuItems(menu.menuItems),
         args = JSON.stringify({'menuItems': menuItems,
-                              '_currentContext': _currentContext});
-        _controller.publishRemoteFunction('executeMenuAction', function (args, callback) {
-            var action = args[0];
-            if (action) {
-                console.log("Executing action: " + args[0]);
-                //Call the items[action] function //
-                _actions[action](action);
-            } else {
-                console.log("No action item was set");
-            }
-        });
-
+                              '_currentContext': _currentContext,
+                              'theme': _theme});
         if (contextMenuEnabled) {
             _overlayWebView.executeJavascript("window.showMenu(" + args + ")");
         } else {
@@ -158,14 +159,13 @@ function init() {
             console.log("No action item was set");
         }
     });
-
-
 }
 
 contextmenu = {
     init: init,
     setMenuOptions: setMenuOptions,
-    enabled : enabled
+    enabled : enabled,
+    theme: theme
 };
 
 // Listen for the init event
