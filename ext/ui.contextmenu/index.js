@@ -234,31 +234,19 @@ function init() {
         if (contextMenuEnabled) {
             addCustomItems(menuItems, _currentContext);
             args = JSON.stringify({'menuItems': menuItems, '_currentContext': _currentContext});
-            _overlayWebView.executeJavaScript("window.showMenu(" + args + ")");
-        } else {
-            console.log("Context Menu is disabled");
+            _overlayWebView.executeJavascript("window.showMenu(" + args + ")");
         }
         return '{"setPreventDefault":true}';
     };
     _controller.publishRemoteFunction('executeMenuAction', function (args, callback) {
-        var action = args[0];
-        if (action) {
-            if (_actions.customHandlers[action]) {
-                _actions.customHandlers[action](action);
-            } else {
-                console.log("Executing action: " + args[0]);
-                //Call the items[action] function //
-                _actions.handlers[action](action);
-            }
-        } else {
-            console.log("No action item was set");
+        var actionId = args[0];
+        if (actionId) {
+            _actions.runHandler(actionId);
         }
     });
 }
 
 contextmenu = {
-    init: init,
-    setMenuOptions: setMenuOptions,
     enabled : enabled,
     addItem: addItem,
     removeItem: removeItem

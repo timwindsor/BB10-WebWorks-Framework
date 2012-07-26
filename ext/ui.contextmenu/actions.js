@@ -22,6 +22,7 @@ var _overlayWebView = require('./../../lib/overlayWebView'),
     _currentContext,
     _invocation = window.qnx.webplatform.getApplication().invocation,
     _application = window.qnx.webplatform.getApplication(),
+    _handlers = {},
     _customHandlers = {},
     menuActions;
 
@@ -202,28 +203,36 @@ function clearCustomHandlers() {
     _customHandlers = {};
 }
 
-menuActions = {
+function runHandler(actionId) {
+    if (_customHandlers[actionId]) {
+        _customHandlers[actionId](actionId);
+    } else if (_handlers[actionId]) {
+        _handlers[actionId](actionId);
+    }
+}
 
-    handlers: {
-        'SaveLink'       : saveLink,
-        'Cancel'         : responseHandler,
-        'ClearField'     : responseHandler,
-        'Cut'            : responseHandler,
-        'Copy'           : responseHandler,
-        'Paste'          : responseHandler,
-        'Select'         : responseHandler,
-        'CopyLink'       : responseHandler,
-        'OpenLink'       : openLink,
-        'SaveLinkAs'     : saveLink,
-        'CopyImageLink'  : responseHandler,
-        'SaveImage'      : saveImage,
-        'ShareLink'      : shareLink,
-        'InspectElement' : responseHandler
-    },
-    customHandlers: _customHandlers,
+_handlers = {
+    'SaveLink'       : saveLink,
+    'Cancel'         : responseHandler,
+    'ClearField'     : responseHandler,
+    'Cut'            : responseHandler,
+    'Copy'           : responseHandler,
+    'Paste'          : responseHandler,
+    'Select'         : responseHandler,
+    'CopyLink'       : responseHandler,
+    'OpenLink'       : openLink,
+    'SaveLinkAs'     : saveLink,
+    'CopyImageLink'  : responseHandler,
+    'SaveImage'      : saveImage,
+    'ShareLink'      : shareLink,
+    'InspectElement' : responseHandler
+};
+
+menuActions = {
+    handlers: _handlers,
+    runHandler: runHandler,
     clearCustomHandlers: clearCustomHandlers,
     setCurrentContext: setCurrentContext,
-    customItemHandler: customItemHandler,
     addCustomItem: addCustomItem,
     removeCustomItem: removeCustomItem
 };
