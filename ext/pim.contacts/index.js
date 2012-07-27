@@ -29,14 +29,19 @@ module.exports = {
         success(pimContacts.find(findOptions));
     },
 
-    createContact: function (success, fail, args) {
+    create: function (success, fail, args) {
+        var contact = {};
+        success(contact);
+    },
+
+    save: function (success, fail, args) {
         var attributes = {};
 
         for (key in args) {
             attributes[key] = JSON.parse(decodeURIComponent(args[key]));
         }
 
-        pimContacts.createContact(attributes);
+        pimContacts.save(attributes);
         success();
     },
 
@@ -65,8 +70,8 @@ JNEXT.PimContacts = function ()
         return JSON.parse(val);
     };
 
-    self.createContact = function (args) {
-        var val = JNEXT.invoke(self.m_id, "createContact " + JSON.stringify(args));
+    self.save = function (args) {
+        var val = JNEXT.invoke(self.m_id, "save " + JSON.stringify(args));
         return "";
     };
 

@@ -30,6 +30,7 @@ std::map<std::string, AttributeSubKind::Type> PimContactsQt::attributeSubKindMap
 
 PimContactsQt::PimContactsQt()
 {
+    // TODO: Should the mappings be done in native or in JavaScript?
     static bool mapInit = false;
 
     if (!mapInit) {
@@ -43,7 +44,7 @@ PimContactsQt::~PimContactsQt()
 {
 }
 
-std::string PimContactsQt::find(const std::string& optionsJson)
+std::string PimContactsQt::Find(const std::string& optionsJson)
 {
     Json::Reader reader;
     Json::Value options_obj;
@@ -106,7 +107,7 @@ std::string PimContactsQt::find(const std::string& optionsJson)
     return writer.write(contact_obj);
 }
 
-void PimContactsQt::createContact(const std::string& attributeJson) {
+void PimContactsQt::Save(const std::string& attributeJson) {
     Json::Reader reader;
     Json::Value attribute_obj;
     bool parse = reader.parse(attributeJson, attribute_obj);
@@ -116,7 +117,21 @@ void PimContactsQt::createContact(const std::string& attributeJson) {
         throw "Cannot parse JSON object";
     }
 
-    const Json::Value::Members attribute_keys = attribute_obj.getMemberNames();
+    if (attribute_obj.isMember("id")) {
+        ContactService service;
+        Contact contact = service.contactDetails(attribute_obj["id"].asInt());
+
+        if (contact.isValid()) {
+            EditContact(contact, attribute_obj);
+            return;
+        }
+    }
+
+    CreateContact(attribute_obj);
+}
+
+void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
+    const Json::Value::Members attribute_keys = attributeObj.getMemberNames();
 
     Contact new_contact;
     ContactBuilder contact_builder(new_contact.edit());
@@ -128,157 +143,111 @@ void PimContactsQt::createContact(const std::string& attributeJson) {
 
         if (kind_iter != attributeKindMap.end()) {
             switch (kind_iter->second) {
-                case AttributeKind::Name:
-                    {
-                        // TODO: Are group keys needed here?
-                        Json::Value name_obj = attribute_obj[key];
-                        const Json::Value::Members name_fields = name_obj.getMemberNames();
-
-                        for (int j = 0; j < name_fields.size(); j++) {
-                            const std::string name_key = name_fields[j];
-                            std::map<std::string, AttributeSubKind::Type>::const_iterator name_iter = attributeSubKindMap.find(name_key);
-
-                            if (name_iter != attributeSubKindMap.end()) {
-                                ContactAttribute attribute;
-                                ContactAttributeBuilder attribute_builder(attribute.edit());
-
-                                attribute_builder = attribute_builder.setKind(AttributeKind::Name);
-                                attribute_builder = attribute_builder.setSubKind(name_iter->second);
-                                attribute_builder = attribute_builder.setValue(QString(name_obj[name_key].asString().c_str()));
-
-                                contact_builder = contact_builder.addAttribute(attribute);
-                            }
-                        }
-
-                        break;
+                case AttributeKind::Name: {
+                    if (key == "displayName") {
+                        std::string display_name = attributeObj[key].asString();
+                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::NameDisplayName, display_name);
+                    } else if (key == "nickname") {
+                        std::string display_name = attributeObj[key].asString();
+                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::NameNickname, display_name);
+                    } else {
+                        Json::Value name_obj = attributeObj[key];
+                        contact_builder = buildGroupedAttributes(contact_builder, name_obj, kind_iter->second);
                     }
-                case AttributeKind::OrganizationAffiliation:
-                    {
-                        Json::Value attribute_array = attribute_obj[key];
+                    break;
+                }
+                case AttributeKind::OrganizationAffiliation: {
+                    Json::Value attribute_array = attributeObj[key];
 
-                        for (int j = 0; j < attribute_array.size(); j++) {
-                            Json::Value field_obj = attribute_array[j];
-                            const Json::Value::Members fields = field_obj.getMemberNames();
-
-                            // TODO: need to use group keys for organizations
-
-                            for (int k = 0; k < fields.size(); k++) {
-                                const std::string field_key = fields[k];
-                                std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(field_key);
-
-                                if (subkind_iter != attributeSubKindMap.end()) {
-                                    ContactAttribute attribute;
-                                    ContactAttributeBuilder attribute_builder(attribute.edit());
-
-                                    attribute_builder = attribute_builder.setKind(kind_iter->second);
-                                    attribute_builder = attribute_builder.setSubKind(subkind_iter->second);
-                                    attribute_builder = attribute_builder.setValue(QString(field_obj[field_key].asString().c_str()));
-
-                                    contact_builder = contact_builder.addAttribute(attribute);
-                                }
-                            }
-                        }
-
-                        break;
+                    for (int j = 0; j < attribute_array.size(); j++) {
+                        Json::Value field_obj = attribute_array[j];
+                        contact_builder = buildGroupedAttributes(contact_builder, field_obj, kind_iter->second);
                     }
+
+                    break;
+                }
+                case AttributeKind::Date: {
+                    std::string date = attributeObj[key].asString();
+
+                    if (key == "birthday") {
+                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::DateBirthday, date);
+                    } else if (key == "anniversary") {
+                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::DateAnniversary, date);
+                    }
+
+                    break;
+                }
+                case AttributeKind::VideoChat: {
+                    Json::Value field_array = attributeObj[key];
+
+                    for (int j = 0; j < field_array.size(); j++) {
+                        std::string videochat = field_array[j].asString();
+                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::VideoChatBbPlaybook, videochat);
+                    }
+
+                    break;
+                }
+                case AttributeKind::Note:
+                case AttributeKind::Sound: {
+                    std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(key);
+
+                    if (subkind_iter != attributeSubKindMap.end()) {
+                        std::string value = attributeObj[key].asString();
+                        contact_builder = addAttribute(contact_builder, kind_iter->second, subkind_iter->second, value);
+                    }
+
+                    break;
+                }
                 case AttributeKind::Phone:
                 case AttributeKind::Email:
                 case AttributeKind::Fax:
                 case AttributeKind::Pager:
                 case AttributeKind::InstantMessaging:
                 case AttributeKind::Website:
-                case AttributeKind::Profile:
-                    {
-                        Json::Value field_array = attribute_obj[key];
+                case AttributeKind::Group:
+                case AttributeKind::Profile: {
+                    Json::Value field_array = attributeObj[key];
 
-                        for (int j = 0; j < field_array.size(); j++) {
-                            Json::Value field_obj = field_array[j];
-
-                            std::string type = field_obj["type"].asString();
-                            std::string value = field_obj["value"].asString();
-                            bool pref = field_obj["pref"].asBool();
-
-                            std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(type);
-
-                            if (subkind_iter != attributeSubKindMap.end()) {
-                                ContactAttribute attribute;
-                                ContactAttributeBuilder attribute_builder(attribute.edit());
-
-                                attribute_builder = attribute_builder.setKind(kind_iter->second);
-                                attribute_builder = attribute_builder.setSubKind(subkind_iter->second);
-                                attribute_builder = attribute_builder.setValue(QString(value.c_str()));
-
-                                contact_builder = contact_builder.addAttribute(attribute);
-                            }
-                        }
-
-                        break;
+                    for (int j = 0; j < field_array.size(); j++) {
+                        Json::Value field_obj = field_array[j];
+                        contact_builder = buildFieldAttribute(contact_builder, field_obj, kind_iter->second);
                     }
-                case AttributeKind::Invalid:
-                    {
-                        if (key == "addresses") {
-                            Json::Value address_array = attribute_obj[key];
 
-                            for (int j = 0; j < address_array.size(); j++) {
-                                Json::Value address_obj = address_array[j];
+                    break;
+                }
+                case AttributeKind::Invalid: {
+                    if (key == "addresses") {
+                        Json::Value address_array = attributeObj[key];
 
-                                ContactPostalAddress address;
-                                ContactPostalAddressBuilder address_builder(address.edit());
-
-                                if (address_obj.isMember("type")) {
-                                    std::string value = address_obj["type"].asString();
-                                    std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(value);
-
-                                    if (subkind_iter != attributeSubKindMap.end()) {
-                                        address_builder = address_builder.setSubKind(subkind_iter->second);
-                                    }
-                                }
-
-                                if (address_obj.isMember("address1")) {
-                                    std::string value = address_obj["address1"].asString();
-                                    address_builder = address_builder.setLine1(QString(value.c_str()));
-                                }
-
-                                if (address_obj.isMember("address2")) {
-                                    std::string value = address_obj["address2"].asString();
-                                    address_builder = address_builder.setLine2(QString(value.c_str()));
-                                }
-
-                                if (address_obj.isMember("locality")) {
-                                    std::string value = address_obj["locality"].asString();
-                                    address_builder = address_builder.setCity(QString(value.c_str()));
-                                }
-
-                                if (address_obj.isMember("region")) {
-                                    std::string value = address_obj["region"].asString();
-                                    address_builder = address_builder.setRegion(QString(value.c_str()));
-                                }
-
-                                if (address_obj.isMember("country")) {
-                                    std::string value = address_obj["country"].asString();
-                                    address_builder = address_builder.setCountry(QString(value.c_str()));
-                                }
-
-                                if (address_obj.isMember("postalCode")) {
-                                    std::string value = address_obj["postalCode"].asString();
-                                    address_builder = address_builder.setPostalCode(QString(value.c_str()));
-                                }
-
-                                contact_builder = contact_builder.addPostalAddress(address);
-                            }
+                        for (int j = 0; j < address_array.size(); j++) {
+                            Json::Value address_obj = address_array[j];
+                            contact_builder = buildPostalAddress(contact_builder, address_obj);
                         }
+                    } else if (key == "photos") {
+                        Json::Value photo_array = attributeObj[key];
 
-                        break;
+                        for (int j = 0; j < photo_array.size(); j++) {
+                            Json::Value photo_obj = photo_array[j];
+                            contact_builder = buildPhoto(contact_builder, photo_obj);
+                        }
+                    } else if (key == "favorite") {
+                        bool is_favorite = attributeObj[key].asBool();
+                        contact_builder = contact_builder.setFavorite(is_favorite);
                     }
+
+                    break;
+                }
             }
         }
     }
 
     ContactService contact_service;
-    contact_service.createContact(new_contact, false);
+    new_contact = contact_service.createContact(new_contact, false);
+
+    // TODO: return ContactId
 }
 
-void PimContactsQt::deleteContact(const std::string& contactJson) {
+void PimContactsQt::DeleteContact(const std::string& contactJson) {
     Json::Reader reader;
     Json::Value obj;
     bool parse = reader.parse(contactJson, obj);
@@ -294,6 +263,131 @@ void PimContactsQt::deleteContact(const std::string& contactJson) {
     service.deleteContact(contact_id);
 }
 
+void PimContactsQt::EditContact(Contact& contact, const Json::Value& attributeObj) {
+}
+
+ContactBuilder& PimContactsQt::addAttribute(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value) {
+    ContactAttribute attribute;
+    ContactAttributeBuilder attribute_builder(attribute.edit());
+
+    attribute_builder = attribute_builder.setKind(kind);
+    attribute_builder = attribute_builder.setSubKind(subkind);
+    attribute_builder = attribute_builder.setValue(QString(value.c_str()));
+
+    return contactBuilder.addAttribute(attribute);
+}
+
+ContactBuilder& PimContactsQt::addAttributeToGroup(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey) {
+    ContactAttribute attribute;
+    ContactAttributeBuilder attribute_builder(attribute.edit());
+
+    attribute_builder = attribute_builder.setKind(kind);
+    attribute_builder = attribute_builder.setSubKind(subkind);
+    attribute_builder = attribute_builder.setValue(QString(value.c_str()));
+    attribute_builder = attribute_builder.setGroupKey(QString(groupKey.c_str()));
+
+    return contactBuilder.addAttribute(attribute);
+}
+
+ContactBuilder& PimContactsQt::buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind) {
+    const Json::Value::Members fields = fieldsObj.getMemberNames();
+
+    // TODO: need a better way to create group keys (perhaps based on user data)
+    std::stringstream ss;
+    ss << rand();
+    ss << fieldsObj.get("givenName", "").asString();
+    ss << fieldsObj.get("middleName", "").asString();
+    ss << fieldsObj.get("familyName", "").asString();
+    ss << fieldsObj.get("name", "").asString();
+    ss << fieldsObj.get("title", "").asString();
+    ss << fieldsObj.get("department", "").asString();
+    std::string group_key = ss.str();
+
+    for (int i = 0; i < fields.size(); i++) {
+        const std::string field_key = fields[i];
+        std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(field_key);
+
+        if (subkind_iter != attributeSubKindMap.end()) {
+            contactBuilder = addAttributeToGroup(contactBuilder, kind, subkind_iter->second, fieldsObj[field_key].asString(), group_key);
+        }
+    }
+
+    return contactBuilder;
+}
+
+ContactBuilder& PimContactsQt::buildFieldAttribute(ContactBuilder& contactBuilder, const Json::Value& fieldObj, AttributeKind::Type kind) {
+    std::string type = fieldObj["type"].asString();
+    std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(type);
+
+    if (subkind_iter != attributeSubKindMap.end()) {
+        //std::string value = fieldObj["value"].asString();
+        bool pref = fieldObj["pref"].asBool();
+
+        contactBuilder = addAttribute(contactBuilder, kind, subkind_iter->second, fieldObj["value"].asString());
+    }
+
+    return contactBuilder;
+}
+
+ContactBuilder& PimContactsQt::buildPostalAddress(ContactBuilder& contactBuilder, const Json::Value& addressObj) {
+    ContactPostalAddress address;
+    ContactPostalAddressBuilder address_builder(address.edit());
+
+    if (addressObj.isMember("type")) {
+        std::string value = addressObj["type"].asString();
+        std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(value);
+
+        if (subkind_iter != attributeSubKindMap.end()) {
+            address_builder = address_builder.setSubKind(subkind_iter->second);
+        }
+    }
+
+    if (addressObj.isMember("address1")) {
+        std::string value = addressObj["address1"].asString();
+        address_builder = address_builder.setLine1(QString(value.c_str()));
+    }
+
+    if (addressObj.isMember("address2")) {
+        std::string value = addressObj["address2"].asString();
+        address_builder = address_builder.setLine2(QString(value.c_str()));
+    }
+
+    if (addressObj.isMember("locality")) {
+        std::string value = addressObj["locality"].asString();
+        address_builder = address_builder.setCity(QString(value.c_str()));
+    }
+
+    if (addressObj.isMember("region")) {
+        std::string value = addressObj["region"].asString();
+        address_builder = address_builder.setRegion(QString(value.c_str()));
+    }
+
+    if (addressObj.isMember("country")) {
+        std::string value = addressObj["country"].asString();
+        address_builder = address_builder.setCountry(QString(value.c_str()));
+    }
+
+    if (addressObj.isMember("postalCode")) {
+        std::string value = addressObj["postalCode"].asString();
+        address_builder = address_builder.setPostalCode(QString(value.c_str()));
+    }
+
+    return contactBuilder.addPostalAddress(address);
+}
+
+ContactBuilder& PimContactsQt::buildPhoto(ContactBuilder& contactBuilder, const Json::Value& photoObj) {
+    ContactPhoto photo;
+    ContactPhotoBuilder photo_builder(photo.edit());
+
+    std::string filepath = photoObj["originalFilePath"].asString();
+    bool pref = photoObj["pref"].asBool();
+
+    photo_builder.setOriginalPhoto(QString(filepath.c_str()));
+    photo_builder.setPrimaryPhoto(pref);
+
+    return contactBuilder.addPhoto(photo, pref);
+}
+
 void PimContactsQt::createAttributeKindMap() {
     attributeKindMap["phoneNumbers"] = AttributeKind::Phone;
     attributeKindMap["faxNumbers"] = AttributeKind::Fax;
@@ -303,14 +397,19 @@ void PimContactsQt::createAttributeKindMap() {
     attributeKindMap["socialNetworks"] = AttributeKind::Profile;
     attributeKindMap["anniversary"] = AttributeKind::Date;
     attributeKindMap["birthday"] = AttributeKind::Date;
+    attributeKindMap["categories"] = AttributeKind::Group;
     attributeKindMap["name"] = AttributeKind::Name;
     attributeKindMap["displayName"] = AttributeKind::Name;
+    attributeKindMap["nickname"] = AttributeKind::Name;
     attributeKindMap["organizations"] = AttributeKind::OrganizationAffiliation;
     attributeKindMap["education"] = AttributeKind::Education;
     attributeKindMap["note"] = AttributeKind::Note;
     attributeKindMap["ims"] = AttributeKind::InstantMessaging;
+    attributeKindMap["ringtone"] = AttributeKind::Sound;
     attributeKindMap["videoChat"] = AttributeKind::VideoChat;
     attributeKindMap["addresses"] = AttributeKind::Invalid;
+    attributeKindMap["favorite"] = AttributeKind::Invalid;
+    attributeKindMap["photos"] = AttributeKind::Invalid;
 }
 
 void PimContactsQt::createAttributeSubKindMap() {
@@ -331,6 +430,7 @@ void PimContactsQt::createAttributeSubKindMap() {
     attributeSubKindMap["tungle"] = AttributeSubKind::ProfileTungle;
     attributeSubKindMap["birthday"] = AttributeSubKind::DateBirthday;
     attributeSubKindMap["anniversary"] = AttributeSubKind::DateAnniversary;
+    attributeSubKindMap["categories"] = AttributeSubKind::GroupDepartment;
     attributeSubKindMap["givenName"] = AttributeSubKind::NameGiven;
     attributeSubKindMap["familyName"] = AttributeSubKind::NameSurname;
     attributeSubKindMap["honorificPrefix"] = AttributeSubKind::Title;
@@ -353,6 +453,8 @@ void PimContactsQt::createAttributeSubKindMap() {
     attributeSubKindMap["YahooMessenger"] = AttributeSubKind::InstantMessagingYahooMessenger;
     attributeSubKindMap["YahooMessegerJapan"] = AttributeSubKind::InstantMessagingYahooMessengerJapan;
     attributeSubKindMap["BbPlaybook"] = AttributeSubKind::VideoChatBbPlaybook;
+    attributeSubKindMap["ringtone"] = AttributeSubKind::SoundRingtone;
+    attributeSubKindMap["note"] = AttributeSubKind::Invalid;
 }
 
 } // namespace webworks

@@ -50,11 +50,11 @@ std::string PimContacts::InvokeMethod(const std::string& command)
 
     if (strCommand == "find") {
         webworks::PimContactsQt pim_qt;
-        return pim_qt.find(jsonObject);
+        return pim_qt.Find(jsonObject);
 
-    } else if (strCommand == "createContact") {
+    } else if (strCommand == "save") {
         webworks::PimContactsQt pim_qt;
-        pim_qt.createContact(jsonObject);
+        pim_qt.Save(jsonObject);
         return "";
 
         /*
@@ -70,7 +70,7 @@ std::string PimContacts::InvokeMethod(const std::string& command)
         */
     } else if (strCommand == "deleteContact") {
         webworks::PimContactsQt pim_qt;
-        pim_qt.deleteContact(jsonObject);
+        pim_qt.DeleteContact(jsonObject);
         return "";
     }
 

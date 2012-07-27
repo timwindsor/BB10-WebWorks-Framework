@@ -21,8 +21,12 @@ _self.find = function (findOptions) {
     return window.webworks.execSync(_ID, "find", findOptions || {});
 };
 
-_self.createContact = function (attributes) {
-    return window.webworks.execSync(_ID, "createContact", attributes);
+_self.create = function (attributes) {
+    return window.webworks.execSync(_ID, "create", attributes);
+};
+
+_self.save = function (attributes) {
+    return window.webworks.execSync(_ID, "save", attributes);
 };
 
 _self.deleteContact = function (attributes) {

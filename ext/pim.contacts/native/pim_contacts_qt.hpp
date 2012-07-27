@@ -19,6 +19,7 @@
 
 #include <string>
 #include <map>
+#include <json/reader.h>
 #include <bb/pim/contacts/ContactService.hpp>
 #include <bb/pim/contacts/ContactConsts.hpp>
 #include <bb/pim/contacts/Contact.hpp>
@@ -27,6 +28,8 @@
 #include <bb/pim/contacts/ContactAttributeBuilder.hpp>
 #include <bb/pim/contacts/ContactPostalAddress.hpp>
 #include <bb/pim/contacts/ContactPostalAddressBuilder.hpp>
+#include <bb/pim/contacts/ContactPhoto.hpp>
+#include <bb/pim/contacts/ContactPhotoBuilder.hpp>
 #include "../common/plugin.h"
 
 namespace webworks {
@@ -37,14 +40,23 @@ class PimContactsQt {
 public:
     PimContactsQt();
     ~PimContactsQt();
-    std::string find(const std::string& optionsJson);
-    void createContact(const std::string& attributeJson);
-    void deleteContact(const std::string& contactJson);
+    std::string Find(const std::string& optionsJson);
+    void Save(const std::string& attributeJson);
+    void CreateContact(const Json::Value& attributeObj);
+    void DeleteContact(const std::string& contactJson);
+    void EditContact(Contact& contact, const Json::Value& attributeObj);
+
+private:
+    ContactBuilder& buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind);
+    ContactBuilder& buildFieldAttribute(ContactBuilder& contactBuilder, const Json::Value& fieldObj, AttributeKind::Type kind);
+    ContactBuilder& buildPostalAddress(ContactBuilder& contactBuilder, const Json::Value& addressObj);
+    ContactBuilder& buildPhoto(ContactBuilder& contactBuilder, const Json::Value& photoObj);
+
+    ContactBuilder& addAttribute(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value);
+    ContactBuilder& addAttributeToGroup(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
 
     static void createAttributeKindMap();
     static void createAttributeSubKindMap();
-
-private:
     static std::map<std::string, AttributeKind::Type> attributeKindMap;
     static std::map<std::string, AttributeSubKind::Type> attributeSubKindMap;
 };
