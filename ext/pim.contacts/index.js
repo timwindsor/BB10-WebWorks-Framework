@@ -20,7 +20,8 @@ var pimContacts;
     
 module.exports = {
     find: function (success, fail, args) {
-        var findOptions = {};
+        var findOptions = {},
+            key;
 
         for (key in args) {
             findOptions[key] = JSON.parse(decodeURIComponent(args[key]));
@@ -30,7 +31,8 @@ module.exports = {
     },
 
     createContact: function (success, fail, args) {
-        var attributes = {};
+        var attributes = {},
+            key;
 
         for (key in args) {
             attributes[key] = JSON.parse(decodeURIComponent(args[key]));
@@ -41,7 +43,8 @@ module.exports = {
     },
 
     deleteContact: function (success, fail, args) {
-        var attributes = {};
+        var attributes = {},
+            key;
 
         for (key in args) {
             attributes[key] = JSON.parse(decodeURIComponent(args[key]));
@@ -66,12 +69,14 @@ JNEXT.PimContacts = function ()
     };
 
     self.createContact = function (args) {
-        var val = JNEXT.invoke(self.m_id, "createContact " + JSON.stringify(args));
+        /*var val =*/
+        JNEXT.invoke(self.m_id, "createContact " + JSON.stringify(args));
         return "";
     };
 
     self.deleteContact = function (args) {
-        var val = JNEXT.invoke(self.m_id, "deleteContact " + JSON.stringify(args));
+        /*var val =*/
+        JNEXT.invoke(self.m_id, "deleteContact " + JSON.stringify(args));
         return "";
     };
 

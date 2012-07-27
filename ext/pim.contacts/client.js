@@ -17,8 +17,19 @@
 var _self = {},
     _ID = require("./manifest.json").namespace;
 
+/*
 _self.find = function (findOptions) {
     return window.webworks.execSync(_ID, "find", findOptions || {});
+};
+*/
+_self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
+    // TODO validation
+
+    // TODO async, invoke callbacks
+    return window.webworks.execSync(_ID, "find", {
+        "fields": contactFields,
+        "options": findOptions
+    });
 };
 
 _self.createContact = function (attributes) {
@@ -28,5 +39,7 @@ _self.createContact = function (attributes) {
 _self.deleteContact = function (attributes) {
     return window.webworks.execSync(_ID, "deleteContact", attributes);
 };
+
+_self.ContactFindOptions = require("./ContactFindOptions");
 
 module.exports = _self;

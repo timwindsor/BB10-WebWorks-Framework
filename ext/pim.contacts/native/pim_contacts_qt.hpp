@@ -17,8 +17,6 @@
 #ifndef PIM_CONTACTS_QT_H_
 #define PIM_CONTACTS_QT_H_
 
-#include <string>
-#include <map>
 #include <bb/pim/contacts/ContactService.hpp>
 #include <bb/pim/contacts/ContactConsts.hpp>
 #include <bb/pim/contacts/Contact.hpp>
@@ -27,11 +25,29 @@
 #include <bb/pim/contacts/ContactAttributeBuilder.hpp>
 #include <bb/pim/contacts/ContactPostalAddress.hpp>
 #include <bb/pim/contacts/ContactPostalAddressBuilder.hpp>
+#include <json/value.h>
+#include <string>
+#include <map>
 #include "../common/plugin.h"
 
 namespace webworks {
 
-using namespace bb::pim::contacts;
+typedef bb::pim::contacts::ContactId ContactId;
+typedef bb::pim::contacts::Contact Contact;
+typedef bb::pim::contacts::ContactBuilder ContactBuilder;
+typedef bb::pim::contacts::ContactPostalAddress ContactPostalAddress;
+typedef bb::pim::contacts::ContactPostalAddressBuilder ContactPostalAddressBuilder;
+typedef bb::pim::contacts::ContactAttributeBuilder ContactAttributeBuilder;
+typedef bb::pim::contacts::ContactAttribute ContactAttribute;
+typedef bb::pim::contacts::ContactService ContactService;
+typedef bb::pim::contacts::ContactSearchFilters ContactSearchFilters;
+typedef bb::pim::contacts::ContactListFilters ContactListFilters;
+typedef bb::pim::contacts::AttributeKind AttributeKind;
+typedef bb::pim::contacts::AttributeSubKind AttributeSubKind;
+typedef bb::pim::contacts::SearchField SearchField;
+typedef bb::pim::contacts::SortSpecifier SortSpecifier;
+typedef bb::pim::contacts::SortColumn SortColumn;
+typedef bb::pim::contacts::SortOrder SortOrder;
 
 class PimContactsQt {
 public:
@@ -43,10 +59,27 @@ public:
 
     static void createAttributeKindMap();
     static void createAttributeSubKindMap();
+    static void createKindAttributeMap();
+    static void createSubKindAttributeMap();
+
+    friend bool lessThan(const Contact& c1, const Contact& c2);
 
 private:
+    QSet<ContactId> singleFieldSearch(const Json::Value& search_field_json, const Json::Value& contact_fields, bool favorite);
+    Json::Value assembleSearchResults(const QSet<ContactId>& results, const Json::Value& contact_fields, int limit);
+    void populateContactField(const bb::pim::contacts::Contact& contact, bb::pim::contacts::AttributeKind::Type kind, Json::Value& contact_item);
+    void populateChildField(const Contact& contact, AttributeKind::Type kind, Json::Value& contact_field);
+    void populateOrganizations(const Contact& contact, Json::Value& contact_orgs);
+    void populateAddresses(const Contact& contact, Json::Value& contact_addrs);
+    
+    static QString getSortFieldValue(const SortColumn::Type sort_field, const Contact& contact);
     static std::map<std::string, AttributeKind::Type> attributeKindMap;
     static std::map<std::string, AttributeSubKind::Type> attributeSubKindMap;
+    static std::map<AttributeKind::Type, std::string> kindAttributeMap;
+    static std::map<AttributeSubKind::Type, std::string> subKindAttributeMap;
+    static QList<SortSpecifier> sortSpecs;
+
+    std::map<ContactId, Contact> m_contactSearchMap;
 };
 
 } // namespace webworks
