@@ -220,6 +220,11 @@ function addCustomItems(menuItems, currentContext) {
     addCustomItemsForContext(menuItems, context);
 }
 
+function restoreDefaultMenu() {
+    _customContextItems = {};
+    _actions.clearCustomHandlers();
+}
+
 function init() {
 
     _overlayWebView.onPropertyCurrentContextEvent = function (value) {
@@ -243,6 +248,9 @@ function init() {
         if (actionId) {
             _actions.runHandler(actionId);
         }
+    });
+    _webview.addEventListener('DocumentLoaded', function () {
+       restoreDefaultMenu();
     });
 }
 
