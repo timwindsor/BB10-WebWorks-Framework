@@ -56,7 +56,7 @@ function generateMenuItems(menuItems) {
     for (i = 0; i < menuItems.length; i++) {
         switch (menuItems[i]) {
         case 'ClearField':
-            items.push({'label': 'Clear Field', 'actionId': 'ClearField', 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+            items.push({'label': 'Clear Field', 'actionId': 'ClearField', 'imageUrl': 'platform:///ui-resources/assets/Browser_Cancel_Selection.png'});
             break;
         case 'SendLink':
             break;
@@ -67,38 +67,38 @@ function generateMenuItems(menuItems) {
         case 'Delete':
             break;
         case 'Cancel':
-            items.push({'label': 'Cancel', 'actionId': 'Cancel', 'imageUrl': 'assets/Browser_Cancel_Selection.png'});
+            items.push({'label': 'Cancel', 'actionId': 'Cancel', 'imageUrl': 'platform:///ui-resources/assets/Browser_Cancel_Selection.png'});
             break;
         case 'Cut':
-            items.push({'label': 'Cut', 'actionId': 'Cut', 'imageUrl': 'assets/Browser_Cut.png'});
+            items.push({'label': 'Cut', 'actionId': 'Cut', 'imageUrl': 'platform:///ui-resources/assets/Browser_Cut.png'});
             break;
         case 'Copy':
-            items.push({'label': 'Copy', 'actionId': 'Copy', 'imageUrl': 'assets/Browser_Copy.png'});
+            items.push({'label': 'Copy', 'actionId': 'Copy', 'imageUrl': 'platform:///ui-resources/assets/Browser_Copy.png'});
             break;
         case 'Paste':
-            items.push({'label': 'Paste', 'actionId': 'Paste', 'imageUrl': 'assets/crosscutmenu_paste.png'});
+            items.push({'label': 'Paste', 'actionId': 'Paste', 'imageUrl': 'platform:///ui-resources/assets/crosscutmenu_paste.png'});
             break;
         case 'Select':
-            items.push({'label': 'Select', 'actionId': 'Select', 'imageUrl': 'assets/crosscutmenu_paste.png'});
+            items.push({'label': 'Select', 'actionId': 'Select', 'imageUrl': 'platform:///ui-resources/assets/crosscutmenu_paste.png'});
             break;
         case 'AddLinkToBookmarks':
             break;
         case 'CopyLink':
-            items.push({'label': 'Copy Link', 'actionId': 'CopyLink', 'imageUrl': 'assets/Browser_CopyLink.png'});
+            items.push({'label': 'Copy Link', 'actionId': 'CopyLink', 'imageUrl': 'platform:///ui-resources/assets/Browser_CopyLink.png'});
             break;
         case 'OpenLinkInNewTab':
             break;
         case 'OpenLink':
-            items.push({'label': 'Open', 'actionId': 'OpenLink', 'imageUrl': 'assets/Browser_OpenLink.png'});
+            items.push({'label': 'Open', 'actionId': 'OpenLink', 'imageUrl': 'platform:///ui-resources/assets/Browser_OpenLink.png'});
             break;
         case 'SaveLinkAs':
-            items.push({'label': 'Save Link as', 'actionId': 'SaveLinkAs', 'imageUrl': 'assets/Browser_SaveLink.png'});
+            items.push({'label': 'Save Link as', 'actionId': 'SaveLinkAs', 'imageUrl': 'platform:///ui-resources/assets/Browser_SaveLink.png'});
             break;
         case 'SaveImage':
-            items.push({'label': 'Save Image', 'actionId': 'SaveImage', 'imageUrl': 'assets/Browser_SaveImage.png'});
+            items.push({'label': 'Save Image', 'actionId': 'SaveImage', 'imageUrl': 'platform:///ui-resources/assets/Browser_SaveImage.png'});
             break;
         case 'CopyImageLink':
-            items.push({'label': 'Copy Image Link', 'actionId': 'CopyImageLink', 'imageUrl': 'assets/Browser_CopyImageLink.png'});
+            items.push({'label': 'Copy Image Link', 'actionId': 'CopyImageLink', 'imageUrl': 'platform:///ui-resources/assets/Browser_CopyImageLink.png'});
             break;
         case 'ViewImage':
             break;
@@ -107,13 +107,13 @@ function generateMenuItems(menuItems) {
         case 'ShareLink':
             // local and file protocol won't have sharelink menuitem
             if (!/^local|^file/.test(_currentContext.url)) {
-                items.push({'label': 'Share Link', 'actionId': 'ShareLink', 'imageUrl': 'assets/Browser_ShareLink.png'});
+                items.push({'label': 'Share Link', 'actionId': 'ShareLink', 'imageUrl': 'platform:///ui-resources/assets/Browser_ShareLink.png'});
             }
             break;
         case 'ShareImage':
             break;
         case 'InspectElement':
-            items.push({'label': 'Inspect Element', 'actionId': 'InspectElement', 'imageUrl': 'assets/generic_81_81_placeholder.png'});
+            items.push({'label': 'Inspect Element', 'actionId': 'InspectElement', 'imageUrl': 'platform:///ui-resources/assets/generic_81_81_placeholder.png'});
             break;
         }
     }

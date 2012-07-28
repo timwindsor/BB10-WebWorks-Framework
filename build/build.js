@@ -44,7 +44,6 @@ function _handle(func) {
 module.exports = _handle(function () {
     var build = jWorkflow.order(clean)
                          .andThen(buildNative)
-                         .andThen(compileUI)
                          .andThen(pack);
 
     build.start(function (error) {

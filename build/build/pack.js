@@ -89,6 +89,7 @@ module.exports = function (src, baton) {
     copyExtensions(_c.EXT, extDest);
     copyFolder(_c.CLIENTFILES, clientFilesDest);
     copyFolder(_c.DEPENDENCIES_BOOTSTRAP, bootstrapDest);
+    copyFolder(_c.UI, _c.DEPLOY_UI);
 
     //Copy files to target directory (DO NOT copy webplatform-framework lib/* files over)
     utils.copyFile(_c.DEPENDENCIES_WEBPLATFORM_FRAMEWORK_REQUIRE, browserRequireDest);
