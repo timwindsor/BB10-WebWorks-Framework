@@ -4,6 +4,7 @@ target
 dependencies/test-server
 dependencies/webplatform
 dependencies/jnext_1_0_8_3
+dependencies/xui
 ui-resources/thirdparty
 clientFiles
 ext/blackberry.example.test

@@ -22,7 +22,6 @@ var contextmenu,
     utils,
     includePath;
 
-
 function requireLocal(id) {
     return require(!!require.resolve ? "../../" + id.replace(/\/chrome/, "") : id);
 }
