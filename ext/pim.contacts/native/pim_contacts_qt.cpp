@@ -107,7 +107,7 @@ std::string PimContactsQt::Find(const std::string& optionsJson)
     return writer.write(contact_obj);
 }
 
-void PimContactsQt::Save(const std::string& attributeJson) {
+std::string PimContactsQt::Save(const std::string& attributeJson) {
     Json::Reader reader;
     Json::Value attribute_obj;
     bool parse = reader.parse(attributeJson, attribute_obj);
@@ -117,20 +117,29 @@ void PimContactsQt::Save(const std::string& attributeJson) {
         throw "Cannot parse JSON object";
     }
 
-    if (attribute_obj.isMember("id")) {
+    if (attribute_obj.isMember("id") && attribute_obj["id"].isInt()) {
+        int contact_id = attribute_obj["id"].asInt();
         ContactService service;
-        Contact contact = service.contactDetails(attribute_obj["id"].asInt());
 
-        if (contact.isValid()) {
-            EditContact(contact, attribute_obj);
-            return;
+        if (contact_id > 0) {
+            Contact contact = service.contactDetails(contact_id);
+
+            if (contact.isValid()) {
+                return EditContact(contact, attribute_obj);
+            }
+        } else {
+            Contact contact = service.contactDetails(contact_id * -1);
+
+            if (contact.isValid()) {
+                return CloneContact(contact, attribute_obj);
+            }
         }
     }
 
-    CreateContact(attribute_obj);
+    return CreateContact(attribute_obj);
 }
 
-void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
+std::string PimContactsQt::CreateContact(const Json::Value& attributeObj) {
     const Json::Value::Members attribute_keys = attributeObj.getMemberNames();
 
     Contact new_contact;
@@ -144,16 +153,19 @@ void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
         if (kind_iter != attributeKindMap.end()) {
             switch (kind_iter->second) {
                 case AttributeKind::Name: {
+                    /*
                     if (key == "displayName") {
                         std::string display_name = attributeObj[key].asString();
                         contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::NameDisplayName, display_name);
                     } else if (key == "nickname") {
                         std::string display_name = attributeObj[key].asString();
                         contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::NameNickname, display_name);
-                    } else {
-                        Json::Value name_obj = attributeObj[key];
-                        contact_builder = buildGroupedAttributes(contact_builder, name_obj, kind_iter->second);
                     }
+                    */
+
+                    Json::Value name_obj = attributeObj[key];
+                    contact_builder = buildGroupedAttributes(contact_builder, name_obj, kind_iter->second);
+
                     break;
                 }
                 case AttributeKind::OrganizationAffiliation: {
@@ -162,17 +174,6 @@ void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
                     for (int j = 0; j < attribute_array.size(); j++) {
                         Json::Value field_obj = attribute_array[j];
                         contact_builder = buildGroupedAttributes(contact_builder, field_obj, kind_iter->second);
-                    }
-
-                    break;
-                }
-                case AttributeKind::Date: {
-                    std::string date = attributeObj[key].asString();
-
-                    if (key == "birthday") {
-                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::DateBirthday, date);
-                    } else if (key == "anniversary") {
-                        contact_builder = addAttribute(contact_builder, kind_iter->second, AttributeSubKind::DateAnniversary, date);
                     }
 
                     break;
@@ -187,6 +188,7 @@ void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
 
                     break;
                 }
+                case AttributeKind::Date:
                 case AttributeKind::Note:
                 case AttributeKind::Sound: {
                     std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(key);
@@ -208,6 +210,7 @@ void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
                 case AttributeKind::Profile: {
                     Json::Value field_array = attributeObj[key];
 
+                    // TODO: May need to add attributes in the reverse order to maintain priority/preference
                     for (int j = 0; j < field_array.size(); j++) {
                         Json::Value field_obj = field_array[j];
                         contact_builder = buildFieldAttribute(contact_builder, field_obj, kind_iter->second);
@@ -244,7 +247,10 @@ void PimContactsQt::CreateContact(const Json::Value& attributeObj) {
     ContactService contact_service;
     new_contact = contact_service.createContact(new_contact, false);
 
-    // TODO: return ContactId
+    Json::Value return_obj = attributeObj;
+    return_obj["id"] = Json::Value(new_contact.id());
+    Json::FastWriter writer;
+    return writer.write(return_obj);
 }
 
 void PimContactsQt::DeleteContact(const std::string& contactJson) {
@@ -263,7 +269,117 @@ void PimContactsQt::DeleteContact(const std::string& contactJson) {
     service.deleteContact(contact_id);
 }
 
-void PimContactsQt::EditContact(Contact& contact, const Json::Value& attributeObj) {
+std::string PimContactsQt::EditContact(Contact& contact, const Json::Value& attributeObj) {
+    ContactBuilder contact_builder(contact.edit());
+    const Json::Value::Members attribute_keys = attributeObj.getMemberNames();
+
+    for (int i = 0; i < attribute_keys.size(); i++) {
+        const std::string key = attribute_keys[i];
+        std::map<std::string, AttributeKind::Type>::const_iterator kind_iter = attributeKindMap.find(key);
+
+        if (kind_iter != attributeKindMap.end()) {
+            switch (kind_iter->second) {
+                case AttributeKind::Name: {
+                    Json::Value name_obj = attributeObj[key];
+                    QList<ContactAttribute> saved_list = contact.filteredAttributes(kind_iter->second);
+
+                    for (int j = 0; j < saved_list.size(); j++) {
+                        contact_builder.deleteAttribute(saved_list[j]);
+                    }
+
+                    contact_builder = buildGroupedAttributes(contact_builder, name_obj, kind_iter->second);
+
+                    break;
+                }
+                case AttributeKind::OrganizationAffiliation: {
+                    Json::Value attribute_array = attributeObj[key];
+                    QList<ContactAttribute> saved_list = contact.filteredAttributes(kind_iter->second);
+
+                    for (int j = 0; j < saved_list.size(); j++) {
+                        contact_builder.deleteAttribute(saved_list[j]);
+                    }
+
+                    for (int j = 0; j < attribute_array.size(); j++) {
+                        Json::Value field_obj = attribute_array[j];
+                        contact_builder = buildGroupedAttributes(contact_builder, field_obj, kind_iter->second);
+                    }
+
+                    break;
+                }
+                case AttributeKind::Phone:
+                case AttributeKind::Email:
+                case AttributeKind::Fax:
+                case AttributeKind::Pager:
+                case AttributeKind::InstantMessaging:
+                case AttributeKind::Website:
+                case AttributeKind::Group:
+                case AttributeKind::Profile: {
+                    QList<ContactAttribute> saved_list = contact.filteredAttributes(kind_iter->second);
+                    Json::Value json_array = attributeObj[key];
+                    int index;
+
+                    for (index = 0; index < json_array.size(); index++) {
+                        Json::Value json_field = json_array[index];
+                        std::map<std::string, AttributeSubKind::Type>::const_iterator subkind_iter = attributeSubKindMap.find(json_field["type"].asString());
+
+                        if (subkind_iter != attributeSubKindMap.end()) {
+                            if (index < saved_list.size()) {
+                                ContactAttributeBuilder attribute_builder(saved_list[index].edit());
+                                attribute_builder = attribute_builder.setSubKind(subkind_iter->second);
+                                attribute_builder = attribute_builder.setValue(QString(json_field["value"].asString().c_str()));
+                            } else {
+                                ContactAttribute attribute;
+                                ContactAttributeBuilder attribute_builder(attribute.edit());
+                                attribute_builder = attribute_builder.setKind(kind_iter->second);
+                                attribute_builder = attribute_builder.setSubKind(subkind_iter->second);
+                                attribute_builder = attribute_builder.setValue(QString(json_field["value"].asString().c_str()));
+
+                                contact_builder = contact_builder.addAttribute(attribute);
+                            }
+                        }
+                    }
+
+                    for (; index < saved_list.size(); index++) {
+                        contact_builder = contact_builder.deleteAttribute(saved_list[index]);
+                    }
+
+                    break;
+                }
+            }
+        }
+    }
+
+    ContactService contact_service;
+    contact_service.updateContact(contact);
+
+    Json::FastWriter writer;
+    return writer.write(attributeObj);
+}
+
+std::string PimContactsQt::CloneContact(Contact& contact, const Json::Value& attributeObj) {
+    ContactService service;
+    Contact new_contact;
+    ContactBuilder contact_builder(new_contact.edit());
+    contact_builder = contact_builder.addFromContact(contact);
+
+    QList<ContactPhoto> copy_photos = contact.photos();
+    for (int i = 0; i < copy_photos.size(); i++) {
+        ContactPhoto photo;
+        ContactPhotoBuilder photo_builder(photo.edit());
+        photo_builder.setOriginalPhoto(copy_photos[i].originalPhoto());
+        photo_builder.setPrimaryPhoto(true);
+        contact_builder = contact_builder.addPhoto(photo);
+    }
+
+    contact_builder = contact_builder.setFavorite(contact.isFavourite());
+
+    new_contact = service.createContact(new_contact, false);
+    EditContact(new_contact, attributeObj);
+
+    Json::Value return_obj = attributeObj;
+    return_obj["id"] = Json::Value(new_contact.id());
+    Json::FastWriter writer;
+    return writer.write(return_obj);
 }
 
 ContactBuilder& PimContactsQt::addAttribute(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value) {
@@ -399,8 +515,8 @@ void PimContactsQt::createAttributeKindMap() {
     attributeKindMap["birthday"] = AttributeKind::Date;
     attributeKindMap["categories"] = AttributeKind::Group;
     attributeKindMap["name"] = AttributeKind::Name;
-    attributeKindMap["displayName"] = AttributeKind::Name;
-    attributeKindMap["nickname"] = AttributeKind::Name;
+//    attributeKindMap["displayName"] = AttributeKind::Name;
+//    attributeKindMap["nickname"] = AttributeKind::Name;
     attributeKindMap["organizations"] = AttributeKind::OrganizationAffiliation;
     attributeKindMap["education"] = AttributeKind::Education;
     attributeKindMap["note"] = AttributeKind::Note;
@@ -436,6 +552,8 @@ void PimContactsQt::createAttributeSubKindMap() {
     attributeSubKindMap["honorificPrefix"] = AttributeSubKind::Title;
     attributeSubKindMap["honorificSuffix"] = AttributeSubKind::NameSuffix;
     attributeSubKindMap["middleName"] = AttributeSubKind::NameMiddle;
+    attributeSubKindMap["nickname"] = AttributeSubKind::NameNickname;
+    attributeSubKindMap["displayName"] = AttributeSubKind::NameDisplayName;
     attributeSubKindMap["phoneticGivenName"] = AttributeSubKind::NamePhoneticGiven;
     attributeSubKindMap["phoneticFamilyName"] = AttributeSubKind::NamePhoneticSurname;
     attributeSubKindMap["name"] = AttributeSubKind::OrganizationAffiliationName;

@@ -54,8 +54,7 @@ std::string PimContacts::InvokeMethod(const std::string& command)
 
     } else if (strCommand == "save") {
         webworks::PimContactsQt pim_qt;
-        pim_qt.Save(jsonObject);
-        return "";
+        return pim_qt.Save(jsonObject);
 
         /*
         // parse the JSON
@@ -68,7 +67,7 @@ std::string PimContacts::InvokeMethod(const std::string& command)
             return "Cannot parse JSON object";
         }
         */
-    } else if (strCommand == "deleteContact") {
+    } else if (strCommand == "remove") {
         webworks::PimContactsQt pim_qt;
         pim_qt.DeleteContact(jsonObject);
         return "";

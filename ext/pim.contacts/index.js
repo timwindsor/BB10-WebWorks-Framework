@@ -23,36 +23,36 @@ module.exports = {
         var findOptions = {};
 
         for (key in args) {
-            findOptions[key] = JSON.parse(decodeURIComponent(args[key]));
+            if (args.hasOwnProperty(key)) {
+                findOptions[key] = JSON.parse(decodeURIComponent(args[key]));
+            }
         }
 
         success(pimContacts.find(findOptions));
-    },
-
-    create: function (success, fail, args) {
-        var contact = {};
-        success(contact);
     },
 
     save: function (success, fail, args) {
         var attributes = {};
 
         for (key in args) {
-            attributes[key] = JSON.parse(decodeURIComponent(args[key]));
+            if (args.hasOwnProperty(key)) {
+                attributes[key] = JSON.parse(decodeURIComponent(args[key]));
+            }
         }
 
-        pimContacts.save(attributes);
-        success();
+        success(pimContacts.save(attributes));
     },
 
-    deleteContact: function (success, fail, args) {
+    remove: function (success, fail, args) {
         var attributes = {};
 
         for (key in args) {
-            attributes[key] = JSON.parse(decodeURIComponent(args[key]));
+            if (args.hasOwnProperty(key)) {
+                attributes[key] = JSON.parse(decodeURIComponent(args[key]));
+            }
         }
 
-        pimContacts.deleteContact(attributes);
+        pimContacts.remove(attributes);
         success();
     }
 };
@@ -71,12 +71,32 @@ JNEXT.PimContacts = function ()
     };
 
     self.save = function (args) {
+        if (args.displayName) {
+            args.name.displayName = args.displayName;
+        } 
+
+        if (args.nickname) {
+            args.name.nickname = args.nickname;
+        }
+
         var val = JNEXT.invoke(self.m_id, "save " + JSON.stringify(args));
-        return "";
+
+        val = JSON.parse(val);
+
+        if (val.name.displayName) {
+            delete val.name.displayName;
+        }
+
+        if (val.name.nickname) {
+            delete val.name.nickname;
+        }
+
+        return val;
+        //return JSON.parse(val);
     };
 
-    self.deleteContact = function (args) {
-        var val = JNEXT.invoke(self.m_id, "deleteContact " + JSON.stringify(args));
+    self.remove = function (args) {
+        var val = JNEXT.invoke(self.m_id, "remove " + JSON.stringify(args));
         return "";
     };
 

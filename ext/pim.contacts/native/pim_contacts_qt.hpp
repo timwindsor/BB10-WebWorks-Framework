@@ -41,10 +41,11 @@ public:
     PimContactsQt();
     ~PimContactsQt();
     std::string Find(const std::string& optionsJson);
-    void Save(const std::string& attributeJson);
-    void CreateContact(const Json::Value& attributeObj);
+    std::string Save(const std::string& attributeJson);
+    std::string CreateContact(const Json::Value& attributeObj);
     void DeleteContact(const std::string& contactJson);
-    void EditContact(Contact& contact, const Json::Value& attributeObj);
+    std::string EditContact(Contact& contact, const Json::Value& attributeObj);
+    std::string CloneContact(Contact& contact, const Json::Value& attributeObj);
 
 private:
     ContactBuilder& buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind);

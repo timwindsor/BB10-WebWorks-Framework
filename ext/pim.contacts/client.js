@@ -15,6 +15,11 @@
  */
  
 var _self = {},
+    Contact,
+    ContactField,
+    ContactAddress,
+    ContactOrganization,
+    ContactPhoto,
     _ID = require("./manifest.json").namespace;
 
 _self.find = function (findOptions) {
@@ -22,7 +27,12 @@ _self.find = function (findOptions) {
 };
 
 _self.create = function (attributes) {
-    return window.webworks.execSync(_ID, "create", attributes);
+    var contact = new Contact();
+
+    for (key in attributes) {
+    }
+
+    return contact;
 };
 
 _self.save = function (attributes) {
@@ -30,7 +40,48 @@ _self.save = function (attributes) {
 };
 
 _self.deleteContact = function (attributes) {
-    return window.webworks.execSync(_ID, "deleteContact", attributes);
+    return window.webworks.execSync(_ID, "remove", attributes);
 };
+
+Contact = function () {
+    this.id = "";
+    this.addresses = [];
+};
+
+Contact.prototype.save = function (onSaveSuccess, onSaveError) {
+    var old_contact = window.webworks.execSync(_ID, "save", this);
+    var new_contact = new Contact();
+
+    for (key in old_contact) {
+        if (old_contact.hasOwnProperty(key)) {
+            new_contact[key] = old_contact[key];
+        }
+    }
+
+    return new_contact;
+};
+
+Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
+    return window.webworks.execSync(_ID, "remove", attributes);
+};
+
+Contact.prototype.clone = function () {
+    var contact = new Contact();
+
+    for (key in this) {
+        if (this.hasOwnProperty(key)) {
+            contact[key] = this[key];
+        }
+    }
+
+    contact.id = -1 * this.id;
+    return contact;
+};
+
+_self.Contact = Contact;
+_self.ContactField = ContactField;
+_self.ContactAddress = ContactAddress;
+_self.ContactOrganization = ContactOrganization;
+_self.ContactPhoto = ContactPhoto;
 
 module.exports = _self;
