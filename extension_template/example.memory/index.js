@@ -13,20 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var greetingWithNative,
+var memoryJNext,
     _event = require("../../lib/event");
-    
+
 module.exports = {
-    getGreeting: function (success, fail, args, env) {
-        var greeting = {};
-        
+    getMemoryServer: function (success, fail, args, env) {
         try {
-            if (args.classicGreeting) {
-                greeting.classicGreeting = JSON.parse(decodeURIComponent(args.classicGreeting));
-            }
-            
-            greetingWithNative.getGreeting(greeting);
-            success();
+            success(memoryJNext.getMemoryJNext());
+        } catch (e) {
+            fail(-1, e);
+        }
+    },
+
+    monitorMemoryServer: function (success, fail, args, env) {
+        try {
+            success(memoryJNext.monitorMemoryJNext());
         } catch (e) {
             fail(-1, e);
         }
@@ -37,16 +38,16 @@ module.exports = {
 // JavaScript wrapper for JNEXT plugin
 ///////////////////////////////////////////////////////////////////
 
-JNEXT.GreetingWithNative = function ()
+JNEXT.MemoryJNext = function ()
 {   
     var _self = this;
-        _self._id = "";
 
+    _self.getMemoryJNext = function () {
+        return JNEXT.invoke(_self._id, "getMemoryNative ");
+    };
 
-    _self.getGreeting = function (classicGreeting) {
-        var returnValue = JNEXT.invoke(_self._id, "getGreeting " + JSON.stringify(settings));
-        
-        return returnValue;
+    _self.monitorMemoryJNext = function () {
+        return JNEXT.invoke(_self._id, "monitorMemoryNative ");
     };
 
     _self.getId = function () {
@@ -54,20 +55,33 @@ JNEXT.GreetingWithNative = function ()
     };
 
     _self.init = function () {
-        if (!JNEXT.require("greeting")) {   
+        if (!JNEXT.require("MemoryExtension")) {   
             return false;
         }
 
-        _self._id = JNEXT.createObject("greeting.GreetingWithNative");
-        
+        _self._id = JNEXT.createObject("MemoryExtension.Memory");
+
         if (!_self._id || _self._id === "") {   
             return false;
         }
 
         JNEXT.registerEvents(_self);
     };
+
+    _self.onEvent = function (strData) {
+        var arData = strData.split(" "),
+            strEventId = arData[0],
+            arg = arData[1];
+
+        // Trigger the event handler of specific Push events
+        if (strEventId === "FreeMemory") {
+            _event.trigger("example.memory.memoryEvent", arg);
+        }
+    };
+    
+    _self._id = "";
     
     _self.init();
 };
 
-greetingWithNative = new JNEXT.GreetingWithNative();
+memoryJNext = new JNEXT.MemoryJNext();

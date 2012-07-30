@@ -17,8 +17,14 @@
 var _self = {},
     _ID = require("./manifest.json").namespace;
 
-_self.getGreeting = function (isClassicGreeting) {
-    return window.webworks.execSync(ID, "getGreeting", {"classicGreeting": isClassicGreeting});
+_self.getMemory = function () {
+    return window.webworks.execSync(_ID, "getMemoryServer", null);
+};
+
+_self.monitorMemory = function (cb) {
+    window.webworks.event.once(_ID, "example.memory.memoryEvent", cb);
+
+    return window.webworks.execSync(_ID, "monitorMemoryServer", null);
 };
 
 module.exports = _self;
