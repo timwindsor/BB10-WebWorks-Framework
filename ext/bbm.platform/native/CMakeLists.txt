@@ -12,9 +12,13 @@ set(bbm_srcs
     ../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common/plugin.cpp
 )
 
+
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/jnext_1_0_8_3/jncore/jnext-extensions/common)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../dependencies/JsonCpp/jsoncpp-src-0.5.0/include)
+
+add_subdirectory(unitTests)
+
 add_definitions(-DXP_UNIX)
 add_library(bbm MODULE ${bbm_srcs})
 target_link_libraries(bbm bbmsp bps socket QtCore)
