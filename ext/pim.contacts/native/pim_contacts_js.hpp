@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-//#include <pthread.h>
-#include <string>
-//#include <vector>
-
-#include "../common/plugin.h"
-
 #ifndef PIM_CONTACTS_JS_H_
 #define PIM_CONTACTS_JS_H_
+
+#include <json/value.h>
+#include <pthread.h>
+#include <string>
+
+#include "../common/plugin.h"
 
 class PimContacts : public JSExt
 {
@@ -30,8 +30,14 @@ public:
     virtual ~PimContacts() {}
     virtual std::string InvokeMethod(const std::string& command);
     virtual bool CanDelete();
-    void NotifyEvent(const std::string& event);
+    void NotifyEvent(const std::string& eventId, const std::string& event);
+
+    static void* FindThread(void *args);
+    static void* SaveThread(void *args);
+    static void* RemoveThread(void *args);
 private:
+    bool startThread(void* (*threadFunction)(void *), Json::Value *jsonObj);
+
     std::string m_id;
 };
 

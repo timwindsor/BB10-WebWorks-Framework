@@ -23,6 +23,14 @@ var _self = {},
     ContactPhoto,
     _ID = require("./manifest.json").namespace;
 
+function S4() {
+    return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+}
+
+function guid() {
+    return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
+}
+
 _self.find = function (findOptions) {
     return window.webworks.execSync(_ID, "find", findOptions || {});
 };
@@ -38,28 +46,95 @@ _self.create = function (attributes) {
 
 Contact = function () {
     this.id = "";
+
+    // Undefined?
+    this.addresses;
+    this.anniversary;
+    this.birthday;
+    this.categories;
+    this.displayName;
+    this.emails;
+    this.favorite;
+    this.faxNumbers;
+    this.ims;
+    this.name;
+    this.nickname;
+    this.note;
+    this.organizations;
+    this.pagerNumbers;
+    this.phoneNumbers;
+    this.photos;
+    this.ringtone;
+    this.socialNetworks;
+    this.urls;
+    this.videoChat;
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {
-    var old_contact = window.webworks.execSync(_ID, "save", this);
-    var new_contact = new Contact();
+    var args = {},
+        key,
+        successCallback = onSaveSuccess,
+        errorCallback = onSaveError,
+        saveCallback;
 
-    for (key in old_contact) {
-        if (old_contact.hasOwnProperty(key)) {
-            new_contact[key] = old_contact[key];
+    for (key in this) {
+        if (this.hasOwnProperty(key) && this[key] != undefined) {
+            args[key] = this[key];
         }
     }
 
-    return new_contact;
+    args._eventId = guid();
+
+    saveCallback = function (args) {
+        var result = JSON.parse(unescape(args.result));
+
+        if (result._success) {
+            this.id = result.id;
+
+            if (successCallback) {
+                successCallback(this);
+            }
+        } else {
+            if (errorCallback) {
+                errorCallback(result);
+            }
+        }
+    };
+
+    window.webworks.event.once(_ID, args._eventId, saveCallback.bind(this));
+    return window.webworks.execAsync(_ID, "save", args);
 };
 
 Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
-    var attributes = { "contactId" : this.id };
-    return window.webworks.execSync(_ID, "remove", attributes);
+    var args = {},
+        successCallback = onRemoveSuccess,
+        errorCallback = onRemoveError,
+        removeCallback;
+
+    args.contactId = this.id;
+    args._eventId = guid();
+
+    removeCallback = function (args) {
+        var result = JSON.parse(unescape(args.result));
+
+        if (result._success) {
+            if (successCallback) {
+                successCallback();
+            }
+        } else {
+            if (errorCallback) {
+                errorCallback(result);
+            }
+        }
+    };
+
+    window.webworks.event.once(_ID, args._eventId, removeCallback.bind(this));
+    return window.webworks.execAsync(_ID, "remove", args);
 };
 
 Contact.prototype.clone = function () {
-    var contact = new Contact();
+    var contact = new Contact(),
+        key;
 
     for (key in this) {
         if (this.hasOwnProperty(key)) {

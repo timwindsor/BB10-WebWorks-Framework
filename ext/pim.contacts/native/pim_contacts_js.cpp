@@ -16,8 +16,8 @@
 
 #include "pim_contacts_js.hpp"
 #include "pim_contacts_qt.hpp"
-//#include <json/reader.h>
-//#include <sstream>
+#include <json/reader.h>
+#include <json/writer.h>
 #include <string>
 
 PimContacts::PimContacts(const std::string& id) : m_id(id)
@@ -43,41 +43,32 @@ JSExt* onCreateObject(const std::string& className, const std::string& id)
 
 std::string PimContacts::InvokeMethod(const std::string& command)
 {
-    try {
     int index = command.find_first_of(" ");
 
     string strCommand = command.substr(0, index);
     string jsonObject = command.substr(index + 1, command.length());
 
+    // Parse the JSON
+    Json::Reader reader;
+    Json::Value *obj = new Json::Value;
+    bool parse = reader.parse(jsonObject, *obj);
+
+    if (!parse) {
+        fprintf(stderr, "%s", "error parsing\n");
+        return "Cannot parse JSON object";
+    }
+
     if (strCommand == "find") {
-        webworks::PimContactsQt pim_qt;
-        return pim_qt.Find(jsonObject);
+        startThread(FindThread, obj);
 
     } else if (strCommand == "save") {
-        webworks::PimContactsQt pim_qt;
-        return pim_qt.Save(jsonObject);
+        startThread(SaveThread, obj);
 
-        /*
-        // parse the JSON
-        Json::Reader reader;
-        Json::Value obj;
-        bool parse = reader.parse(jsonObject, obj);
-
-        if (!parse) {
-            fprintf(stderr, "%s", "error parsing\n");
-            return "Cannot parse JSON object";
-        }
-        */
     } else if (strCommand == "remove") {
-        webworks::PimContactsQt pim_qt;
-        pim_qt.DeleteContact(jsonObject);
-        return "";
+        startThread(RemoveThread, obj);
     }
 
     return "";
-    } catch (std::string e) {
-        return "";
-    }
 }
 
 bool PimContacts::CanDelete()
@@ -86,11 +77,78 @@ bool PimContacts::CanDelete()
 }
 
 // Notifies JavaScript of an event
-void PimContacts::NotifyEvent(const std::string& event)
+void PimContacts::NotifyEvent(const std::string& eventId, const std::string& event)
 {
-    /*
     std::string eventString = m_id + " result ";
+    eventString.append(eventId);
+    eventString.append(" ");
     eventString.append(event);
     SendPluginEvent(eventString.c_str(), m_pContext);
-    */
 }
+
+bool PimContacts::startThread(void* (*threadFunction)(void *), Json::Value *jsonObj) {
+    webworks::PimContactsThreadInfo *thread_info = new webworks::PimContactsThreadInfo;
+    thread_info->parent = this;
+    thread_info->jsonObj = jsonObj;
+    thread_info->eventId = jsonObj->removeMember("_eventId").asString();
+
+    pthread_attr_t thread_attr;
+    pthread_attr_init(&thread_attr);
+    pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
+
+    pthread_t thread;
+    pthread_create(&thread, &thread_attr, (*threadFunction), static_cast<void *>(thread_info));
+    pthread_attr_destroy(&thread_attr);
+
+    if (!thread) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// Static functions:
+
+void* PimContacts::FindThread(void *args)
+{
+    webworks::PimContactsThreadInfo *thread_info = static_cast<webworks::PimContactsThreadInfo *>(args);
+
+    webworks::PimContactsQt pim_qt;
+    Json::Value result = pim_qt.Find(*(thread_info->jsonObj));
+
+    Json::FastWriter writer;
+    std::string event = writer.write(result);
+
+    thread_info->parent->NotifyEvent(thread_info->eventId, event);
+    return NULL;
+}
+
+void* PimContacts::SaveThread(void *args)
+{
+    webworks::PimContactsThreadInfo *thread_info = static_cast<webworks::PimContactsThreadInfo *>(args);
+
+    webworks::PimContactsQt pim_qt;
+    Json::Value result = pim_qt.Save(*(thread_info->jsonObj));
+
+    Json::FastWriter writer;
+    std::string event = writer.write(result);
+
+    thread_info->parent->NotifyEvent(thread_info->eventId, event);
+    return NULL;
+}
+
+void* PimContacts::RemoveThread(void *args)
+{
+    webworks::PimContactsThreadInfo *thread_info = static_cast<webworks::PimContactsThreadInfo *>(args);
+
+    webworks::PimContactsQt pim_qt;
+    Json::Value result = pim_qt.DeleteContact(*(thread_info->jsonObj));
+
+    Json::FastWriter writer;
+    std::string event = writer.write(result);
+
+    thread_info->parent->NotifyEvent(thread_info->eventId, event);
+    return NULL;
+}
+

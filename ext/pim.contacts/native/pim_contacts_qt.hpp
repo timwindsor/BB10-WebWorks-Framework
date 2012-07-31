@@ -19,7 +19,7 @@
 
 #include <string>
 #include <map>
-#include <json/reader.h>
+#include <json/value.h>
 #include <bb/pim/contacts/ContactService.hpp>
 #include <bb/pim/contacts/ContactConsts.hpp>
 #include <bb/pim/contacts/Contact.hpp>
@@ -32,20 +32,28 @@
 #include <bb/pim/contacts/ContactPhotoBuilder.hpp>
 #include "../common/plugin.h"
 
+class PimContacts;
+
 namespace webworks {
 
 using namespace bb::pim::contacts;
+
+struct PimContactsThreadInfo {
+    PimContacts *parent;
+    Json::Value *jsonObj;
+    std::string eventId;
+};
 
 class PimContactsQt {
 public:
     PimContactsQt();
     ~PimContactsQt();
-    std::string Find(const std::string& optionsJson);
-    std::string Save(const std::string& attributeJson);
-    std::string CreateContact(const Json::Value& attributeObj);
-    void DeleteContact(const std::string& contactJson);
-    std::string EditContact(Contact& contact, const Json::Value& attributeObj);
-    std::string CloneContact(Contact& contact, const Json::Value& attributeObj);
+    Json::Value Find(const Json::Value& optionsObj);
+    Json::Value Save(const Json::Value& attributeObj);
+    Json::Value CreateContact(const Json::Value& attributeObj);
+    Json::Value DeleteContact(const Json::Value& contactObj);
+    Json::Value EditContact(Contact& contact, const Json::Value& attributeObj);
+    Json::Value CloneContact(Contact& contact, const Json::Value& attributeObj);
 
 private:
     ContactBuilder& buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind);

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-var pimContacts;
-    //_event = require("../../lib/event"),
-    //_webview = require("../../lib/webview");
+var pimContacts,
+    _event = require("../../lib/event");
     
 module.exports = {
     find: function (success, fail, args) {
-        var findOptions = {};
+        var findOptions = {},
+            key;
 
         for (key in args) {
             if (args.hasOwnProperty(key)) {
@@ -28,11 +28,13 @@ module.exports = {
             }
         }
 
-        success(pimContacts.find(findOptions));
+        pimContacts.find(findOptions);
+        success();
     },
 
     save: function (success, fail, args) {
-        var attributes = {};
+        var attributes = {},
+            key;
 
         for (key in args) {
             if (args.hasOwnProperty(key)) {
@@ -40,11 +42,13 @@ module.exports = {
             }
         }
 
-        success(pimContacts.save(attributes));
+        pimContacts.save(attributes);
+        success();
     },
 
     remove: function (success, fail, args) {
-        var attributes = { "contactId" : JSON.parse(decodeURIComponent(args.contactId)) };
+        var attributes = { "contactId" : JSON.parse(decodeURIComponent(args.contactId)),
+                           "_eventId" : JSON.parse(decodeURIComponent(args._eventId))};
 
         pimContacts.remove(attributes);
         success();
@@ -108,19 +112,20 @@ JNEXT.PimContacts = function ()
             return false;
         }
 
-        //JNEXT.registerEvents(self);
+        JNEXT.registerEvents(self);
     };
    
-    /*
     self.onEvent = function (strData) {
+        console.log(strData);
         var arData = strData.split(" "),
             strEventDesc = arData[0];
             
         if (strEventDesc === "result") {
-            _event.trigger(self.eventId, arData[1]);
+            var args = {};
+            args.result = escape(strData.split(" ").slice(2).join(" "));
+            _event.trigger(arData[1], args);
         }
     };
-    */
     
     self.m_id = "";
 

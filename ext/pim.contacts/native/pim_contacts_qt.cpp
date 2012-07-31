@@ -15,8 +15,6 @@
  */
 
 #include <json/value.h>
-#include <json/writer.h>
-#include <json/reader.h>
 #include <stdio.h>
 #include <string>
 #include <sstream>
@@ -44,33 +42,24 @@ PimContactsQt::~PimContactsQt()
 {
 }
 
-std::string PimContactsQt::Find(const std::string& optionsJson)
+Json::Value PimContactsQt::Find(const Json::Value& optionsObj)
 {
-    Json::Reader reader;
-    Json::Value options_obj;
-    bool parse = reader.parse(optionsJson, options_obj);
-
-    if (!parse) {
-        fprintf(stderr, "%s", "error parsing\n");
-        throw "Cannot parse JSON object";
-    }
-
     ContactService contact_service;
     QList<Contact> contact_list;
 
-    if (options_obj.empty()) {
+    if (optionsObj.empty()) {
         ContactListFilters contact_filter;
         contact_list = contact_service.contacts(contact_filter);
     } else {
         ContactSearchFilters contact_filter;
 
-        const Json::Value::Members option_keys = options_obj.getMemberNames();
+        const Json::Value::Members option_keys = optionsObj.getMemberNames();
         QList<SearchField::Type> search_fields;
         std::string search_value;
 
         for (int i = 0; i < option_keys.size(); i++) {
             const std::string key = option_keys[i];
-            const std::string value = options_obj[key].asString();
+            const std::string value = optionsObj[key].asString();
 
             if (key == "firstName") {
                 search_fields.append(SearchField::FirstName);
@@ -103,43 +92,33 @@ std::string PimContactsQt::Find(const std::string& optionsJson)
 
     contact_obj["contacts"] = contact_array;
 
-    Json::FastWriter writer;
-    return writer.write(contact_obj);
+    return contact_obj;
 }
 
-std::string PimContactsQt::Save(const std::string& attributeJson) {
-    Json::Reader reader;
-    Json::Value attribute_obj;
-    bool parse = reader.parse(attributeJson, attribute_obj);
-
-    if (!parse) {
-        fprintf(stderr, "%s", "error parsing\n");
-        throw "Cannot parse JSON object";
-    }
-
-    if (attribute_obj.isMember("id") && attribute_obj["id"].isInt()) {
-        int contact_id = attribute_obj["id"].asInt();
+Json::Value PimContactsQt::Save(const Json::Value& attributeObj) {
+    if (attributeObj.isMember("id") && attributeObj["id"].isInt()) {
+        int contact_id = attributeObj["id"].asInt();
         ContactService service;
 
         if (contact_id > 0) {
             Contact contact = service.contactDetails(contact_id);
 
             if (contact.isValid()) {
-                return EditContact(contact, attribute_obj);
+                return EditContact(contact, attributeObj);
             }
         } else {
             Contact contact = service.contactDetails(contact_id * -1);
 
             if (contact.isValid()) {
-                return CloneContact(contact, attribute_obj);
+                return CloneContact(contact, attributeObj);
             }
         }
     }
 
-    return CreateContact(attribute_obj);
+    return CreateContact(attributeObj);
 }
 
-std::string PimContactsQt::CreateContact(const Json::Value& attributeObj) {
+Json::Value PimContactsQt::CreateContact(const Json::Value& attributeObj) {
     const Json::Value::Members attribute_keys = attributeObj.getMemberNames();
 
     Contact new_contact;
@@ -249,29 +228,25 @@ std::string PimContactsQt::CreateContact(const Json::Value& attributeObj) {
 
     Json::Value return_obj = attributeObj;
     return_obj["id"] = Json::Value(new_contact.id());
-    Json::FastWriter writer;
-    return writer.write(return_obj);
+
+    return_obj["_success"] = true;
+    return return_obj;
 }
 
-void PimContactsQt::DeleteContact(const std::string& contactJson) {
-    Json::Reader reader;
-    Json::Value obj;
-    bool parse = reader.parse(contactJson, obj);
-
-    if (!parse) {
-        fprintf(stderr, "%s", "error parsing\n");
-        throw "Cannot parse JSON object";
-    }
-
-    if (obj.isMember("contactId") && obj["contactId"].isInt()) {
-        ContactId contact_id = obj["contactId"].asInt();
+Json::Value PimContactsQt::DeleteContact(const Json::Value& contactObj) {
+    if (contactObj.isMember("contactId") && contactObj["contactId"].isInt()) {
+        ContactId contact_id = contactObj["contactId"].asInt();
 
         ContactService service;
         service.deleteContact(contact_id);
     }
+
+    Json::Value return_obj;
+    return_obj["_success"] = true;
+    return return_obj;
 }
 
-std::string PimContactsQt::EditContact(Contact& contact, const Json::Value& attributeObj) {
+Json::Value PimContactsQt::EditContact(Contact& contact, const Json::Value& attributeObj) {
     ContactBuilder contact_builder(contact.edit());
     const Json::Value::Members attribute_keys = attributeObj.getMemberNames();
 
@@ -354,11 +329,13 @@ std::string PimContactsQt::EditContact(Contact& contact, const Json::Value& attr
     ContactService contact_service;
     contact_service.updateContact(contact);
 
-    Json::FastWriter writer;
-    return writer.write(attributeObj);
+    Json::Value return_obj = attributeObj;
+    return_obj["_success"] = true;
+
+    return return_obj;
 }
 
-std::string PimContactsQt::CloneContact(Contact& contact, const Json::Value& attributeObj) {
+Json::Value PimContactsQt::CloneContact(Contact& contact, const Json::Value& attributeObj) {
     ContactService service;
     Contact new_contact;
     ContactBuilder contact_builder(new_contact.edit());
@@ -381,8 +358,9 @@ std::string PimContactsQt::CloneContact(Contact& contact, const Json::Value& att
 
     Json::Value return_obj = attributeObj;
     return_obj["id"] = Json::Value(new_contact.id());
-    Json::FastWriter writer;
-    return writer.write(return_obj);
+
+    return_obj["_success"] = true;
+    return return_obj;
 }
 
 ContactBuilder& PimContactsQt::addAttribute(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value) {
