@@ -43,6 +43,7 @@ JSExt* onCreateObject(const std::string& className, const std::string& id)
 
 std::string PimContacts::InvokeMethod(const std::string& command)
 {
+    try {
     int index = command.find_first_of(" ");
 
     string strCommand = command.substr(0, index);
@@ -74,6 +75,9 @@ std::string PimContacts::InvokeMethod(const std::string& command)
     }
 
     return "";
+    } catch (std::string e) {
+        return "";
+    }
 }
 
 bool PimContacts::CanDelete()

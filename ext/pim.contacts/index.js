@@ -44,13 +44,7 @@ module.exports = {
     },
 
     remove: function (success, fail, args) {
-        var attributes = {};
-
-        for (key in args) {
-            if (args.hasOwnProperty(key)) {
-                attributes[key] = JSON.parse(decodeURIComponent(args[key]));
-            }
-        }
+        var attributes = { "contactId" : JSON.parse(decodeURIComponent(args.contactId)) };
 
         pimContacts.remove(attributes);
         success();
@@ -92,7 +86,6 @@ JNEXT.PimContacts = function ()
         }
 
         return val;
-        //return JSON.parse(val);
     };
 
     self.remove = function (args) {

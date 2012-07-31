@@ -18,6 +18,7 @@ var _self = {},
     Contact,
     ContactField,
     ContactAddress,
+    ContactName,
     ContactOrganization,
     ContactPhoto,
     _ID = require("./manifest.json").namespace;
@@ -35,17 +36,8 @@ _self.create = function (attributes) {
     return contact;
 };
 
-_self.save = function (attributes) {
-    return window.webworks.execSync(_ID, "save", attributes);
-};
-
-_self.deleteContact = function (attributes) {
-    return window.webworks.execSync(_ID, "remove", attributes);
-};
-
 Contact = function () {
     this.id = "";
-    this.addresses = [];
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {
@@ -62,6 +54,7 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
 };
 
 Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
+    var attributes = { "contactId" : this.id };
     return window.webworks.execSync(_ID, "remove", attributes);
 };
 
@@ -78,9 +71,42 @@ Contact.prototype.clone = function () {
     return contact;
 };
 
+ContactField = function (type, value, pref) {
+    this.type = type || "";
+    this.value = value || "";
+    this.pref = pref || false;
+};
+
+ContactAddress = function (type, address1, address2, locality, region, postalCode, country, pref) {
+    this.type = type || "";
+    this.address1 = address1 || "";
+    this.address2 = address2 || "";
+    this.locality = locality || "";
+    this.region = region || "";
+    this.postalCode = postalCode || "";
+    this.country = country || "";
+    this.pref = pref || false;
+};
+
+ContactName = function () {
+};
+
+ContactOrganization = function (name, department, title, pref) {
+    this.name = name || "";
+    this.department = department || "";
+    this.title = title || "";
+    this.pref = pref || false;
+};
+
+ContactPhoto = function (originalFilePath, pref) {
+    this.originalFilePath = originalFilePath || "";
+    this.pref = pref || false;
+};
+
 _self.Contact = Contact;
 _self.ContactField = ContactField;
 _self.ContactAddress = ContactAddress;
+_self.ContactName = ContactName;
 _self.ContactOrganization = ContactOrganization;
 _self.ContactPhoto = ContactPhoto;
 

@@ -263,10 +263,12 @@ void PimContactsQt::DeleteContact(const std::string& contactJson) {
         throw "Cannot parse JSON object";
     }
 
-    ContactId contact_id = obj["contactId"].asInt();
+    if (obj.isMember("contactId") && obj["contactId"].isInt()) {
+        ContactId contact_id = obj["contactId"].asInt();
 
-    ContactService service;
-    service.deleteContact(contact_id);
+        ContactService service;
+        service.deleteContact(contact_id);
+    }
 }
 
 std::string PimContactsQt::EditContact(Contact& contact, const Json::Value& attributeObj) {
@@ -362,6 +364,7 @@ std::string PimContactsQt::CloneContact(Contact& contact, const Json::Value& att
     ContactBuilder contact_builder(new_contact.edit());
     contact_builder = contact_builder.addFromContact(contact);
 
+    // Need to add photos and favorite seperately (addFromContact does not seem to copy these...)
     QList<ContactPhoto> copy_photos = contact.photos();
     for (int i = 0; i < copy_photos.size(); i++) {
         ContactPhoto photo;
