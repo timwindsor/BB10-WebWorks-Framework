@@ -17,16 +17,27 @@
 var _self = {},
     _ID = require("./manifest.json").namespace;
 
-/*
-_self.find = function (findOptions) {
-    return window.webworks.execSync(_ID, "find", findOptions || {});
-};
-*/
 _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
     // TODO validation
+    var callback = function (args) {
+        var result = JSON.parse(unescape(args.result));
+
+        if (result._success) {
+            if (onFindSuccess) {
+                onFindSuccess(result.contacts);
+            }
+        } else {
+            if (onFindError) {
+                onFindError(result);
+            }
+        }
+    };
+
+    window.webworks.event.once(_ID, "tempEventId", callback);
 
     // TODO async, invoke callbacks
-    return window.webworks.execSync(_ID, "find", {
+    return window.webworks.execAsync(_ID, "find", {
+        "_eventId": "tempEventId",
         "fields": contactFields,
         "options": findOptions
     });

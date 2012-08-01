@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-var pimContacts;
-    //_event = require("../../lib/event"),
-    //_webview = require("../../lib/webview");
+var pimContacts,
+    _event = require("../../lib/event");
     
 module.exports = {
     find: function (success, fail, args) {
@@ -27,7 +26,8 @@ module.exports = {
             findOptions[key] = JSON.parse(decodeURIComponent(args[key]));
         }
 
-        success(pimContacts.find(findOptions));
+        pimContacts.find(findOptions);
+        success();
     },
 
     createContact: function (success, fail, args) {
@@ -65,7 +65,7 @@ JNEXT.PimContacts = function ()
 
     self.find = function (args) {
         var val = JNEXT.invoke(self.m_id, "find " + JSON.stringify(args));
-        return JSON.parse(val);
+        return "";//JSON.parse(val);
     };
 
     self.createContact = function (args) {
@@ -95,19 +95,20 @@ JNEXT.PimContacts = function ()
             return false;
         }
 
-        //JNEXT.registerEvents(self);
+        JNEXT.registerEvents(self);
     };
    
-    /*
     self.onEvent = function (strData) {
+        console.log(strData);
         var arData = strData.split(" "),
             strEventDesc = arData[0];
             
         if (strEventDesc === "result") {
-            _event.trigger(self.eventId, arData[1]);
+            var args = {};
+            args.result = escape(strData.split(" ").slice(2).join(" "));
+            _event.trigger(arData[1], args);
         }
     };
-    */
     
     self.m_id = "";
 

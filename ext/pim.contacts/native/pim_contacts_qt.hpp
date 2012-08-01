@@ -30,6 +30,8 @@
 #include <map>
 #include "../common/plugin.h"
 
+class PimContacts;
+
 namespace webworks {
 
 typedef bb::pim::contacts::ContactId ContactId;
@@ -49,11 +51,17 @@ typedef bb::pim::contacts::SortSpecifier SortSpecifier;
 typedef bb::pim::contacts::SortColumn SortColumn;
 typedef bb::pim::contacts::SortOrder SortOrder;
 
+struct PimContactsThreadInfo {
+    PimContacts *parent;
+    Json::Value *jsonObj;
+    std::string eventId;
+};
+
 class PimContactsQt {
 public:
     PimContactsQt();
     ~PimContactsQt();
-    std::string find(const std::string& optionsJson);
+    Json::Value Find(const Json::Value& argsJson);
     void createContact(const std::string& attributeJson);
     void deleteContact(const std::string& contactJson);
 
@@ -73,13 +81,13 @@ private:
     void populateAddresses(const Contact& contact, Json::Value& contact_addrs);
     
     static QString getSortFieldValue(const SortColumn::Type sort_field, const Contact& contact);
-    static std::map<std::string, AttributeKind::Type> attributeKindMap;
-    static std::map<std::string, AttributeSubKind::Type> attributeSubKindMap;
-    static std::map<AttributeKind::Type, std::string> kindAttributeMap;
-    static std::map<AttributeSubKind::Type, std::string> subKindAttributeMap;
-    static QList<SortSpecifier> sortSpecs;
+    static std::map<std::string, AttributeKind::Type> _attributeKindMap;
+    static std::map<std::string, AttributeSubKind::Type> _attributeSubKindMap;
+    static std::map<AttributeKind::Type, std::string> _kindAttributeMap;
+    static std::map<AttributeSubKind::Type, std::string> _subKindAttributeMap;
+    static QList<SortSpecifier> _sortSpecs;
 
-    std::map<ContactId, Contact> m_contactSearchMap;
+    std::map<ContactId, Contact> _contactSearchMap;
 };
 
 } // namespace webworks
