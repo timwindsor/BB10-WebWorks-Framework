@@ -43,11 +43,11 @@ JNEXT.MemoryJNext = function ()
     var _self = this;
 
     _self.getMemoryJNext = function () {
-        return JNEXT.invoke(_self._id, "getMemoryNative ");
+        return JNEXT.invoke(_self._id, "getMemoryNative");
     };
 
     _self.monitorMemoryJNext = function () {
-        return JNEXT.invoke(_self._id, "monitorMemoryNative ");
+        return JNEXT.invoke(_self._id, "monitorMemoryNative");
     };
 
     _self.getId = function () {
@@ -55,13 +55,13 @@ JNEXT.MemoryJNext = function ()
     };
 
     _self.init = function () {
-        if (!JNEXT.require("MemoryExtension")) {   
+        if (!JNEXT.require("memoryJnext")) {
             return false;
         }
 
-        _self._id = JNEXT.createObject("MemoryExtension.Memory");
+        _self._id = JNEXT.createObject("memoryJnext.Memory");
 
-        if (!_self._id || _self._id === "") {   
+        if (!_self._id || _self._id === "") {
             return false;
         }
 

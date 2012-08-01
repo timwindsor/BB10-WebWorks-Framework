@@ -24,20 +24,42 @@
 
 using namespace std;
 
+long getMemory();
+string convertLongToString(long l);
+
 /**
- * Default constructor. Initializes the thread that can be used to get memory
- * usage.
+ * Default constructor.
  */
-Memory::Memory() {
-	m_thread = 0;
+Memory::Memory(const std::string& id) : m_id(id)
+{
+    m_thread = 0;
 }
 
 /**
- * Memory destructor. Cleans up the thread.
+ * Memory destructor.
  */
 Memory::~Memory() {
-	fprintf(stderr, "native side: Memory Object deleted\n");
-	Memory::StopThread();
+}
+
+/**
+ * This method returns the list of objects implemented by this native
+ * extension.
+ */
+char* onGetObjList() {
+	static char name[] = "Memory";
+	return name;
+}
+
+/**
+ * This method is used by JNext to instantiate the Memory object when
+ * an object is created on the JavaScript server side.
+ */
+JSExt* onCreateObject(const string& className, const string& id) {
+	if (className == "Memory") {
+		return new Memory(id);
+	}
+
+	return NULL;
 }
 
 /**
@@ -48,42 +70,20 @@ bool Memory::CanDelete() {
 }
 
 /**
- * Method that retreives the current amount of free memory in the system.
+ * It will be called from JNext JavaScript side with passed string.
+ * This method implements the interface for the JavaScript to native binding
+ * for invoking native code. This method is triggered when JNext.invoke is
+ * called on the JavaScript side with this native objects id.
  */
-long getMemory() {
-	struct stat statbuf;
-	paddr_t freemem;
-
-	stat("/proc", &statbuf);
-	freemem = (paddr_t)statbuf.st_size;
-
-	return freemem;
-}
-
-/**
- * Utility function to convert a long into a string.
- */
-string convertLongToString(long l) {
-	stringstream ss;
-	ss << l;
-	return ss.str();
-}
-
-/**
- * Method used by the getMemoryUsage thread to pass the amount of free memory
- * on the JavaScript side by firing an event.
- */
-void Memory::SendJNextEvent(long fm) {
-	fprintf(stderr, "native side: thread sending JNext Event started\n");
-    std::string eventString = "FreeMemory: " + convertLongToString(fm);
-    fprintf(stderr, "native side: memory usage %s\n", eventString.c_str());
-    if (SendPluginEvent == NULL) {
-    	fprintf(stderr, "native side: SendPluginEvent is null\n");
-    } else {
-    	fprintf(stderr, "native side: SendPluginEvent is GOOD\n");
-    }
-	//SendPluginEvent("abcde", m_pContext);
-	fprintf(stderr, "native side: thread sending JNext Event done\n");
+string Memory::InvokeMethod(const string& command) {
+	// Determine which function should be executed
+	if (command == "getMemoryNative") {
+		return convertLongToString(getMemory());
+	} else if (command == "monitorMemoryNative") {
+		return MonitorMemoryNative();
+	} else {
+		return "Unsupported Method";
+	}
 }
 
 /**
@@ -99,7 +99,7 @@ void* MemoryThread(void* parent)
 
 	while (true) {
 		long fm = getMemory();
-		pParent->SendJNextEvent(fm);
+		pParent->SendMemoryInfo(fm);
 		sleep(1);
 	}
 
@@ -127,74 +127,53 @@ bool Memory::StartThread() {
 }
 
 /**
- * Method responsible for terminating a thread.
- */
-void Memory::StopThread() {
-	m_thread = 0;
-}
-
-/**
  * Method used to start the get memory usage thread. The method shall return a
  * string to the JavaScript side indicating whether or not the memory
  * monitoring was initialized.
  */
-string Memory::monitorMemoryNative() {
-	if (Memory::StartThread()) {
-		return "Memory Monitoring Initialized";
+string Memory::MonitorMemoryNative() {
+	if (StartThread()) {
+		return "Memory monitored";
 	} else {
 		return "Memory already being monitored";
 	}
 }
 
 /**
- * It will be called from JNext JavaScript side with passed string.
- * This method implements the interface for the JavaScript to native binding
- * for invoking native code. This method is triggered when JNext.invoke is
- * called on the JavaScript side with this native objects id.
+ * Method used by the getMemoryUsage thread to pass the amount of free memory
+ * on the JavaScript side by firing an event.
  */
-string Memory::InvokeMethod(const string& command) {
-	// Get the method name string
-	if (SendPluginEvent == NULL) {
-		fprintf(stderr, "native side: SendPluginEvent is null\n");
-	} else {
-		fprintf(stderr, "native side: SendPluginEvent is GOOD\n");
-	}
+void Memory::SendMemoryInfo(long fm) {
+    std::string eventString = "FreeMemory " + convertLongToString(fm);
+	NotifyEvent(eventString);
+}
 
-    int index = command.find_first_of(" ");
-	string strCommand = command.substr(0, index);
-	fprintf(stderr, "native side: %s\n", strCommand.c_str());
-
-	// Determine which function should be executed
-	if (strCommand == "getMemoryNative") {
-		return convertLongToString(getMemory());
-	} else if (strCommand == "monitorMemoryNative") {
-		return monitorMemoryNative();
-	} else {
-		return "Unsupported Method";
-	}
+// Notifies JavaScript of an event
+void Memory::NotifyEvent(const std::string& event)
+{
+    std::string eventString = m_id + " ";
+    eventString.append(event);
+    SendPluginEvent(eventString.c_str(), m_pContext);
 }
 
 /**
- * This method returns the list of objects implemented by this native
- * extension.
+ * Method that retreives the current free memory of OS.
  */
-char* onGetObjList() {
-	static char name[] = "Memory";
-	return name;
+long getMemory() {
+	struct stat statbuf;
+	paddr_t freemem;
+
+	stat("/proc", &statbuf);
+	freemem = (paddr_t)statbuf.st_size;
+
+	return freemem;
 }
 
 /**
- * This method is used by JNext to instantiate the Memory object when
- * an object is created on the JavaScript server side.
+ * Utility function to convert a long into a string.
  */
-JSExt* onCreateObject(const string& className, const string& id) {
-	if (className == "Memory") {
-		return new Memory();
-	}
-
-	return NULL;
+string convertLongToString(long l) {
+	stringstream ss;
+	ss << l;
+	return ss.str();
 }
-
-
-
-

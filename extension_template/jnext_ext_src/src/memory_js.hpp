@@ -21,18 +21,28 @@
 #include "../common/plugin.h"
 
 class Memory: public JSExt {
+
 public:
-	explicit Memory();
+	explicit Memory(const std::string& id);
 	virtual ~Memory();
+
+// Interfaces of JSExt
+public:
 	virtual bool CanDelete();
 	virtual std::string InvokeMethod(const std::string& command);
-	void SendJNextEvent(long fm);
+
+public:
+	void SendMemoryInfo(long fm);
+	void NotifyEvent(const std::string& event);
 
 private:
-	string monitorMemoryNative();
-	pthread_t m_thread;
+	string MonitorMemoryNative();
 	bool StartThread();
 	void StopThread();
+
+private:
+    std::string m_id;
+    pthread_t m_thread;
 };
 
 
