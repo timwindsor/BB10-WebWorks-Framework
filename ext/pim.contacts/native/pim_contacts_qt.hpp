@@ -73,14 +73,14 @@ public:
     friend bool lessThan(const Contact& c1, const Contact& c2);
 
 private:
-    QSet<ContactId> singleFieldSearch(const Json::Value& search_field_json, const Json::Value& contact_fields, bool favorite);
-    Json::Value assembleSearchResults(const QSet<ContactId>& results, const Json::Value& contact_fields, int limit);
-    void populateContactField(const bb::pim::contacts::Contact& contact, bb::pim::contacts::AttributeKind::Type kind, Json::Value& contact_item);
-    void populateChildField(const Contact& contact, AttributeKind::Type kind, Json::Value& contact_field);
-    void populateOrganizations(const Contact& contact, Json::Value& contact_orgs);
-    void populateAddresses(const Contact& contact, Json::Value& contact_addrs);
+    QSet<ContactId> singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contactFields, bool favorite);
+    Json::Value assembleSearchResults(const QSet<ContactId>& results, const Json::Value& contactFields, int limit);
+    void populateField(const Contact& contact, AttributeKind::Type kind, Json::Value& contactItem, bool isContactField);
+    void populateOrganizations(const Contact& contact, Json::Value& contactOrgs);
+    void populateAddresses(const Contact& contact, Json::Value& contactAddrs);
     
-    static QString getSortFieldValue(const SortColumn::Type sort_field, const Contact& contact);
+    static QString getSortFieldValue(const SortColumn::Type sortField, const Contact& contact);
+    static QList<SearchField::Type> getSearchFields(const Json::Value& searchFieldsJson);
     static std::map<std::string, AttributeKind::Type> _attributeKindMap;
     static std::map<std::string, AttributeSubKind::Type> _attributeSubKindMap;
     static std::map<AttributeKind::Type, std::string> _kindAttributeMap;

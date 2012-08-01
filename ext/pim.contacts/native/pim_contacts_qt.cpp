@@ -51,174 +51,157 @@ PimContactsQt::~PimContactsQt()
 {
 }
 
-QSet<ContactId> PimContactsQt::singleFieldSearch(const Json::Value& search_field_json, const Json::Value& contact_fields, bool favorite)
+QList<SearchField::Type> PimContactsQt::getSearchFields(const Json::Value& searchFieldsJson)
 {
-    ContactService contact_service;
-    ContactSearchFilters contact_filter;
-    QList<AttributeKind::Type> include_fields;
-    QList<SearchField::Type> search_fields;
-    QList<Contact> results;
-    QSet<ContactId> contact_ids_set;
+    QList<SearchField::Type> searchFields;
 
-    switch (search_field_json["fieldName"].asInt()) {
+    switch (searchFieldsJson["fieldName"].asInt()) {
         case SearchField::FirstName:
-            search_fields.append(SearchField::FirstName);
+            searchFields.append(SearchField::FirstName);
             break;
         case SearchField::LastName:
-            search_fields.append(SearchField::LastName);
+            searchFields.append(SearchField::LastName);
             break;
         case SearchField::CompanyName:
-            search_fields.append(SearchField::CompanyName);
+            searchFields.append(SearchField::CompanyName);
             break;
         case SearchField::Phone:
-            search_fields.append(SearchField::Phone);
+            searchFields.append(SearchField::Phone);
             break;
         case SearchField::Email:
-            search_fields.append(SearchField::Email);
+            searchFields.append(SearchField::Email);
             break;
         case SearchField::BBMPin:
-            search_fields.append(SearchField::BBMPin);
+            searchFields.append(SearchField::BBMPin);
             break;
         case SearchField::LinkedIn:
-            search_fields.append(SearchField::LinkedIn);
+            searchFields.append(SearchField::LinkedIn);
             break;
         case SearchField::Twitter:
-            search_fields.append(SearchField::Twitter);
+            searchFields.append(SearchField::Twitter);
             break;
         case SearchField::VideoChat:
-            search_fields.append(SearchField::VideoChat);
+            searchFields.append(SearchField::VideoChat);
             break;
     }
 
-    if (!search_fields.empty()) {
-        contact_filter.setSearchFields(search_fields);
-        contact_filter.setSearchValue(QString(search_field_json["fieldValue"].asString().c_str()));
+    return searchFields;
+}
+
+QSet<ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contact_fields, bool favorite)
+{
+    QList<SearchField::Type> searchFields = PimContactsQt::getSearchFields(searchFieldsJson);
+    QSet<ContactId> contactIds;
+
+    if (!searchFields.empty()) {
+        ContactService contactService;
+        ContactSearchFilters contactFilter;
+        QList<AttributeKind::Type> includeFields;
+        QList<Contact> results;
+
+        contactFilter.setSearchFields(searchFields);
+        contactFilter.setSearchValue(QString(searchFieldsJson["fieldValue"].asString().c_str()));
 
         if (favorite) {
-            contact_filter.setIsFavourite(favorite);
+            contactFilter.setIsFavourite(favorite);
         }
 
         for (int i = 0; i < contact_fields.size(); i++) {
-            std::map<std::string, AttributeKind::Type>::const_iterator kind_iter = _attributeKindMap.find(contact_fields[i].asString());
+            std::map<std::string, AttributeKind::Type>::const_iterator kindIter = _attributeKindMap.find(contact_fields[i].asString());
 
-            if (kind_iter != _attributeKindMap.end()) {
-                include_fields.append(kind_iter->second);
+            if (kindIter != _attributeKindMap.end()) {
+                includeFields.append(kindIter->second);
+            } else {
+                fprintf(stderr, "Could not find search field in map: %s\n", contact_fields[i].asString().c_str());
             }
         }
 
-        contact_filter.setShowAttributes(true);
-        contact_filter.setIncludeAttributes(include_fields);
+        contactFilter.setShowAttributes(true);
+        contactFilter.setIncludeAttributes(includeFields);
 
-        results = contact_service.searchContacts(contact_filter);
+        results = contactService.searchContacts(contactFilter);
 
         for (int i = 0; i < results.size(); i++) {
-            contact_ids_set.insert(results[i].id());
+            contactIds.insert(results[i].id());
             _contactSearchMap[results[i].id()] = results[i];
         }
     }
 
-    return contact_ids_set;
+    return contactIds;
 }
 
-void PimContactsQt::populateContactField(const Contact& contact, AttributeKind::Type kind, Json::Value& contact_item)
+void PimContactsQt::populateField(const Contact& contact, AttributeKind::Type kind, Json::Value& contactItem, bool isContactField)
 {
-    fprintf(stderr, "populateContactField: kind= %d\n", kind);
-    QList<ContactAttribute> attrs = contact.filteredAttributes(kind);
-    QList<ContactAttribute>::const_iterator k = attrs.constBegin();
-    Json::Value array;
-
-    while (k != attrs.constEnd()) {
-        ContactAttribute curr_attr = *k;
-        Json::Value val;
-        std::map<AttributeSubKind::Type, std::string>::const_iterator type_iter = _subKindAttributeMap.find(curr_attr.subKind());
-
-        if (type_iter != _subKindAttributeMap.end()) {
-            val["type"] = Json::Value(type_iter->second);
-            val["value"] = Json::Value(curr_attr.value().toStdString());
-            array.append(val);
-        } else {
-            // TODO(rtse): not found in map
-            fprintf(stderr, "populateContactField: subkind not found in map: %d\n", curr_attr.subKind());
-        }
-        ++k;
-    }
-
-    std::map<AttributeKind::Type, std::string>::const_iterator field_iter = _kindAttributeMap.find(kind);
-
-    if (field_iter != _kindAttributeMap.end()) {
-        contact_item[field_iter->second] = array;
-    } else {
-        // TODO(rtse): not found in map
-        fprintf(stderr, "populateContactField: kind not found in map%s\n");
-    }
-}
-
-void PimContactsQt::populateChildField(const Contact& contact, AttributeKind::Type kind, Json::Value& contact_field)
-{
-    fprintf(stderr, "populateChildField: kind= %d\n", kind);
+    fprintf(stderr, "populateField kind= %d\n", kind);
     QList<ContactAttribute> attrs = contact.filteredAttributes(kind);
     QList<ContactAttribute>::const_iterator k = attrs.constBegin();
 
     while (k != attrs.constEnd()) {
-        ContactAttribute curr_attr = *k;
+        ContactAttribute currentAttr = *k;
         Json::Value val;
-        std::map<AttributeSubKind::Type, std::string>::const_iterator type_iter = _subKindAttributeMap.find(curr_attr.subKind());
+        std::map<AttributeSubKind::Type, std::string>::const_iterator typeIter = _subKindAttributeMap.find(currentAttr.subKind());
 
-        if (type_iter != _subKindAttributeMap.end()) {
-            contact_field[type_iter->second] = Json::Value(curr_attr.value().toStdString());
+        if (typeIter != _subKindAttributeMap.end()) {
+            if (isContactField) {
+                val["type"] = Json::Value(typeIter->second);
+                val["value"] = Json::Value(currentAttr.value().toStdString());
+                contactItem.append(val);
+            } else {
+                contactItem[typeIter->second] = Json::Value(currentAttr.value().toStdString());
+            }
         } else {
             // TODO(rtse): not found in map
-            fprintf(stderr, "populateContactField: subkind not found in map: %d\n", curr_attr.subKind());
+            fprintf(stderr, "populateField: subkind not found in map: %d\n", currentAttr.subKind());
         }
         ++k;
     }
 }
 
-void PimContactsQt::populateAddresses(const Contact& contact, Json::Value& contact_addrs)
+void PimContactsQt::populateAddresses(const Contact& contact, Json::Value& contactAddrs)
 {
-    ContactService contact_service;
-    Contact full_contact = contact_service.contactDetails(contact.id());
-    QList<ContactPostalAddress> addrs = full_contact.postalAddresses();
+    ContactService contactService;
+    Contact fullContact = contactService.contactDetails(contact.id());
+    QList<ContactPostalAddress> addrs = fullContact.postalAddresses();
     QList<ContactPostalAddress>::const_iterator k = addrs.constBegin();
 
     while (k != addrs.constEnd()) {
-        ContactPostalAddress curr_addr = *k;
+        ContactPostalAddress currentAddr = *k;
         Json::Value addr;
 
-        std::map<AttributeSubKind::Type, std::string>::const_iterator type_iter = _subKindAttributeMap.find(curr_addr.subKind());
+        std::map<AttributeSubKind::Type, std::string>::const_iterator typeIter = _subKindAttributeMap.find(currentAddr.subKind());
 
-        if (type_iter != _subKindAttributeMap.end()) {
-            addr["type"] = Json::Value(type_iter->second);
+        if (typeIter != _subKindAttributeMap.end()) {
+            addr["type"] = Json::Value(typeIter->second);
         }
 
-        addr["address1"] = Json::Value(curr_addr.line1().toStdString());
-        addr["address2"] = Json::Value(curr_addr.line2().toStdString());
-        addr["country"] = Json::Value(curr_addr.country().toStdString());        
-        addr["locality"] = Json::Value(curr_addr.city().toStdString());
-        addr["postalCode"] = Json::Value(curr_addr.postalCode().toStdString());
-        addr["region"] = Json::Value(curr_addr.region().toStdString());
+        addr["address1"] = Json::Value(currentAddr.line1().toStdString());
+        addr["address2"] = Json::Value(currentAddr.line2().toStdString());
+        addr["country"] = Json::Value(currentAddr.country().toStdString());        
+        addr["locality"] = Json::Value(currentAddr.city().toStdString());
+        addr["postalCode"] = Json::Value(currentAddr.postalCode().toStdString());
+        addr["region"] = Json::Value(currentAddr.region().toStdString());
 
-        contact_addrs.append(addr);
+        contactAddrs.append(addr);
         ++k;
     }
 }
 
-void PimContactsQt::populateOrganizations(const Contact& contact, Json::Value& contact_orgs)
+void PimContactsQt::populateOrganizations(const Contact& contact, Json::Value& contactOrgs)
 {
-    QList<QList<ContactAttribute> > org_attrs = contact.filteredAttributesByGroupKey(AttributeKind::OrganizationAffiliation);
-    QList<QList<ContactAttribute> >::const_iterator j = org_attrs.constBegin();
+    QList<QList<ContactAttribute> > orgAttrs = contact.filteredAttributesByGroupKey(AttributeKind::OrganizationAffiliation);
+    QList<QList<ContactAttribute> >::const_iterator j = orgAttrs.constBegin();
 
-    while (j != org_attrs.constEnd()) {
-        QList<ContactAttribute> curr_org_attrs = *j;
-        QList<ContactAttribute>::const_iterator k = curr_org_attrs.constBegin();
+    while (j != orgAttrs.constEnd()) {
+        QList<ContactAttribute> currentOrgAttrs = *j;
+        QList<ContactAttribute>::const_iterator k = currentOrgAttrs.constBegin();
         Json::Value org;
 
-        while (k != curr_org_attrs.constEnd()) {
+        while (k != currentOrgAttrs.constEnd()) {
             ContactAttribute attr = *k;
-            std::map<AttributeSubKind::Type, std::string>::const_iterator type_iter = _subKindAttributeMap.find(attr.subKind());
+            std::map<AttributeSubKind::Type, std::string>::const_iterator typeIter = _subKindAttributeMap.find(attr.subKind());
 
-            if (type_iter != _subKindAttributeMap.end()) {
-                org[type_iter->second] = Json::Value(attr.value().toStdString());
+            if (typeIter != _subKindAttributeMap.end()) {
+                org[typeIter->second] = Json::Value(attr.value().toStdString());
             } else {
                 // TODO(rtse): not found in map
                 fprintf(stderr, "populateOrganizations: subkind not found in map%s\n");
@@ -227,7 +210,7 @@ void PimContactsQt::populateOrganizations(const Contact& contact, Json::Value& c
             ++k;
         }
 
-        contact_orgs.append(org);
+        contactOrgs.append(org);
         ++j;
     }
 }
@@ -249,72 +232,73 @@ QString PimContactsQt::getSortFieldValue(const SortColumn::Type sort_field, cons
 bool lessThan(const Contact& c1, const Contact& c2)
 {
     QList<SortSpecifier>::const_iterator i = PimContactsQt::_sortSpecs.constBegin();
-    SortSpecifier sort_spec = *i;
-    QString val1 = PimContactsQt::getSortFieldValue(sort_spec.first, c1);
-    QString val2 = PimContactsQt::getSortFieldValue(sort_spec.first, c2);
+    SortSpecifier sortSpec;
+    QString val1, val2;
 
-    if (sort_spec.second == SortOrder::Ascending) {
+    do {
+        sortSpec = *i;
+        val1 = PimContactsQt::getSortFieldValue(sortSpec.first, c1);
+        val2 = PimContactsQt::getSortFieldValue(sortSpec.first, c2);
+        ++i;
+    } while (val1 == val2 && i != PimContactsQt::_sortSpecs.constEnd());
+
+    if (sortSpec.second == SortOrder::Ascending) {
         return val1 < val2;
     } else {
         return !(val1 < val2);
     }
 }
 
-Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& result_ids, const Json::Value& contact_fields, int limit)
+Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& resultIds, const Json::Value& contactFields, int limit)
 {
-    fprintf(stderr, "Beginning of assembleSearchResults, results size=%d\n", result_ids.size());
-    QMap<ContactId, Contact> complete_results;
-
-    QSet<ContactId>::const_iterator i = result_ids.constBegin();
-    Contact current_contact;
+    fprintf(stderr, "Beginning of assembleSearchResults, results size=%d\n", resultIds.size());
+    QMap<ContactId, Contact> completeResults;
+    QSet<ContactId>::const_iterator i = resultIds.constBegin();
 
     // put complete contacts in map
-    while (i != result_ids.constEnd()) {
-        current_contact = _contactSearchMap[*i];
-        complete_results.insertMulti(*i, current_contact);
+    while (i != resultIds.constEnd()) {
+        completeResults.insertMulti(*i, _contactSearchMap[*i]);
         ++i;
     }
 
-    // sort results based on sort specs (only using the first field for now)
-    QList<Contact> sorted_results = complete_results.values();
+    // sort results based on sort specs
+    QList<Contact> sortedResults = completeResults.values();
     if (!_sortSpecs.empty()) {
-        qSort(sorted_results.begin(), sorted_results.end(), lessThan);
+        qSort(sortedResults.begin(), sortedResults.end(), lessThan);
     }
 
-    Json::Value contact_obj;
-    Json::Value contact_array;
+    Json::Value contactArray;
 
     // if limit is -1, returned all available results, otherwise return based on the number passed in find options
     if (limit == -1) {
-        limit = sorted_results.size();
+        limit = sortedResults.size();
     } else {
-        limit = min(limit, sorted_results.size());
+        limit = min(limit, sortedResults.size());
     }
 
     for (int i = 0; i < limit; i++) {
-        Json::Value contact_item;
+        Json::Value contactItem;
 
-        for (int j = 0; j < contact_fields.size(); j++) {
-            std::string field = contact_fields[j].asString();
+        for (int j = 0; j < contactFields.size(); j++) {
+            std::string field = contactFields[j].asString();
             std::map<std::string, AttributeKind::Type>::const_iterator kind_iter = _attributeKindMap.find(field);
 
             if (kind_iter != _attributeKindMap.end()) {
                 switch (kind_iter->second) {
                     case AttributeKind::Name: {
-                        contact_item[field] = Json::Value();
-                        populateChildField(sorted_results[i], kind_iter->second, contact_item[field]);
-                        // TODO(rtse): other fields in name
+                        contactItem[field] = Json::Value();
+                        populateField(sortedResults[i], kind_iter->second, contactItem[field], false);
                         break;
                     }
 
                     case AttributeKind::OrganizationAffiliation: {
-                        contact_item[field] = Json::Value();
-                        populateOrganizations(sorted_results[i], contact_item[field]);
+                        contactItem[field] = Json::Value();
+                        populateOrganizations(sortedResults[i], contactItem[field]);
                         break;
                     }
 
                     case AttributeKind::Date: {
-                        populateChildField(sorted_results[i], kind_iter->second, contact_item);
+                        populateField(sortedResults[i], kind_iter->second, contactItem, false);
                         break;
                     }
 
@@ -325,7 +309,8 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& result_i
                     case AttributeKind::Profile:
                     case AttributeKind::Website:
                     case AttributeKind::InstantMessaging: {
-                        populateContactField(sorted_results[i], kind_iter->second, contact_item);
+                        contactItem[field] = Json::Value();
+                        populateField(sortedResults[i], kind_iter->second, contactItem[field], true);
                         break;
                     }
                 }
@@ -333,36 +318,34 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& result_i
                 fprintf(stderr, "cannot find field=%s in map\n", field.c_str());
 
                 if (field == "displayName") {
-                    contact_item[field] = Json::Value(sorted_results[i].displayName().toStdString());
+                    contactItem[field] = Json::Value(sortedResults[i].displayName().toStdString());
                 } else if (field == "favorite") {
-                    contact_item[field] = Json::Value(sorted_results[i].isFavourite());
+                    contactItem[field] = Json::Value(sortedResults[i].isFavourite());
                 } else if (field == "addresses") {
-                    contact_item["addresses"] = Json::Value();
-                    populateAddresses(sorted_results[i], contact_item["addresses"]);
+                    contactItem["addresses"] = Json::Value();
+                    populateAddresses(sortedResults[i], contactItem["addresses"]);
                 }
             }
         }
 
         // TODO(rtse): always include id?
         // TODO(rtse): handle fields not under regular kinds/subkinds
-        contact_item["id"] = Json::Value(sorted_results[i].id());
+        contactItem["id"] = Json::Value(sortedResults[i].id());
 
-        contact_array.append(contact_item);
+        contactArray.append(contactItem);
     }
 
-    contact_obj["contacts"] = contact_array;
-
-    return contact_obj;
+    return contactArray;
 }
 
-Json::Value PimContactsQt::Find(const Json::Value& args_obj)
+Json::Value PimContactsQt::Find(const Json::Value& argsObj)
 {
     fprintf(stderr, "%s", "Beginning of find\n");
 
     _contactSearchMap.clear();
     _sortSpecs.clear();
 
-    Json::Value contact_fields;
+    Json::Value contactFields;
     QSet<ContactId> results;
 
     Json::Value filter;
@@ -370,44 +353,41 @@ Json::Value PimContactsQt::Find(const Json::Value& args_obj)
     int limit;
     bool favorite;
 
-    const Json::Value::Members args_key = args_obj.getMemberNames();
+    const Json::Value::Members argsKey = argsObj.getMemberNames();
 
-    for (int i = 0; i < args_key.size(); i++) {
-        fprintf(stderr, "find, args key size: %d\n", args_key.size());
-        const std::string key = args_key[i];
+    for (int i = 0; i < argsKey.size(); i++) {
+        const std::string key = argsKey[i];
 
         if (key == "fields") {
-            contact_fields = args_obj[key];
+            contactFields = argsObj[key];
         } else if (key == "options") {
-            favorite = args_obj[key]["favorite"].asBool();
-            limit = args_obj[key]["limit"].asInt();
+            favorite = argsObj[key]["favorite"].asBool();
+            limit = argsObj[key]["limit"].asInt();
 
-            filter = args_obj[key]["filter"];
+            filter = argsObj[key]["filter"];
             if (filter.isArray()) {
                 for (int j = 0; j < filter.size(); j++) {
-                    QSet<ContactId> current_results = singleFieldSearch(filter[j], contact_fields, favorite);
+                    QSet<ContactId> currentResults = singleFieldSearch(filter[j], contactFields, favorite);
 
-                    fprintf(stderr, "current results[%d] size=%d\n", j, current_results.size());
-
-                    if (current_results.empty()) {
+                    if (currentResults.empty()) {
                         // no need to continue, can return right away
-                        results = current_results;
+                        results = currentResults;
                         break;
                     } else {
                         if (j == 0) {
-                            results = current_results;
+                            results = currentResults;
                         } else {
-                            results.intersect(current_results);
+                            results.intersect(currentResults);
                         }
                     }
                 }
             }
 
-            sort = args_obj[key]["sort"];
+            sort = argsObj[key]["sort"];
             if (sort.isArray()) {
                 for (int j = 0; j < sort.size(); j++) {
                     SortOrder::Type order;
-                    SortColumn::Type sort_field;
+                    SortColumn::Type sortField;
 
                     if (sort[j]["desc"].asBool()) {
                         order = SortOrder::Descending;
@@ -417,27 +397,27 @@ Json::Value PimContactsQt::Find(const Json::Value& args_obj)
 
                     switch (sort[j]["fieldName"].asInt()) {
                         case SortColumn::FirstName:
-                            sort_field = SortColumn::FirstName;
+                            sortField = SortColumn::FirstName;
                             break;
                         case SortColumn::LastName:
-                            sort_field = SortColumn::LastName;
+                            sortField = SortColumn::LastName;
                             break;
                         case SortColumn::CompanyName:
-                            sort_field = SortColumn::CompanyName;
+                            sortField = SortColumn::CompanyName;
                             break;
                     }
 
-                    _sortSpecs.append(SortSpecifier(sort_field, order));
+                    _sortSpecs.append(SortSpecifier(sortField, order));
                 }
             }
         }
     }
 
-    Json::Value return_obj;
-    return_obj["_success"] = true;
-    return_obj["contacts"] = assembleSearchResults(results, contact_fields, limit);
+    Json::Value returnObj;
+    returnObj["_success"] = true;
+    returnObj["contacts"] = assembleSearchResults(results, contactFields, limit);
 
-    return return_obj;
+    return returnObj;
 }
 
 void PimContactsQt::createContact(const std::string& attributeJson) {
