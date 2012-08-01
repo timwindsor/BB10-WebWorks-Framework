@@ -17,6 +17,7 @@
 var _overlayWebView = require('./../../lib/overlayWebView'),
     _utils = require('./../../lib/utils'),
     _config = require('./../../lib/config.js'),
+    _dialog = require('./../../lib/dialog/index.js'),
     _menuItems,
     _currentContext,
     _invocation = window.qnx.webplatform.getApplication().invocation,
@@ -145,7 +146,7 @@ function saveImage() {
 
     // Check that the proper access permissions have been enabled
     if (!_config.permissions || _config.permissions.indexOf("access_shared") === -1) {
-        alert("Access shared permissions are not enabled");
+        _dialog.show({ dialogType : "JavaScriptAlert", message : "Access shared permissions are not enabled"});
         return;
     }
 

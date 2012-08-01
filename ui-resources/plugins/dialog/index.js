@@ -2,7 +2,12 @@
  * Copyright (C) Research In Motion Limited 2012. All rights reserved.
  */
 
-var dialog;
+var dialog,
+    utils;
+
+function requireLocal(id) {
+    return require(!!require.resolve ? "../../" + id.replace(/\/chrome/, "") : id);
+}
 
 function hide(evt) {
     if (!x$('#dialog').hasClass('hidden')) {
@@ -15,13 +20,25 @@ function show(desc) {
         panel = x$('#dialog-panel'),
         header = x$(document.createElement('div')),
         content = x$(document.createElement('div')),
+        inputContainer,
+        inputDesc,
         input,
+        inputDesc2,
+        input2,
         buttons = x$(document.createElement('div')),
         divider,
+        divider2,
         button = x$(document.createElement('button')),
         button2,
         button3,
-        res = {};
+        classAutofill,
+        res = {},
+        url;
+
+    //Check and parse the incoming description, since we use the executeJS into this context
+    desc = typeof desc === 'string' ? JSON.parse(desc) : desc;
+    url = desc.url;
+    utils  = requireLocal("../chrome/lib/utils");
 
     if (!dialog.hasClass('hidden')) {
         dialog.addClass('hidden');
@@ -122,6 +139,114 @@ function show(desc) {
             return input[0].value;
         });
         break;
+    case 'AuthenticationChallenge':
+        header.bottom(x$(document.createTextNode(desc.title ? desc.title : (desc.isProxy ? "Proxy Authentication Required" : "Authentication Required"))));
+        content.bottom(x$(document.createElement('div')).inner("Connecting to " + utils.parseUri(url).host));
+        if (url.indexOf("https://") === 0) {
+            content.bottom(x$(document.createElement('div')).inner("via SSL connection"));
+        }
+        content.bottom(desc.htmlmessage ? desc.htmlmessage : x$(document.createTextNode(desc.message)));
+        inputContainer = x$(document.createElement('div'))
+            .addClass('dialog-input-container');
+        classAutofill = 'dialog-input-autofill';
+        inputDesc = x$(document.createTextNode('User Name:'));
+        input = x$(document.createElement('input'))
+            .attr('type', 'text')
+            .attr('autocomplete', 'off')
+            .addClass('dialog-input')
+            .on('keydown', function (keyEvent) {
+                if (parseInt(keyEvent.keyCode, 10) === 13) {
+                    input2[0].focus();
+                    return;
+                }
+                if (input.hasClass(classAutofill)) {
+                    input.removeClass(classAutofill);
+                    input2.removeClass(classAutofill);
+                    input2[0].value = '';
+                }
+            });
+        if (desc.username) {
+            input.attr('value', decodeURIComponent(desc.username)).addClass(classAutofill);
+        }
+        inputDesc2 = x$(document.createTextNode('Password:'));
+        input2 = x$(document.createElement('input'))
+            .attr('type', 'password')
+            .addClass('dialog-input')
+            .on('keydown', function (keyEvent) {
+                if (parseInt(keyEvent.keyCode, 10) === 13) {
+                    button.click();
+                    return;
+                }
+                if (input2.hasClass(classAutofill)) {
+                    input2.removeClass(classAutofill);
+                }
+            });
+        if (desc.password) {
+            input2.attr('value', decodeURIComponent(desc.password)).addClass(classAutofill);
+        }
+        button.bottom(x$(document.createTextNode(desc.oklabel ? desc.oklabel : "OK")))
+                .on('click', hide);
+        divider = x$(document.createElement('div'))
+            .addClass('dialog-button-divider');
+        button2 = x$(document.createElement('button'))
+            .addClass('dialog-button')
+            .bottom(x$(document.createTextNode(desc.cancellabel ? desc.cancellabel : "Cancel")))
+            .on('click', hide);
+
+        panel.bottom(header)
+            .bottom(content
+                .bottom(inputContainer
+                    .bottom(inputDesc)
+                    .bottom(input)
+                    .bottom(inputDesc2)
+                    .bottom(input2)))
+            .bottom(buttons
+                .bottom(button)
+                .bottom(divider)
+                .bottom(button2));
+
+        res.ok = button[0];
+        res.cancel = button2[0];
+        res.__defineGetter__('username', function () {
+            return input[0].value;
+        });
+        res.__defineGetter__('password', function () {
+            return input2[0].value;
+        });
+        res.oktext = 'true';
+        break;
+    case 'SaveCredential':
+        header.bottom(x$(document.createTextNode(desc.title ? desc.title : "Signing In")));
+        content.bottom(desc.htmlmessage ? desc.htmlmessage : x$(document.createTextNode(desc.message)));
+        button.bottom(x$(document.createTextNode(desc.oklabel ? desc.oklabel : "Save")))
+            .on('click', hide);
+        divider = x$(document.createElement('div'))
+            .addClass('dialog-button-divider');
+        button2 = x$(document.createElement('button'))
+            .addClass('dialog-button')
+            .bottom(x$(document.createTextNode(desc.neverlabel ? desc.neverlabel : "Never")))
+            .on('click', hide);
+        divider2 = x$(document.createElement('div'))
+            .addClass('dialog-button-divider');
+        button3 = x$(document.createElement('button'))
+            .addClass('dialog-button')
+            .bottom(x$(document.createTextNode(desc.cancellabel ? desc.cancellabel : "Ignore")))
+            .on('click', hide);
+
+        panel.bottom(header)
+            .bottom(content)
+            .bottom(buttons
+                .bottom(button)
+                .bottom(divider)
+                .bottom(button2)
+                .bottom(divider2)
+                .bottom(button3));
+
+        res.save = button[0];
+        res.never = button2[0];
+        res.cancel = button3[0];
+        break;
+
     case 'Generic':
     case 'GeolocationPermission':
     case 'NotificationPermission':
@@ -134,13 +259,8 @@ function show(desc) {
     return res;
 }
 
-/*function requestDialog(id, evt, evtId, returnValue) {
-    if (id === iris.chromeId) {
-        console.error("chrome shouldn't spawn dialogs. Doing nothing.");
-        return;
-    }
-    // have to bring it to the front, as with the current process model one dialog suspends all tabs
-    tabs.update(id, {selected: true});
+/*
+function requestDialog(evt, evtId, returnValue) {
 
     var res = show(evt);
     if (res) {
@@ -192,8 +312,8 @@ dialog = {
      *   username - User name for authentication challenge dialog
      *   password - Password for authentication challenge dialog
      */
-    showDialog: function (description) {
-        return show(description);
+    showDialog: function (args) {
+        return show(args);
     }
 };
 
