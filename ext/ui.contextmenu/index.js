@@ -133,7 +133,7 @@ function addItem(success, fail, args, env) {
     var contexts = JSON.parse(decodeURIComponent(args["contexts"])),
         action = JSON.parse(decodeURIComponent(args["action"])),
         context;
-    
+
     // Check actionId is valid or if item already has been added
     if (!action.actionId || action.actionId === '') {
         return fail('Cannot add item.  actionId is not valid');
@@ -145,15 +145,15 @@ function addItem(success, fail, args, env) {
         if (!_customContextItems[contexts[context]]) {
             _customContextItems[contexts[context]] = {};
         }
-        _customContextItems[contexts[context]][action.actionId] = action; 
+        _customContextItems[contexts[context]][action.actionId] = action;
     }
-   
+
     success();
 }
 
 function removeItemFromAllContexts(actionId) {
     var everyContext = [CONTEXT_ALL,
-                        CONTEXT_LINK, 
+                        CONTEXT_LINK,
                         CONTEXT_IMAGE_LINK,
                         CONTEXT_IMAGE,
                         CONTEXT_INPUT,
@@ -161,9 +161,9 @@ function removeItemFromAllContexts(actionId) {
         context;
 
     for (context in everyContext) {
-        if (_customContextItems[everyContext[context]]) { 
+        if (_customContextItems[everyContext[context]]) {
             delete _customContextItems[everyContext[context]][actionId];
-        } 
+        }
     }
 }
 
@@ -177,7 +177,7 @@ function removeItem(success, fail, args, env) {
             removeItemFromAllContexts(actionId);
         } else {
             if (_customContextItems[contexts[context]]) {
-                delete _customContextItems[contexts[context]][actionId]; 
+                delete _customContextItems[contexts[context]][actionId];
             }
         }
     }
@@ -186,22 +186,22 @@ function removeItem(success, fail, args, env) {
 }
 
 function addCustomItemsForContext(items, context) {
-    var customItem; 
-       
+    var customItem;
+
     if (_customContextItems[context]) {
         for (customItem in _customContextItems[context]) {
-            items.push(_customContextItems[context][customItem]); 
+            items.push(_customContextItems[context][customItem]);
         }
     }
 }
 
 function addCustomItems(menuItems, currentContext) {
-      
+
     var context;
 
     // Add ALL
     addCustomItemsForContext(menuItems, CONTEXT_ALL);
-   
+
     // Determine context
     if (currentContext.url && !currentContext.isImage) {
         context = CONTEXT_LINK;
@@ -218,7 +218,7 @@ function addCustomItems(menuItems, currentContext) {
     else if (currentContext.text) {
         context = CONTEXT_TEXT;
     }
-    
+
     addCustomItemsForContext(menuItems, context);
 }
 
@@ -236,14 +236,19 @@ function init() {
     _overlayWebView.onContextMenuRequestEvent = function (value) {
         var menu = JSON.parse(value),
             menuItems = generateMenuItems(menu.menuItems),
-            args; 
-            
+            args;
+
         if (contextMenuEnabled) {
             addCustomItems(menuItems, _currentContext);
             args = JSON.stringify({'menuItems': menuItems, '_currentContext': _currentContext});
             _overlayWebView.executeJavascript("window.showMenu(" + args + ")");
         }
         return '{"setPreventDefault":true}';
+    };
+    _overlayWebView.onContextMenuCancelEvent = function () {
+        if (contextMenuEnabled) {
+            _overlayWebView.executeJavascript("window.hideMenu()");
+        }
     };
     _controller.publishRemoteFunction('executeMenuAction', function (args, callback) {
         var actionId = args[0];
