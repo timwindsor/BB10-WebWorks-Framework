@@ -38,6 +38,9 @@ namespace webworks {
 
 using namespace bb::pim::contacts;
 
+typedef std::map<std::string, AttributeKind::Type> StringKindMap;
+typedef std::map<std::string, AttributeSubKind::Type> StringSubKindMap;
+
 struct PimContactsThreadInfo {
     PimContacts *parent;
     Json::Value *jsonObj;
@@ -56,7 +59,8 @@ public:
     Json::Value CloneContact(Contact& contact, const Json::Value& attributeObj);
 
 private:
-    ContactBuilder& buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind);
+    ContactBuilder& buildAttributeKind(ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
+    ContactBuilder& buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind, const std::string& groupKey);
     ContactBuilder& buildFieldAttribute(ContactBuilder& contactBuilder, const Json::Value& fieldObj, AttributeKind::Type kind);
     ContactBuilder& buildPostalAddress(ContactBuilder& contactBuilder, const Json::Value& addressObj);
     ContactBuilder& buildPhoto(ContactBuilder& contactBuilder, const Json::Value& photoObj);
@@ -66,8 +70,8 @@ private:
 
     static void createAttributeKindMap();
     static void createAttributeSubKindMap();
-    static std::map<std::string, AttributeKind::Type> attributeKindMap;
-    static std::map<std::string, AttributeSubKind::Type> attributeSubKindMap;
+    static std::map<std::string, AttributeKind::Type> _attributeKindMap;
+    static std::map<std::string, AttributeSubKind::Type> _attributeSubKindMap;
 };
 
 } // namespace webworks

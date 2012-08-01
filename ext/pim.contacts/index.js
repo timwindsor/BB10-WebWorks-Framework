@@ -64,8 +64,8 @@ JNEXT.PimContacts = function ()
     var self = this;
 
     self.find = function (args) {
-        var val = JNEXT.invoke(self.m_id, "find " + JSON.stringify(args));
-        return JSON.parse(val);
+        JNEXT.invoke(self.m_id, "find " + JSON.stringify(args));
+        return "";
     };
 
     self.save = function (args) {
@@ -77,23 +77,12 @@ JNEXT.PimContacts = function ()
             args.name.nickname = args.nickname;
         }
 
-        var val = JNEXT.invoke(self.m_id, "save " + JSON.stringify(args));
-
-        val = JSON.parse(val);
-
-        if (val.name.displayName) {
-            delete val.name.displayName;
-        }
-
-        if (val.name.nickname) {
-            delete val.name.nickname;
-        }
-
-        return val;
+        JNEXT.invoke(self.m_id, "save " + JSON.stringify(args));
+        return "";
     };
 
     self.remove = function (args) {
-        var val = JNEXT.invoke(self.m_id, "remove " + JSON.stringify(args));
+        JNEXT.invoke(self.m_id, "remove " + JSON.stringify(args));
         return "";
     };
 
