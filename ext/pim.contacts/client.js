@@ -22,46 +22,41 @@ var _self = {},
     ContactOrganization = require("./ContactOrganization"),
     ContactField = require("./ContactField");
 
-function populateFieldArray(contactProps, field, array, ClassName) {
+function populateFieldArray(contactProps, field, ClassName) {
     if (contactProps[field]) {
+        var list = [];
         contactProps[field].forEach(function (obj) {
-            array.push(new ClassName(obj));
+            if (ClassName === ContactField) {
+                list.push(new ClassName(obj.type, obj.value));
+            } else {
+                list.push(new ClassName(obj));
+            }
         });
-        contactProps[field] = array;
+        contactProps[field] = list;
     }
 }
 
 _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
     // TODO validation
     var callback = function (args) {
-        var result = JSON.parse(unescape(args.result));
+        var result = JSON.parse(unescape(args.result)),
+            contacts = result.contacts,
+            realContacts = [];
 
         if (result._success) {
             if (onFindSuccess) {
-                var contacts = result.contacts,
-                    realContacts = [];
-
                 contacts.forEach(function (contact) {
-                    var name = new ContactName(contact.name),
-                        orgs = [],
-                        addresses = [],
-                        emails = [],
-                        phones = [],
-                        faxes = [],
-                        pagers = [],
-                        ims = [],
-                        socialNetworks,
-                        urls = [];
+                    var name = new ContactName(contact.name);
 
-                    populateFieldArray(contact, "addresses", addresses, ContactAddress);
-                    populateFieldArray(contact, "organizations", orgs, ContactOrganization);
-                    populateFieldArray(contact, "emails", emails, ContactField);
-                    populateFieldArray(contact, "phoneNumbers", phones, ContactField);
-                    populateFieldArray(contact, "faxNumbers", faxes, ContactField);
-                    populateFieldArray(contact, "pagerNumbers", pagers, ContactField);
-                    populateFieldArray(contact, "ims", ims, ContactField);
-                    populateFieldArray(contact, "socialNetworks", socialNetworks, ContactField);
-                    populateFieldArray(contact, "urls", urls, ContactField);
+                    populateFieldArray(contact, "addresses", ContactAddress);
+                    populateFieldArray(contact, "organizations", ContactOrganization);
+                    populateFieldArray(contact, "emails", ContactField);
+                    populateFieldArray(contact, "phoneNumbers", ContactField);
+                    populateFieldArray(contact, "faxNumbers", ContactField);
+                    populateFieldArray(contact, "pagerNumbers", ContactField);
+                    populateFieldArray(contact, "ims", ContactField);
+                    populateFieldArray(contact, "socialNetworks", ContactField);
+                    populateFieldArray(contact, "urls", ContactField);
 
                     contact.displayName = contact.name.displayName;
                     contact.nickname = contact.name.nickname;
@@ -69,6 +64,7 @@ _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
 
                     realContacts.push(new Contact(contact));
                 });
+
                 onFindSuccess(realContacts);
             }
         } else {
@@ -80,9 +76,8 @@ _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
 
     window.webworks.event.once(_ID, "tempEventId", callback);
 
-    // TODO async, invoke callbacks
     return window.webworks.execAsync(_ID, "find", {
-        "_eventId": "tempEventId",
+        "_eventId": "tempEventId", // should use real event id
         "fields": contactFields,
         "options": findOptions
     });

@@ -13,10 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var ContactField = function (properties) {
-    this.type = properties && properties.type ? properties.type : "";
-    this.value = properties && properties.value ? properties.value : "";
-    this.pref = properties && properties.pref ? properties.pref : false;
+var ContactField = function (type, value) {
+    this.type = type || "";
+    this.value = value || "";
 };
 
 module.exports = ContactField;

@@ -130,7 +130,7 @@ QSet<ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searchFields
     return contactIds;
 }
 
-void PimContactsQt::populateField(const Contact& contact, AttributeKind::Type kind, Json::Value& contactItem, bool isContactField)
+void PimContactsQt::populateField(const Contact& contact, AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray)
 {
     fprintf(stderr, "populateField kind= %d\n", kind);
     QList<ContactAttribute> attrs = contact.filteredAttributes(kind);
@@ -146,16 +146,23 @@ void PimContactsQt::populateField(const Contact& contact, AttributeKind::Type ki
                 val["type"] = Json::Value(typeIter->second);
                 val["value"] = Json::Value(currentAttr.value().toStdString());
                 contactItem.append(val);
-            } else {/*
-                if (kind == AttributeKind::Date) {
-                    //Json::Value::Int64 numMillisecs;
-                    //numMillisecs = static_cast<Json::Value::Int64> (currentAttr.valueAsDateTime().toMSecsSinceEpoch());
-                    //yyyy-MM-ddThh:mm:ss.zzzZ
-                    // if it's a date field, store number of milliseconds since UTC and let JS convert it
-                    contactItem[typeIter->second] = Json::Value(currentAttr.valueAsDateTime().toString(QString("yyyy-MM-ddThh:mm:ss.zzzZ")).toStdString());
-                } else {*/
-                    contactItem[typeIter->second] = Json::Value(currentAttr.value().toStdString());
-                //}
+            } else {
+                if (isArray) {
+                    val[typeIter->second] = Json::Value(currentAttr.value().toStdString());
+                    contactItem.append(val);
+                } else {
+                    if (kind == AttributeKind::Date) {
+                        //Json::Value::Int64 numMillisecs;
+                        //numMillisecs = static_cast<Json::Value::Int64> (currentAttr.valueAsDateTime().toMSecsSinceEpoch());
+                        //yyyy-MM-ddThh:mm:ss.zzzZ
+                        QString format = "yyyy-MM-dd";
+                        // if it's a date field, store number of milliseconds since UTC and let JS convert it
+                        fprintf(stderr, "date=%s\n", currentAttr.valueAsDateTime().date().toString(format).toStdString().c_str());
+                        contactItem[typeIter->second] = Json::Value(currentAttr.valueAsDateTime().date().toString(format).toStdString());
+                    } else {
+                        contactItem[typeIter->second] = Json::Value(currentAttr.value().toStdString());
+                    }
+                }
             }
         } else {
             // TODO(rtse): not found in map
@@ -184,7 +191,7 @@ void PimContactsQt::populateAddresses(const Contact& contact, Json::Value& conta
 
         addr["address1"] = Json::Value(currentAddr.line1().toStdString());
         addr["address2"] = Json::Value(currentAddr.line2().toStdString());
-        addr["country"] = Json::Value(currentAddr.country().toStdString());        
+        addr["country"] = Json::Value(currentAddr.country().toStdString());
         addr["locality"] = Json::Value(currentAddr.city().toStdString());
         addr["postalCode"] = Json::Value(currentAddr.postalCode().toStdString());
         addr["region"] = Json::Value(currentAddr.region().toStdString());
@@ -295,7 +302,7 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& resultId
                 switch (kindIter->second) {
                     case AttributeKind::Name: {
                         contactItem[field] = Json::Value();
-                        populateField(sortedResults[i], kindIter->second, contactItem[field], false);
+                        populateField(sortedResults[i], kindIter->second, contactItem[field], false, false);
                         break;
                     }
 
@@ -306,22 +313,23 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& resultId
                     }
 
                     case AttributeKind::Date: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false);
+                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
                         break;
                     }
 
                     case AttributeKind::Note: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false);
+                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
                         break;
                     }
 
                     case AttributeKind::Sound: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false);
+                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
                         break;
                     }
 
                     case AttributeKind::VideoChat: {
-                        // TODO
+                        contactItem[field] = Json::Value();
+                        populateField(sortedResults[i], kindIter->second, contactItem[field], false, false);
                         break;
                     }
 
@@ -333,7 +341,7 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& resultId
                     case AttributeKind::Website:
                     case AttributeKind::InstantMessaging: {
                         contactItem[field] = Json::Value();
-                        populateField(sortedResults[i], kindIter->second, contactItem[field], true);
+                        populateField(sortedResults[i], kindIter->second, contactItem[field], true, false);
                         break;
                     }
                 }
@@ -641,6 +649,7 @@ void PimContactsQt::createAttributeKindMap() {
     _attributeKindMap["note"] = AttributeKind::Note;
     _attributeKindMap["ims"] = AttributeKind::InstantMessaging;
     _attributeKindMap["videoChat"] = AttributeKind::VideoChat;
+    _attributeKindMap["ringtone"] = AttributeKind::Sound;
     //_attributeKindMap["addresses"] = AttributeKind::Invalid;
 }
 
@@ -703,6 +712,7 @@ void PimContactsQt::createKindAttributeMap() {
     _kindAttributeMap[AttributeKind::InstantMessaging] = "ims";
     _kindAttributeMap[AttributeKind::VideoChat] = "videoChat";
     //kindAttributeMap[AttributeKind::Invalid] = "addresses";
+    _kindAttributeMap[AttributeKind::Sound] = "ringtone";
 }
 
 void PimContactsQt::createSubKindAttributeMap() {

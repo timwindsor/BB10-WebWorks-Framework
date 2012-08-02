@@ -64,18 +64,16 @@ JNEXT.PimContacts = function ()
     var self = this;
 
     self.find = function (args) {
-        var val = JNEXT.invoke(self.m_id, "find " + JSON.stringify(args));
-        return "";//JSON.parse(val);
+        JNEXT.invoke(self.m_id, "find " + JSON.stringify(args));
+        return "";
     };
 
     self.createContact = function (args) {
-        /*var val =*/
         JNEXT.invoke(self.m_id, "createContact " + JSON.stringify(args));
         return "";
     };
 
     self.deleteContact = function (args) {
-        /*var val =*/
         JNEXT.invoke(self.m_id, "deleteContact " + JSON.stringify(args));
         return "";
     };
@@ -101,10 +99,10 @@ JNEXT.PimContacts = function ()
     self.onEvent = function (strData) {
         console.log(strData);
         var arData = strData.split(" "),
-            strEventDesc = arData[0];
+            strEventDesc = arData[0],
+            args = {};
             
         if (strEventDesc === "result") {
-            var args = {};
             args.result = escape(strData.split(" ").slice(2).join(" "));
             _event.trigger(arData[1], args);
         }

@@ -61,13 +61,14 @@ std::string PimContacts::InvokeMethod(const std::string& command)
 
     if (strCommand == "find") {
         startThread(FindThread, obj);
-
-    }/* else if (strCommand == "save") {
+    }
+    /* else if (strCommand == "save") {
         startThread(SaveThread, obj);
 
     } else if (strCommand == "remove") {
         startThread(RemoveThread, obj);
-    }*/
+    }
+    */
 
     return "";
 }
