@@ -47,6 +47,7 @@ Contact = function (properties) {
     this.categories = properties && properties.categories ? properties.categories : null; // ContactField[]
     this.urls = properties && properties.urls ? properties.urls : null; // ContactField[]
     this.videoChat = properties && properties.videoChat ? properties.videoChat : null; // String[]
+    this.socialNetworks = properties && properties.socialNetworks ? properties.socialNetworks : null; // ContactField[]
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {

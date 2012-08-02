@@ -160,7 +160,11 @@ void PimContactsQt::populateField(const Contact& contact, AttributeKind::Type ki
                         fprintf(stderr, "date=%s\n", currentAttr.valueAsDateTime().date().toString(format).toStdString().c_str());
                         contactItem[typeIter->second] = Json::Value(currentAttr.valueAsDateTime().date().toString(format).toStdString());
                     } else {
-                        contactItem[typeIter->second] = Json::Value(currentAttr.value().toStdString());
+                        if (kind == AttributeKind::Note) {
+                            contactItem["note"] = Json::Value(currentAttr.value().toStdString());
+                        } else {
+                            contactItem[typeIter->second] = Json::Value(currentAttr.value().toStdString());
+                        }
                     }
                 }
             }
@@ -713,6 +717,7 @@ void PimContactsQt::createKindAttributeMap() {
     _kindAttributeMap[AttributeKind::VideoChat] = "videoChat";
     //kindAttributeMap[AttributeKind::Invalid] = "addresses";
     _kindAttributeMap[AttributeKind::Sound] = "ringtone";
+    _kindAttributeMap[AttributeKind::Website] = "urls";
 }
 
 void PimContactsQt::createSubKindAttributeMap() {
@@ -740,7 +745,7 @@ void PimContactsQt::createSubKindAttributeMap() {
     _subKindAttributeMap[AttributeSubKind::NameMiddle] = "middleName";
     _subKindAttributeMap[AttributeSubKind::NamePhoneticGiven] = "phoneticGivenName";
     _subKindAttributeMap[AttributeSubKind::NamePhoneticSurname] = "phoneticFamilyName";
-    _subKindAttributeMap[AttributeSubKind::NameNickname] = "nickname"; // TODO(rtse): nickname in JS top-level, but is a subkind under name
+    _subKindAttributeMap[AttributeSubKind::NameNickname] = "nickname";
     _subKindAttributeMap[AttributeSubKind::NameDisplayName] = "displayName";
     _subKindAttributeMap[AttributeSubKind::OrganizationAffiliationName] = "name";
     _subKindAttributeMap[AttributeSubKind::OrganizationAffiliationDetails] = "department";
@@ -757,6 +762,7 @@ void PimContactsQt::createSubKindAttributeMap() {
     _subKindAttributeMap[AttributeSubKind::InstantMessagingYahooMessenger] = "YahooMessenger";
     _subKindAttributeMap[AttributeSubKind::InstantMessagingYahooMessengerJapan] = "YahooMessegerJapan";
     _subKindAttributeMap[AttributeSubKind::VideoChatBbPlaybook] = "BbPlaybook";
+    _subKindAttributeMap[AttributeSubKind::SoundRingtone] = "ringtone";
 }
 
 } // namespace webworks
