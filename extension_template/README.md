@@ -17,7 +17,7 @@ be copied into a WebWorks Installation extension folder.
 * project/ - An example file structure of a native extension project that can
 build the native portion of an extension.
 
-The Memory Extension implementation should be used in conjunction with this 
+The Memory Extension implementation should be used in conjunction with this
 read me file to understand how to create a WebWorks extension.
 
 ## How to add an WebWorks Extension to your WebWorks Installation
@@ -55,13 +55,13 @@ select File -> New -> BlackBerry C/C++ Project.
 Build Style and an empty shared library project for the project type.
 When you're done click next.
 4. Select the active configuration you want to use for this project then click
-next. 
+next.
 5. If you wish to use a Native SDK that is different from the workspace SDK then
 uncheck the option to use the workspace SDK selection and select a different
 SDK. When you are done, click Finish. You should see your new project appear in
 the Project Explorer window.
 6. In order to build an extension you'll need to import
-[extension resources](#import) into your new project. 
+[extension resources](#import) into your new project.
 
 ### <a name="import">How to import extension resources</a>
 
@@ -128,7 +128,7 @@ passed to the class as an argument to the constructor. It is needed to trigger
 events on the JavaScript side from native.
 
 The can delete method is used by JNEXT to determine whether your native object
-can be deleted. 
+can be deleted.
 
 The InvokeMethod function is called as a result from a request from JavaScript
 to invoke a method of this particular object. The only argument to this
