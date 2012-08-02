@@ -686,8 +686,6 @@ bbpim::ContactBuilder& PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& 
                 } else if (field == "favorite") {
                     bool isFavorite = jsonObj.asBool();
                     contactBuilder = contactBuilder.setFavorite(isFavorite);
-                } else {
-                    // User defined an unsupported field:
                 }
 
                 break;
@@ -812,9 +810,9 @@ void PimContactsQt::createAttributeKindMap()
     _attributeKindMap["ims"] = bbpim::AttributeKind::InstantMessaging;
     _attributeKindMap["ringtone"] = bbpim::AttributeKind::Sound;
     _attributeKindMap["videoChat"] = bbpim::AttributeKind::VideoChat;
-    //_attributeKindMap["addresses"] = bbpim::AttributeKind::Invalid;
-    //_attributeKindMap["favorite"] = bbpim::AttributeKind::Invalid;
-    //_attributeKindMap["photos"] = bbpim::AttributeKind::Invalid;
+    _attributeKindMap["addresses"] = bbpim::AttributeKind::Invalid;
+    _attributeKindMap["favorite"] = bbpim::AttributeKind::Invalid;
+    _attributeKindMap["photos"] = bbpim::AttributeKind::Invalid;
 }
 
 void PimContactsQt::createAttributeSubKindMap()
