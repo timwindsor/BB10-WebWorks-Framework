@@ -29,9 +29,8 @@ namespace webworks {
 
 StringToKindMap PimContactsQt::_attributeKindMap;
 StringToSubKindMap PimContactsQt::_attributeSubKindMap;
-
-std::map<bbpim::AttributeKind::Type, std::string> PimContactsQt::_kindAttributeMap;
-std::map<bbpim::AttributeSubKind::Type, std::string> PimContactsQt::_subKindAttributeMap;
+KindToStringMap PimContactsQt::_kindAttributeMap;
+SubKindToStringMap PimContactsQt::_subKindAttributeMap;
 QList<bbpim::SortSpecifier> PimContactsQt::_sortSpecs;
 
 PimContactsQt::PimContactsQt()
@@ -51,7 +50,11 @@ PimContactsQt::~PimContactsQt()
 {
 }
 
-Json::Value PimContactsQt::Find(const Json::Value& argsJson)
+/****************************************************************
+ * Public Functions
+ ****************************************************************/
+
+Json::Value PimContactsQt::Find(const Json::Value& argsObj)
 {
     fprintf(stderr, "%s", "Beginning of find\n");
 
@@ -110,17 +113,17 @@ Json::Value PimContactsQt::Find(const Json::Value& argsJson)
 
                     switch (sort[j]["fieldName"].asInt()) {
                         case bbpim::SortColumn::FirstName:
-                            sortField = SortColumn::FirstName;
+                            sortField = bbpim::SortColumn::FirstName;
                             break;
                         case bbpim::SortColumn::LastName:
-                            sortField = SortColumn::LastName;
+                            sortField = bbpim::SortColumn::LastName;
                             break;
                         case bbpim::SortColumn::CompanyName:
-                            sortField = SortColumn::CompanyName;
+                            sortField = bbpim::SortColumn::CompanyName;
                             break;
                     }
 
-                    _sortSpecs.append(SortSpecifier(sortField, order));
+                    _sortSpecs.append(bbpim::SortSpecifier(sortField, order));
                 }
             }
         }
@@ -166,7 +169,7 @@ Json::Value PimContactsQt::CreateContact(const Json::Value& attributeObj)
 
     for (int i = 0; i < attributeKeys.size(); i++) {
         const std::string key = attributeKeys[i];
-        contactBuilder = buildbbpim::AttributeKind(contactBuilder, attributeObj[key], key);
+        contactBuilder = buildAttributeKind(contactBuilder, attributeObj[key], key);
     }
 
     bbpim::ContactService service;
@@ -236,7 +239,7 @@ Json::Value PimContactsQt::EditContact(bbpim::Contact& contact, const Json::Valu
             }
         }
 
-        contactBuilder = buildbbpim::AttributeKind(contactBuilder, attributeObj[key], key);
+        contactBuilder = buildAttributeKind(contactBuilder, attributeObj[key], key);
     }
 
     bbpim::ContactService service;
@@ -277,231 +280,50 @@ Json::Value PimContactsQt::CloneContact(bbpim::Contact& contact, const Json::Val
     return returnObj;
 }
 
-bbpim::ContactBuilder& PimContactsQt::buildbbpim::AttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field)
+/****************************************************************
+ * Helper functions for Find
+ ****************************************************************/
+
+QList<bbpim::SearchField::Type> PimContactsQt::getSearchFields(const Json::Value& searchFieldsJson)
 {
-    StringToKindMap::const_iterator kindIter = _attributeKindMap.find(field);
-
-    if (kindIter != _attributeKindMap.end()) {
-        switch (kindIter->second) {
-            // Attributes requiring group keys:
-            case bbpim::bbpim::AttributeKind::Name: {
-                contactBuilder = buildGroupedAttributes(contactBuilder, jsonObj, kindIter->second, "1");
-                break;
-            }
-            case bbpim::bbpim::AttributeKind::OrganizationAffiliation: {
-                for (int i = 0; i < jsonObj.size(); i++) {
-                    Json::Value fieldObj = jsonObj[i];
-                    std::stringstream groupKeyStream;
-                    groupKeyStream << i + 1;
-                    contactBuilder = buildGroupedAttributes(contactBuilder, fieldObj, kindIter->second, groupKeyStream.str());
-                }
-
-                break;
-            }
-
-            // String arrays:
-            case bbpim::bbpim::AttributeKind::VideoChat: {
-                for (int i = 0; i < jsonObj.size(); i++) {
-                    std::string value = jsonObj[i].asString();
-                    contactBuilder = addAttribute(contactBuilder, kindIter->second, bbpim::bbpim::AttributeSubKind::VideoChatBbPlaybook, value);
-                }
-
-                break;
-            }
-
-            // Strings:
-            case bbpim::bbpim::AttributeKind::Date:
-            case bbpim::bbpim::AttributeKind::Note:
-            case bbpim::bbpim::AttributeKind::Sound: {
-                StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
-
-                if (subkindIter != _attributeSubKindMap.end()) {
-                    std::string value = jsonObj.asString();
-                    contactBuilder = addAttribute(contactBuilder, kindIter->second, subkindIter->second, value);
-                }
-
-                break;
-            }
-
-            // ContactField attributes:
-            case bbpim::bbpim::AttributeKind::Phone:
-            case bbpim::bbpim::AttributeKind::Email:
-            case bbpim::bbpim::AttributeKind::Fax:
-            case bbpim::bbpim::AttributeKind::Pager:
-            case bbpim::bbpim::AttributeKind::InstantMessaging:
-            case bbpim::bbpim::AttributeKind::Website:
-            case bbpim::bbpim::AttributeKind::Group:
-            case bbpim::bbpim::AttributeKind::Profile: {
-                for (int i = 0; i < jsonObj.size(); i++) {
-                    Json::Value fieldObj = jsonObj[i];
-                    contactBuilder = buildFieldAttribute(contactBuilder, fieldObj, kindIter->second);
-                }
-
-                break;
-            }
-
-            // Special cases (treated differently in ContactBuilder):
-            case bbpim::bbpim::AttributeKind::Invalid: {
-                if (field == "addresses") {
-                    for (int i = 0; i < jsonObj.size(); i++) {
-                        Json::Value addressObj = jsonObj[i];
-                        contactBuilder = buildPostalAddress(contactBuilder, addressObj);
-                    }
-                } else if (field == "photos") {
-                    for (int i = 0; i < jsonObj.size(); i++) {
-                        Json::Value photoObj = jsonObj[i];
-                        contactBuilder = buildPhoto(contactBuilder, photoObj);
-                    }
-                } else if (field == "favorite") {
-                    bool isFavorite = jsonObj.asBool();
-                    contactBuilder = contactBuilder.setFavorite(isFavorite);
-                }
-
-                break;
-            }
-
-            // User defined an unsupported field:
-            default: {
-                break;
-            }
-        }
-    }
-
-    return contactBuilder;
-}
-
-bbpim::ContactBuilder& PimContactsQt::addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::bbpim::AttributeKind::Type kind, const bbpim::bbpim::AttributeSubKind::Type subkind, const std::string& value)
-{
-    bbpim::ContactAttribute attribute;
-    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
-
-    attributeBuilder = attributeBuilder.setKind(kind);
-    attributeBuilder = attributeBuilder.setSubKind(subkind);
-    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
-
-    return contactBuilder.addAttribute(attribute);
-}
-
-bbpim::ContactBuilder& PimContactsQt::addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::bbpim::AttributeKind::Type kind, const bbpim::bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey)
-{
-    bbpim::ContactAttribute attribute;
-    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
-
-    attributeBuilder = attributeBuilder.setKind(kind);
-    attributeBuilder = attributeBuilder.setSubKind(subkind);
-    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
-    attributeBuilder = attributeBuilder.setGroupKey(QString(groupKey.c_str()));
-
-    return contactBuilder.addAttribute(attribute);
-}
-
-bbpim::ContactBuilder& PimContactsQt::buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::bbpim::AttributeKind::Type kind, const std::string& groupKey)
-{
-    const Json::Value::Members fields = fieldsObj.getMemberNames();
-
-    for (int i = 0; i < fields.size(); i++) {
-        const std::string fieldKey = fields[i];
-        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(fieldKey);
-
-        if (subkindIter != _attributeSubKindMap.end()) {
-            contactBuilder = addAttributeToGroup(contactBuilder, kind, subkindIter->second, fieldsObj[fieldKey].asString(), groupKey);
-        }
-    }
-
-    return contactBuilder;
-}
-
-bbpim::ContactBuilder& PimContactsQt::buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::bbpim::AttributeKind::Type kind)
-{
-    std::string type = fieldObj["type"].asString();
-    StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(type);
-
-    if (subkindIter != _attributeSubKindMap.end()) {
-        bool pref = fieldObj["pref"].asBool();
-        contactBuilder = addAttribute(contactBuilder, kind, subkindIter->second, fieldObj["value"].asString());
-    }
-
-    return contactBuilder;
-}
-
-bbpim::ContactBuilder& PimContactsQt::buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj)
-{
-    bbpim::ContactPostalAddress address;
-    bbpim::ContactPostalAddressBuilder addressBuilder(address.edit());
-
-    if (addressObj.isMember("type")) {
-        std::string value = addressObj["type"].asString();
-        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(value);
-
-        if (subkindIter != _attributeSubKindMap.end()) {
-            addressBuilder = addressBuilder.setSubKind(subkindIter->second);
-        }
-    }
-
-    addressBuilder = addressBuilder.setLine1(QString(addressObj.get("address1", "").asCString()));
-    addressBuilder = addressBuilder.setLine2(QString(addressObj.get("address2", "").asCString()));
-    addressBuilder = addressBuilder.setCity(QString(addressObj.get("locality", "").asCString()));
-    addressBuilder = addressBuilder.setRegion(QString(addressObj.get("region", "").asCString()));
-    addressBuilder = addressBuilder.setCountry(QString(addressObj.get("country", "").asCString()));
-    addressBuilder = addressBuilder.setPostalCode(QString(addressObj.get("postalCode", "").asCString()));
-
-    return contactBuilder.addPostalAddress(address);
-}
-
-bbpim::ContactBuilder& PimContactsQt::buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj)
-{
-    bbpim::ContactPhoto photo;
-    bbpim::ContactPhotoBuilder photoBuilder(photo.edit());
-
-    std::string filepath = photoObj["originalFilePath"].asString();
-    bool pref = photoObj["pref"].asBool();
-
-    photoBuilder.setOriginalPhoto(QString(filepath.c_str()));
-    photoBuilder.setPrimaryPhoto(pref);
-
-    return contactBuilder.addPhoto(photo, pref);
-}
-
-QList<SearchField::Type> PimContactsQt::getSearchFields(const Json::Value& searchFieldsJson)
-{
-    QList<SearchField::Type> searchFields;
+    QList<bbpim::SearchField::Type> searchFields;
 
     switch (searchFieldsJson["fieldName"].asInt()) {
-        case SearchField::FirstName:
-            searchFields.append(SearchField::FirstName);
+        case bbpim::SearchField::FirstName:
+            searchFields.append(bbpim::SearchField::FirstName);
             break;
-        case SearchField::LastName:
-            searchFields.append(SearchField::LastName);
+        case bbpim::SearchField::LastName:
+            searchFields.append(bbpim::SearchField::LastName);
             break;
-        case SearchField::CompanyName:
-            searchFields.append(SearchField::CompanyName);
+        case bbpim::SearchField::CompanyName:
+            searchFields.append(bbpim::SearchField::CompanyName);
             break;
-        case SearchField::Phone:
-            searchFields.append(SearchField::Phone);
+        case bbpim::SearchField::Phone:
+            searchFields.append(bbpim::SearchField::Phone);
             break;
-        case SearchField::Email:
-            searchFields.append(SearchField::Email);
+        case bbpim::SearchField::Email:
+            searchFields.append(bbpim::SearchField::Email);
             break;
-        case SearchField::BBMPin:
-            searchFields.append(SearchField::BBMPin);
+        case bbpim::SearchField::BBMPin:
+            searchFields.append(bbpim::SearchField::BBMPin);
             break;
-        case SearchField::LinkedIn:
-            searchFields.append(SearchField::LinkedIn);
+        case bbpim::SearchField::LinkedIn:
+            searchFields.append(bbpim::SearchField::LinkedIn);
             break;
-        case SearchField::Twitter:
-            searchFields.append(SearchField::Twitter);
+        case bbpim::SearchField::Twitter:
+            searchFields.append(bbpim::SearchField::Twitter);
             break;
-        case SearchField::VideoChat:
-            searchFields.append(SearchField::VideoChat);
+        case bbpim::SearchField::VideoChat:
+            searchFields.append(bbpim::SearchField::VideoChat);
             break;
     }
 
     return searchFields;
 }
 
-QSet<ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contact_fields, bool favorite)
+QSet<bbpim::ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contact_fields, bool favorite)
 {
-    QList<SearchField::Type> searchFields = PimContactsQt::getSearchFields(searchFieldsJson);
+    QList<bbpim::SearchField::Type> searchFields = PimContactsQt::getSearchFields(searchFieldsJson);
     QSet<bbpim::ContactId> contactIds;
 
     if (!searchFields.empty()) {
@@ -541,7 +363,7 @@ QSet<ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searchFields
     return contactIds;
 }
 
-void PimContactsQt::populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isbbpim::ContactField, bool isArray)
+void PimContactsQt::populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray)
 {
     fprintf(stderr, "populateField kind= %d\n", kind);
     QList<bbpim::ContactAttribute> attrs = contact.filteredAttributes(kind);
@@ -550,7 +372,7 @@ void PimContactsQt::populateField(const bbpim::Contact& contact, bbpim::Attribut
     while (k != attrs.constEnd()) {
         bbpim::ContactAttribute currentAttr = *k;
         Json::Value val;
-        std::map<bbpim::AttributeSubKind::Type, std::string>::const_iterator typeIter = _subKindAttributeMap.find(currentAttr.subKind());
+        SubKindToStringMap::const_iterator typeIter = _subKindAttributeMap.find(currentAttr.subKind());
 
         if (typeIter != _subKindAttributeMap.end()) {
             if (isContactField) {
@@ -591,14 +413,14 @@ void PimContactsQt::populateAddresses(const bbpim::Contact& contact, Json::Value
 {
     bbpim::ContactService contactService;
     bbpim::Contact fullContact = contactService.contactDetails(contact.id());
-    QList<bbpim::ContactPostalAddress> addrs = fullbbpim::Contact.postalAddresses();
+    QList<bbpim::ContactPostalAddress> addrs = fullContact.postalAddresses();
     QList<bbpim::ContactPostalAddress>::const_iterator k = addrs.constBegin();
 
     while (k != addrs.constEnd()) {
         bbpim::ContactPostalAddress currentAddr = *k;
         Json::Value addr;
 
-        std::map<bbpim::AttributeSubKind::Type, std::string>::const_iterator typeIter = _subKindAttributeMap.find(currentAddr.subKind());
+        SubKindToStringMap::const_iterator typeIter = _subKindAttributeMap.find(currentAddr.subKind());
 
         if (typeIter != _subKindAttributeMap.end()) {
             addr["type"] = Json::Value(typeIter->second);
@@ -628,7 +450,7 @@ void PimContactsQt::populateOrganizations(const bbpim::Contact& contact, Json::V
 
         while (k != currentOrgAttrs.constEnd()) {
             bbpim::ContactAttribute attr = *k;
-            std::map<bbpim::AttributeSubKind::Type, std::string>::const_iterator typeIter = _subKindAttributeMap.find(attr.subKind());
+            SubKindToStringMap::const_iterator typeIter = _subKindAttributeMap.find(attr.subKind());
 
             if (typeIter != _subKindAttributeMap.end()) {
                 org[typeIter->second] = Json::Value(attr.value().toStdString());
@@ -659,10 +481,10 @@ QString PimContactsQt::getSortFieldValue(const bbpim::SortColumn::Type sort_fiel
     return QString();
 }
 
-bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2)
+bool PimContactsQt::lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2)
 {
-    QList<SortSpecifier>::const_iterator i = PimContactsQt::_sortSpecs.constBegin();
-    SortSpecifier sortSpec;
+    QList<bbpim::SortSpecifier>::const_iterator i = PimContactsQt::_sortSpecs.constBegin();
+    bbpim::SortSpecifier sortSpec;
     QString val1, val2;
 
     do {
@@ -672,7 +494,7 @@ bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2)
         ++i;
     } while (val1 == val2 && i != PimContactsQt::_sortSpecs.constEnd());
 
-    if (sortSpec.second == SortOrder::Ascending) {
+    if (sortSpec.second == bbpim::SortOrder::Ascending) {
         return val1 < val2;
     } else {
         return !(val1 < val2);
@@ -782,76 +604,265 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& r
     return contactArray;
 }
 
+/****************************************************************
+ * Helper functions for Save
+ ****************************************************************/
 
-void PimContactsQt::createbbpim::AttributeKindMap()
+bbpim::ContactBuilder& PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field)
 {
-    _attributeKindMap["phoneNumbers"] = bbpim::bbpim::AttributeKind::Phone;
-    _attributeKindMap["faxNumbers"] = bbpim::bbpim::AttributeKind::Fax;
-    _attributeKindMap["pagerNumbers"] = bbpim::bbpim::AttributeKind::Pager;
-    _attributeKindMap["emails"] = bbpim::bbpim::AttributeKind::Email;
-    _attributeKindMap["urls"] = bbpim::bbpim::AttributeKind::Website;
-    _attributeKindMap["socialNetworks"] = bbpim::bbpim::AttributeKind::Profile;
-    _attributeKindMap["anniversary"] = bbpim::bbpim::AttributeKind::Date;
-    _attributeKindMap["birthday"] = bbpim::bbpim::AttributeKind::Date;
-    _attributeKindMap["categories"] = bbpim::bbpim::AttributeKind::Group;
-    _attributeKindMap["name"] = bbpim::bbpim::AttributeKind::Name;
-    _attributeKindMap["organizations"] = bbpim::bbpim::AttributeKind::OrganizationAffiliation;
-    _attributeKindMap["education"] = bbpim::bbpim::AttributeKind::Education;
-    _attributeKindMap["note"] = bbpim::bbpim::AttributeKind::Note;
-    _attributeKindMap["ims"] = bbpim::bbpim::AttributeKind::InstantMessaging;
-    _attributeKindMap["ringtone"] = bbpim::bbpim::AttributeKind::Sound;
-    _attributeKindMap["videoChat"] = bbpim::bbpim::AttributeKind::VideoChat;
-    _attributeKindMap["addresses"] = bbpim::bbpim::AttributeKind::Invalid;
-    _attributeKindMap["favorite"] = bbpim::bbpim::AttributeKind::Invalid;
-    _attributeKindMap["photos"] = bbpim::bbpim::AttributeKind::Invalid;
+    StringToKindMap::const_iterator kindIter = _attributeKindMap.find(field);
+
+    if (kindIter != _attributeKindMap.end()) {
+        switch (kindIter->second) {
+            // Attributes requiring group keys:
+            case bbpim::AttributeKind::Name: {
+                contactBuilder = buildGroupedAttributes(contactBuilder, jsonObj, kindIter->second, "1");
+                break;
+            }
+            case bbpim::AttributeKind::OrganizationAffiliation: {
+                for (int i = 0; i < jsonObj.size(); i++) {
+                    Json::Value fieldObj = jsonObj[i];
+                    std::stringstream groupKeyStream;
+                    groupKeyStream << i + 1;
+                    contactBuilder = buildGroupedAttributes(contactBuilder, fieldObj, kindIter->second, groupKeyStream.str());
+                }
+
+                break;
+            }
+
+            // String arrays:
+            case bbpim::AttributeKind::VideoChat: {
+                for (int i = 0; i < jsonObj.size(); i++) {
+                    std::string value = jsonObj[i].asString();
+                    contactBuilder = addAttribute(contactBuilder, kindIter->second, bbpim::AttributeSubKind::VideoChatBbPlaybook, value);
+                }
+
+                break;
+            }
+
+            // Strings:
+            case bbpim::AttributeKind::Date:
+            case bbpim::AttributeKind::Note:
+            case bbpim::AttributeKind::Sound: {
+                StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
+
+                if (subkindIter != _attributeSubKindMap.end()) {
+                    std::string value = jsonObj.asString();
+                    contactBuilder = addAttribute(contactBuilder, kindIter->second, subkindIter->second, value);
+                }
+
+                break;
+            }
+
+            // ContactField attributes:
+            case bbpim::AttributeKind::Phone:
+            case bbpim::AttributeKind::Email:
+            case bbpim::AttributeKind::Fax:
+            case bbpim::AttributeKind::Pager:
+            case bbpim::AttributeKind::InstantMessaging:
+            case bbpim::AttributeKind::Website:
+            case bbpim::AttributeKind::Group:
+            case bbpim::AttributeKind::Profile: {
+                for (int i = 0; i < jsonObj.size(); i++) {
+                    Json::Value fieldObj = jsonObj[i];
+                    contactBuilder = buildFieldAttribute(contactBuilder, fieldObj, kindIter->second);
+                }
+
+                break;
+            }
+
+            // Special cases (treated differently in ContactBuilder):
+            default: {
+                if (field == "addresses") {
+                    for (int i = 0; i < jsonObj.size(); i++) {
+                        Json::Value addressObj = jsonObj[i];
+                        contactBuilder = buildPostalAddress(contactBuilder, addressObj);
+                    }
+                } else if (field == "photos") {
+                    for (int i = 0; i < jsonObj.size(); i++) {
+                        Json::Value photoObj = jsonObj[i];
+                        contactBuilder = buildPhoto(contactBuilder, photoObj);
+                    }
+                } else if (field == "favorite") {
+                    bool isFavorite = jsonObj.asBool();
+                    contactBuilder = contactBuilder.setFavorite(isFavorite);
+                } else {
+                    // User defined an unsupported field:
+                }
+
+                break;
+            }
+        }
+    }
+
+    return contactBuilder;
 }
 
-void PimContactsQt::createbbpim::AttributeSubKindMap()
+bbpim::ContactBuilder& PimContactsQt::addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value)
 {
-    _attributeSubKindMap["other"] = bbpim::bbpim::AttributeSubKind::Other;
-    _attributeSubKindMap["home"] = bbpim::bbpim::AttributeSubKind::Home;
-    _attributeSubKindMap["work"] = bbpim::bbpim::AttributeSubKind::Work;
-    _attributeSubKindMap["mobile"] = bbpim::bbpim::AttributeSubKind::PhoneMobile;
-    _attributeSubKindMap["direct"] = bbpim::bbpim::AttributeSubKind::FaxDirect;
-    _attributeSubKindMap["blog"] = bbpim::bbpim::AttributeSubKind::Blog;
-    _attributeSubKindMap["resume"] = bbpim::bbpim::AttributeSubKind::WebsiteResume;
-    _attributeSubKindMap["portfolio"] = bbpim::bbpim::AttributeSubKind::WebsitePortfolio;
-    _attributeSubKindMap["personal"] = bbpim::bbpim::AttributeSubKind::WebsitePersonal;
-    _attributeSubKindMap["company"] = bbpim::bbpim::AttributeSubKind::WebsiteCompany;
-    _attributeSubKindMap["facebook"] = bbpim::bbpim::AttributeSubKind::ProfileFacebook;
-    _attributeSubKindMap["twitter"] = bbpim::bbpim::AttributeSubKind::ProfileTwitter;
-    _attributeSubKindMap["linkedin"] = bbpim::bbpim::AttributeSubKind::ProfileLinkedIn;
-    _attributeSubKindMap["gist"] = bbpim::bbpim::AttributeSubKind::ProfileGist;
-    _attributeSubKindMap["tungle"] = bbpim::bbpim::AttributeSubKind::ProfileTungle;
-    _attributeSubKindMap["birthday"] = bbpim::bbpim::AttributeSubKind::DateBirthday;
-    _attributeSubKindMap["anniversary"] = bbpim::bbpim::AttributeSubKind::DateAnniversary;
-    _attributeSubKindMap["categories"] = bbpim::bbpim::AttributeSubKind::GroupDepartment;
-    _attributeSubKindMap["givenName"] = bbpim::bbpim::AttributeSubKind::NameGiven;
-    _attributeSubKindMap["familyName"] = bbpim::bbpim::AttributeSubKind::NameSurname;
-    _attributeSubKindMap["honorificPrefix"] = bbpim::bbpim::AttributeSubKind::Title;
-    _attributeSubKindMap["honorificSuffix"] = bbpim::bbpim::AttributeSubKind::NameSuffix;
-    _attributeSubKindMap["middleName"] = bbpim::bbpim::AttributeSubKind::NameMiddle;
-    _attributeSubKindMap["nickname"] = bbpim::bbpim::AttributeSubKind::NameNickname;
-    _attributeSubKindMap["displayName"] = bbpim::bbpim::AttributeSubKind::NameDisplayName;
-    _attributeSubKindMap["phoneticGivenName"] = bbpim::bbpim::AttributeSubKind::NamePhoneticGiven;
-    _attributeSubKindMap["phoneticFamilyName"] = bbpim::bbpim::AttributeSubKind::NamePhoneticSurname;
-    _attributeSubKindMap["name"] = bbpim::bbpim::AttributeSubKind::OrganizationAffiliationName;
-    _attributeSubKindMap["department"] = bbpim::bbpim::AttributeSubKind::OrganizationAffiliationDetails;
-    _attributeSubKindMap["title"] = bbpim::bbpim::AttributeSubKind::Title;
-    _attributeSubKindMap["BbmPin"] = bbpim::bbpim::AttributeSubKind::InstantMessagingBbmPin;
-    _attributeSubKindMap["Aim"] = bbpim::bbpim::AttributeSubKind::InstantMessagingAim;
-    _attributeSubKindMap["Aliwangwang"] = bbpim::bbpim::AttributeSubKind::InstantMessagingAliwangwang;
-    _attributeSubKindMap["GoogleTalk"] = bbpim::bbpim::AttributeSubKind::InstantMessagingGoogleTalk;
-    _attributeSubKindMap["Sametime"] = bbpim::bbpim::AttributeSubKind::InstantMessagingSametime;
-    _attributeSubKindMap["Icq"] = bbpim::bbpim::AttributeSubKind::InstantMessagingIcq;
-    _attributeSubKindMap["Jabber"] = bbpim::bbpim::AttributeSubKind::InstantMessagingJabber;
-    _attributeSubKindMap["MsLcs"] = bbpim::bbpim::AttributeSubKind::InstantMessagingMsLcs;
-    _attributeSubKindMap["Skype"] = bbpim::bbpim::AttributeSubKind::InstantMessagingSkype;
-    _attributeSubKindMap["YahooMessenger"] = bbpim::bbpim::AttributeSubKind::InstantMessagingYahooMessenger;
-    _attributeSubKindMap["YahooMessegerJapan"] = bbpim::bbpim::AttributeSubKind::InstantMessagingYahooMessengerJapan;
-    _attributeSubKindMap["BbPlaybook"] = bbpim::bbpim::AttributeSubKind::VideoChatBbPlaybook;
-    _attributeSubKindMap["ringtone"] = bbpim::bbpim::AttributeSubKind::SoundRingtone;
-    _attributeSubKindMap["note"] = bbpim::bbpim::AttributeSubKind::Invalid;
+    bbpim::ContactAttribute attribute;
+    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+
+    attributeBuilder = attributeBuilder.setKind(kind);
+    attributeBuilder = attributeBuilder.setSubKind(subkind);
+    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+
+    return contactBuilder.addAttribute(attribute);
+}
+
+bbpim::ContactBuilder& PimContactsQt::addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey)
+{
+    bbpim::ContactAttribute attribute;
+    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+
+    attributeBuilder = attributeBuilder.setKind(kind);
+    attributeBuilder = attributeBuilder.setSubKind(subkind);
+    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+    attributeBuilder = attributeBuilder.setGroupKey(QString(groupKey.c_str()));
+
+    return contactBuilder.addAttribute(attribute);
+}
+
+bbpim::ContactBuilder& PimContactsQt::buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::AttributeKind::Type kind, const std::string& groupKey)
+{
+    const Json::Value::Members fields = fieldsObj.getMemberNames();
+
+    for (int i = 0; i < fields.size(); i++) {
+        const std::string fieldKey = fields[i];
+        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(fieldKey);
+
+        if (subkindIter != _attributeSubKindMap.end()) {
+            contactBuilder = addAttributeToGroup(contactBuilder, kind, subkindIter->second, fieldsObj[fieldKey].asString(), groupKey);
+        }
+    }
+
+    return contactBuilder;
+}
+
+bbpim::ContactBuilder& PimContactsQt::buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::AttributeKind::Type kind)
+{
+    std::string type = fieldObj["type"].asString();
+    StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(type);
+
+    if (subkindIter != _attributeSubKindMap.end()) {
+        bool pref = fieldObj["pref"].asBool();
+        contactBuilder = addAttribute(contactBuilder, kind, subkindIter->second, fieldObj["value"].asString());
+    }
+
+    return contactBuilder;
+}
+
+bbpim::ContactBuilder& PimContactsQt::buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj)
+{
+    bbpim::ContactPostalAddress address;
+    bbpim::ContactPostalAddressBuilder addressBuilder(address.edit());
+
+    if (addressObj.isMember("type")) {
+        std::string value = addressObj["type"].asString();
+        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(value);
+
+        if (subkindIter != _attributeSubKindMap.end()) {
+            addressBuilder = addressBuilder.setSubKind(subkindIter->second);
+        }
+    }
+
+    addressBuilder = addressBuilder.setLine1(QString(addressObj.get("address1", "").asCString()));
+    addressBuilder = addressBuilder.setLine2(QString(addressObj.get("address2", "").asCString()));
+    addressBuilder = addressBuilder.setCity(QString(addressObj.get("locality", "").asCString()));
+    addressBuilder = addressBuilder.setRegion(QString(addressObj.get("region", "").asCString()));
+    addressBuilder = addressBuilder.setCountry(QString(addressObj.get("country", "").asCString()));
+    addressBuilder = addressBuilder.setPostalCode(QString(addressObj.get("postalCode", "").asCString()));
+
+    return contactBuilder.addPostalAddress(address);
+}
+
+bbpim::ContactBuilder& PimContactsQt::buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj)
+{
+    bbpim::ContactPhoto photo;
+    bbpim::ContactPhotoBuilder photoBuilder(photo.edit());
+
+    std::string filepath = photoObj["originalFilePath"].asString();
+    bool pref = photoObj["pref"].asBool();
+
+    photoBuilder.setOriginalPhoto(QString(filepath.c_str()));
+    photoBuilder.setPrimaryPhoto(pref);
+
+    return contactBuilder.addPhoto(photo, pref);
+}
+
+/****************************************************************
+ * Mapping functions
+ ****************************************************************/
+
+void PimContactsQt::createAttributeKindMap()
+{
+    _attributeKindMap["phoneNumbers"] = bbpim::AttributeKind::Phone;
+    _attributeKindMap["faxNumbers"] = bbpim::AttributeKind::Fax;
+    _attributeKindMap["pagerNumbers"] = bbpim::AttributeKind::Pager;
+    _attributeKindMap["emails"] = bbpim::AttributeKind::Email;
+    _attributeKindMap["urls"] = bbpim::AttributeKind::Website;
+    _attributeKindMap["socialNetworks"] = bbpim::AttributeKind::Profile;
+    _attributeKindMap["anniversary"] = bbpim::AttributeKind::Date;
+    _attributeKindMap["birthday"] = bbpim::AttributeKind::Date;
+    _attributeKindMap["categories"] = bbpim::AttributeKind::Group;
+    _attributeKindMap["name"] = bbpim::AttributeKind::Name;
+    _attributeKindMap["organizations"] = bbpim::AttributeKind::OrganizationAffiliation;
+    _attributeKindMap["education"] = bbpim::AttributeKind::Education;
+    _attributeKindMap["note"] = bbpim::AttributeKind::Note;
+    _attributeKindMap["ims"] = bbpim::AttributeKind::InstantMessaging;
+    _attributeKindMap["ringtone"] = bbpim::AttributeKind::Sound;
+    _attributeKindMap["videoChat"] = bbpim::AttributeKind::VideoChat;
+    //_attributeKindMap["addresses"] = bbpim::AttributeKind::Invalid;
+    //_attributeKindMap["favorite"] = bbpim::AttributeKind::Invalid;
+    //_attributeKindMap["photos"] = bbpim::AttributeKind::Invalid;
+}
+
+void PimContactsQt::createAttributeSubKindMap()
+{
+    _attributeSubKindMap["other"] = bbpim::AttributeSubKind::Other;
+    _attributeSubKindMap["home"] = bbpim::AttributeSubKind::Home;
+    _attributeSubKindMap["work"] = bbpim::AttributeSubKind::Work;
+    _attributeSubKindMap["mobile"] = bbpim::AttributeSubKind::PhoneMobile;
+    _attributeSubKindMap["direct"] = bbpim::AttributeSubKind::FaxDirect;
+    _attributeSubKindMap["blog"] = bbpim::AttributeSubKind::Blog;
+    _attributeSubKindMap["resume"] = bbpim::AttributeSubKind::WebsiteResume;
+    _attributeSubKindMap["portfolio"] = bbpim::AttributeSubKind::WebsitePortfolio;
+    _attributeSubKindMap["personal"] = bbpim::AttributeSubKind::WebsitePersonal;
+    _attributeSubKindMap["company"] = bbpim::AttributeSubKind::WebsiteCompany;
+    _attributeSubKindMap["facebook"] = bbpim::AttributeSubKind::ProfileFacebook;
+    _attributeSubKindMap["twitter"] = bbpim::AttributeSubKind::ProfileTwitter;
+    _attributeSubKindMap["linkedin"] = bbpim::AttributeSubKind::ProfileLinkedIn;
+    _attributeSubKindMap["gist"] = bbpim::AttributeSubKind::ProfileGist;
+    _attributeSubKindMap["tungle"] = bbpim::AttributeSubKind::ProfileTungle;
+    _attributeSubKindMap["birthday"] = bbpim::AttributeSubKind::DateBirthday;
+    _attributeSubKindMap["anniversary"] = bbpim::AttributeSubKind::DateAnniversary;
+    _attributeSubKindMap["categories"] = bbpim::AttributeSubKind::GroupDepartment;
+    _attributeSubKindMap["givenName"] = bbpim::AttributeSubKind::NameGiven;
+    _attributeSubKindMap["familyName"] = bbpim::AttributeSubKind::NameSurname;
+    _attributeSubKindMap["honorificPrefix"] = bbpim::AttributeSubKind::Title;
+    _attributeSubKindMap["honorificSuffix"] = bbpim::AttributeSubKind::NameSuffix;
+    _attributeSubKindMap["middleName"] = bbpim::AttributeSubKind::NameMiddle;
+    _attributeSubKindMap["nickname"] = bbpim::AttributeSubKind::NameNickname;
+    _attributeSubKindMap["displayName"] = bbpim::AttributeSubKind::NameDisplayName;
+    _attributeSubKindMap["phoneticGivenName"] = bbpim::AttributeSubKind::NamePhoneticGiven;
+    _attributeSubKindMap["phoneticFamilyName"] = bbpim::AttributeSubKind::NamePhoneticSurname;
+    _attributeSubKindMap["name"] = bbpim::AttributeSubKind::OrganizationAffiliationName;
+    _attributeSubKindMap["department"] = bbpim::AttributeSubKind::OrganizationAffiliationDetails;
+    _attributeSubKindMap["title"] = bbpim::AttributeSubKind::Title;
+    _attributeSubKindMap["BbmPin"] = bbpim::AttributeSubKind::InstantMessagingBbmPin;
+    _attributeSubKindMap["Aim"] = bbpim::AttributeSubKind::InstantMessagingAim;
+    _attributeSubKindMap["Aliwangwang"] = bbpim::AttributeSubKind::InstantMessagingAliwangwang;
+    _attributeSubKindMap["GoogleTalk"] = bbpim::AttributeSubKind::InstantMessagingGoogleTalk;
+    _attributeSubKindMap["Sametime"] = bbpim::AttributeSubKind::InstantMessagingSametime;
+    _attributeSubKindMap["Icq"] = bbpim::AttributeSubKind::InstantMessagingIcq;
+    _attributeSubKindMap["Jabber"] = bbpim::AttributeSubKind::InstantMessagingJabber;
+    _attributeSubKindMap["MsLcs"] = bbpim::AttributeSubKind::InstantMessagingMsLcs;
+    _attributeSubKindMap["Skype"] = bbpim::AttributeSubKind::InstantMessagingSkype;
+    _attributeSubKindMap["YahooMessenger"] = bbpim::AttributeSubKind::InstantMessagingYahooMessenger;
+    _attributeSubKindMap["YahooMessegerJapan"] = bbpim::AttributeSubKind::InstantMessagingYahooMessengerJapan;
+    _attributeSubKindMap["BbPlaybook"] = bbpim::AttributeSubKind::VideoChatBbPlaybook;
+    _attributeSubKindMap["ringtone"] = bbpim::AttributeSubKind::SoundRingtone;
+    _attributeSubKindMap["note"] = bbpim::AttributeSubKind::Invalid;
 }
 
 void PimContactsQt::createKindAttributeMap() {

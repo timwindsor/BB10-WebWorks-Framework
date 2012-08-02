@@ -40,6 +40,8 @@ namespace bbpim = bb::pim::contacts;
 
 typedef std::map<std::string, bbpim::AttributeKind::Type> StringToKindMap;
 typedef std::map<std::string, bbpim::AttributeSubKind::Type> StringToSubKindMap;
+typedef std::map<bbpim::AttributeKind::Type, std::string> KindToStringMap;
+typedef std::map<bbpim::AttributeSubKind::Type, std::string> SubKindToStringMap;
 
 struct PimContactsThreadInfo {
     PimContacts *parent;
@@ -51,25 +53,15 @@ class PimContactsQt {
 public:
     PimContactsQt();
     ~PimContactsQt();
-    Json::Value Find(const Json::Value& argsJson);
+    Json::Value Find(const Json::Value& argsObj);
     Json::Value Save(const Json::Value& attributeObj);
     Json::Value CreateContact(const Json::Value& attributeObj);
     Json::Value DeleteContact(const Json::Value& contactObj);
     Json::Value EditContact(bbpim::Contact& contact, const Json::Value& attributeObj);
     Json::Value CloneContact(bbpim::Contact& contact, const Json::Value& attributeObj);
 
-    friend bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2);
-
 private:
-    bbpim::ContactBuilder& buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
-    bbpim::ContactBuilder& buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::AttributeKind::Type kind, const std::string& groupKey);
-    bbpim::ContactBuilder& buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::AttributeKind::Type kind);
-    bbpim::ContactBuilder& buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj);
-    bbpim::ContactBuilder& buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj);
-
-    bbpim::ContactBuilder& addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
-    bbpim::ContactBuilder& addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
-
+    // Helper functions for Find
     QSet<bbpim::ContactId> singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contactFields, bool favorite);
     Json::Value assembleSearchResults(const QSet<bbpim::ContactId>& results, const Json::Value& contactFields, int limit);
     void populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray);
@@ -79,6 +71,19 @@ private:
     static QString getSortFieldValue(const bbpim::SortColumn::Type sortField, const bbpim::Contact& contact);
     static QList<bbpim::SearchField::Type> getSearchFields(const Json::Value& searchFieldsJson);
 
+    static bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2);
+
+    // Helper functions for Save
+    bbpim::ContactBuilder& buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
+    bbpim::ContactBuilder& buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::AttributeKind::Type kind, const std::string& groupKey);
+    bbpim::ContactBuilder& buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::AttributeKind::Type kind);
+    bbpim::ContactBuilder& buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj);
+    bbpim::ContactBuilder& buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj);
+
+    bbpim::ContactBuilder& addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
+    bbpim::ContactBuilder& addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
+
+    // Mappings between JSON strings and attribute kinds/subkinds
     static void createAttributeKindMap();
     static void createAttributeSubKindMap();
     static void createKindAttributeMap();
@@ -86,9 +91,9 @@ private:
 
     static StringToKindMap _attributeKindMap;
     static StringToSubKindMap _attributeSubKindMap;
-    static std::map<bbpim::AttributeKind::Type, std::string> _kindAttributeMap;
-    static std::map<bbpim::AttributeSubKind::Type, std::string> _subKindAttributeMap;
-    static QList<SortSpecifier> _sortSpecs;
+    static KindToStringMap _kindAttributeMap;
+    static SubKindToStringMap _subKindAttributeMap;
+    static QList<bbpim::SortSpecifier> _sortSpecs;
 
     std::map<bbpim::ContactId, bbpim::Contact> _contactSearchMap;
 };
