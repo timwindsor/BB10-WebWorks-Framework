@@ -82,6 +82,7 @@ private:
     bbpim::ContactBuilder& buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj);
 
     bbpim::ContactBuilder& addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
+    bbpim::ContactBuilder& addAttributeDate(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
     bbpim::ContactBuilder& addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
 
     // Mappings between JSON strings and attribute kinds/subkinds
