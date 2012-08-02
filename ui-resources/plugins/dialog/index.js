@@ -56,12 +56,10 @@ function show(desc) {
         content.bottom(desc.htmlmessage ? desc.htmlmessage : x$(document.createTextNode(desc.message)));
         button.bottom(x$(document.createTextNode(desc.oklabel ? desc.oklabel : "OK")))
               .on('click', hide);
-
         panel.bottom(header)
              .bottom(content)
              .bottom(buttons
                 .bottom(button));
-
         res.ok = button[0];
         break;
     case 'InsecureSubresourceLoadPolicyConfirm':
@@ -232,7 +230,6 @@ function show(desc) {
             .addClass('dialog-button')
             .bottom(x$(document.createTextNode(desc.cancellabel ? desc.cancellabel : "Ignore")))
             .on('click', hide);
-
         panel.bottom(header)
             .bottom(content)
             .bottom(buttons
@@ -241,7 +238,6 @@ function show(desc) {
                 .bottom(button2)
                 .bottom(divider2)
                 .bottom(button3));
-
         res.save = button[0];
         res.never = button2[0];
         res.cancel = button3[0];
@@ -256,45 +252,50 @@ function show(desc) {
         return;
     }
     dialog.removeClass('hidden');
+
+    /*
+     * This call is executed from a different context, therefore we can't
+     * really return a value. We need to expose a call through the controller
+     * publish remote function
+     */
+
     return res;
 }
 
-/*
-function requestDialog(evt, evtId, returnValue) {
+function showDialog(description) {
 
-    var res = show(evt);
+    var res = show(description),
+        returnValue = {};
     if (res) {
-        qnx.callExtensionMethod('eventLoop.delayEvent', evtId);
         if (res.ok) {
             x$(res.ok).on('click', function () {
-                qnx.callExtensionMethod(
-                    'eventLoop.resumeEvent',
-                    evtId,
-                    '{"setPreventDefault": true'
-                        + (res.hasOwnProperty('username') ? ', "setUsername": "' + encodeURIComponent(res.username) + '"' : '')
-                        + (res.hasOwnProperty('password') ? ', "setPassword": "' + encodeURIComponent(res.password) + '"' : '')
-                        + (res.hasOwnProperty('oktext') ? ', "setResult": "' + res.oktext + '"' : '') + '}'
-                );
+                returnValue.username = res.hasOwnProperty('username') ? encodeURIComponent(res.username) : '';
+                returnValue.password = res.hasOwnProperty('password') ? encodeURIComponent(res.password) : '';
+                returnValue.oktext = res.hasOwnProperty('oktext') ? encodeURIComponent(res.oktext) : '';
+                window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
         if (res.cancel) {
             x$(res.cancel).on('click', function () {
-                qnx.callExtensionMethod('eventLoop.resumeEvent', evtId, '{"setPreventDefault": true, "setResult": null}');
+                returnValue.result = null;
+                window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
         if (res.save) {
             x$(res.save).on('click', function () {
-                qnx.callExtensionMethod('eventLoop.resumeEvent', evtId, '{"setPreventDefault": true, "setResult": "save"}');
+                returnValue.result = 'save';
+                window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
         if (res.never) {
             x$(res.never).on('click', function () {
-                qnx.callExtensionMethod('eventLoop.resumeEvent', evtId, '{"setPreventDefault": true, "setResult": "never"}');
+                returnValue.result  = 'never';
+                window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
     }
 }
-*/
+
 dialog = {
     /**
      * description can have
@@ -312,9 +313,7 @@ dialog = {
      *   username - User name for authentication challenge dialog
      *   password - Password for authentication challenge dialog
      */
-    showDialog: function (args) {
-        return show(args);
-    }
+    showDialog: showDialog,
 };
 
 module.exports = dialog;

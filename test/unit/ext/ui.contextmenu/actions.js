@@ -20,6 +20,7 @@ var _apiDir = __dirname + "./../../../../ext/ui.contextmenu",
     invocation,
     actions,
     success,
+    dialog,
     mockedWebWorks = {
         execAsync: jasmine.createSpy(),
         event: { once : jasmine.createSpy(),
@@ -72,6 +73,7 @@ describe("blackberry.ui.actions.index", function () {
         };
         GLOBAL.downloadSharedFile = jasmine.createSpy();
         actions = require(_apiDir + '/actions');
+        dialog = require(_libDir + './dialog/index');
         invocation = window.qnx.webplatform.getApplication().invocation;
     });
 
@@ -156,6 +158,7 @@ describe("blackberry.ui.actions.index", function () {
             isImage : true
         };
 
+        spyOn(dialog, 'show');
         actions.setCurrentContext(currentContext);
         actions.SaveImage('SaveImage');
         expect(qnx.callExtensionMethod).not.toHaveBeenCalled();
