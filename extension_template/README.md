@@ -8,19 +8,22 @@ extension that retreives the current amount of free memory on the device.
 
 The resources in the extension template folder include:
 
-* TestWidget/ - Resources for a WebWorks application that uses the Memory
+* TestApplication/ - Resources for a WebWorks application that uses the Memory
 Extension to get the amount of free memory on the device.
-* example.memory/ - JavaScript source files for the example Memory Extension.
-* jnext\_src\_example/common/ - JNext source files.
-* jnext\_src\_example/src/ - Native source files for the Memory Extension.
+* javascript\_src - The JavaScript source files of the example Memory Extension.
+* native\_src/ - The native source files for the Memory Extension.
+* output/ - An example file structure of a completed extension that can
+be copied into a WebWorks Installation extension folder.
+* project/ - An example file structure of a native extension project that can
+build the native portion of an extension.
 
 The Memory Extension implementation should be used in conjunction with this 
-read me file to understand how to create a WebWorks example.
+read me file to understand how to create a WebWorks extension.
 
 ## How to add an WebWorks Extension to your WebWorks Installation
 
 1. Navigate to the  Framework/ext folder of your WebWorks Installation and
-create a folder to for your extension.
+create a folder for your extension.
 2. Copy you JavaScript files to the root folder of your extension folder.
 3. Create a device and a simulator folder in the root of your extension folder.
 4. Build the native portion of your native extension. One shared library for
@@ -29,7 +32,9 @@ the device and another for the simulator.
 6. Copy the shared library for the simulator into the simulator folder.
 
 After completing the above steps you should be able to build WebWorks
-applications that can use your memory extension.
+applications that can use your memory extension. If done correctly, the file
+structure of your extension should match the file structure of the output
+folder in the extension template folder.
 
 IMPORTANT: Make sure that your WebWorks applications whitelist the extension
 otherwise the application will not be able to use the extension.
@@ -39,6 +44,7 @@ otherwise the application will not be able to use the extension.
 This part of the document will describe:
 1. How to setup a native extension project in eclipse.
 2. The steps needed to implement a JNEXT extension on the native side.
+3. How to build your native extension project.
 
 ### How to create an Extension Project with the Native SDK
 
@@ -51,31 +57,35 @@ When you're done click next.
 4. Select the active configuration you want to use for this project then click
 next. 
 5. If you wish to use a Native SDK that is different from the workspace SDK then
-uncheck the option to use the workspace SDK selelction and select a different
+uncheck the option to use the workspace SDK selection and select a different
 SDK. When you are done, click Finish. You should see your new project appear in
 the Project Explorer window.
 6. In order to build an extension you'll need to import
 [extension resources](#import) into your new project. 
 
 ### <a name="import">How to import extension resources</a>
+
 1. Right click on your project and select the import menu item. In the window
 that appears select the file system as an import source and click next.
 2. The next window will prompt you to provide a path to a folder. Select the
-common and src folders located in the extension\_template/jnext\_ext\_src folder
-of your WebWorks Installation folder. Import both the folders and their
-contents. Then click finish. Your project should now have a common folder and a
-source folder which contains source and header files. After following the
-instructions below to implement an extension you should
-[build your extension](#buildExtension) for both the device and the simultaor.
+common and src folders located in the native\_src folder of the extension
+template folder. Import both of the folders and their contents. Then click
+finish. Your project should now have a common folder and a source folder which
+contains source and header files. If done correctly, the file structure of your
+project should match the file structure of the project folder in the extension
+template folder.
+
+After following the instructions below to implement an extension you should
+[build your extension](#buildExtension) for both the device and the simultor.
 
 ### How to implement a JNEXT extension on the native side
 
-The native and javascript portion of a Webworks extension communicate with each
+The native and JavaScript portion of a Webworks extension communicate with each
 other through the use of an extension framework provided by JNEXT. The native
 interface for the JNEXT extension can be viewed in the plugin header file
 located in the common folder of your project. It also contains constants and
 utility functions that can be used in your native code. Your native extension
-must be detrived from JSExt which is defined in plugin.h. Therefore your
+must be derived from JSExt which is defined in plugin.h. Therefore your
 extension should include this header file.
 
 The MemoryExtension sample code included in the extension template folder
@@ -95,7 +105,7 @@ can be instantiated by this JNEXT extension.
 The onCreateObject function is the other callback that must be implemented by
 the native JNEXT extension. It takes two parameters. The first parameter is the
 name of the class requested to be created from the javascript side. Valid names
-are those that are returned in onGetObjList. The second paramter is the unique
+are those that are returned in onGetObjList. The second parameter is the unique
 object id for the class. This method returns a pointer to the created extension
 object.
 
@@ -113,7 +123,7 @@ private:
 };
 ```
 
-The m_id is an attribute contains the JNEXT id for this object. The id is
+The m_id is an attribute that contains the JNEXT id for this object. The id is
 passed to the class as an argument to the constructor. It is needed to trigger
 events on the JavaScript side from native.
 
@@ -122,7 +132,7 @@ can be deleted.
 
 The InvokeMethod function is called as a result from a request from JavaScript
 to invoke a method of this particular object. The only argument to this
-function is a string passed from JavaScript that this method should parsed in
+function is a string passed from JavaScript that this method should parse in
 order to determine which method of the native object should be executed.
 
 If you want the native code to be able to trigger an event on the JavaScript
@@ -133,14 +143,14 @@ following signature:
 void SendPluginEvent( const char* szEvent, void* pContext );
 ```
 
-The first parameter is a string which a space delimited string consisting of
+The first parameter is a space delimited string consisting of
 the m_id (inherited attribute from JSExt) followed by the arguments you wish to
 pass to the JavaScript on event function. The second parameter is the
 m_pContext (inherited attribute from JSExt).
 
 ### <a name="buildExtension">How to build your native Extension</a>
 
-1. Right click your project and select the Clean Project object.
+1. Right click your project and select the Clean Project ootion.
 2. Right click your project again and select Build Configurations -> Build Selected... .
 3. A window will appear that has shows all the available build configurations
 for the project. Depending on the profile you wish to use select the Device and
@@ -159,11 +169,11 @@ artifact tab which you can modify to change the build artifact that is
 generated. When you have completed your changes then select ok.
 
 Please note that each modification of the build artifact corresponds to a
-single configuration. If you wish to modify the build artifact of all the build
+single configuration. If you wish to modify the build artifacts of all the build
 configurations you will need to modify each build configuration.
 
 ## <a name="JavaScript">JavaScript Part - Overview</a>
-Under _example.memory_ folder there are following JavaScript files.
+Under the _javascrip\_src_ folder there are following JavaScript files:
 
 * __client.js__ - Considered to be a client side, exports APIs that are
 accessible from the client's application. __client.js__ file name is mandatory.
@@ -174,11 +184,11 @@ __index.js_ file name is mandatory.
 for the extension.
 
 __example.memory__ is the extension ID as it defined in __manifest.js__ and
-serves as a prefix to all methods and fields define in the __client.js__
+serves as a prefix to all methods and fields defined in the __client.js__
 
 __example.memory__._getMemory_ - Call this method to get free memory bytes
 __example.memory__._monitorMemory_ - Call this method to register and be
-notified on memory events.
+notified of memory events.
 
 ####See sample code below:
 
