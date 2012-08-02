@@ -30,8 +30,6 @@ function guid() {
  * @param properties
  */
 Contact = function (properties) {
-    this.id = properties && properties.id ? properties.id : "";
-    this.rawId = null;
     this.displayName = properties && properties.displayName ? properties.displayName : "";
     this.name = properties && properties.name ? properties.name : null; // ContactName
     this.nickname = properties && properties.nickname ? properties.nickname : "";
@@ -52,6 +50,9 @@ Contact = function (properties) {
     this.socialNetworks = properties && properties.socialNetworks ? properties.socialNetworks : null; // ContactField[]
     this.ringtone = properties && properties.ringtone ? properties.ringtone : "";
     this.favorite = properties && properties.favorite ? properties.favorite : false;
+
+    var privateId = properties && properties.id ? properties.id : null;
+    Object.defineProperty(this, "id", { "value": privateId });
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {
@@ -62,21 +63,47 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
         saveCallback;
 
     for (key in this) {
-        if (this.hasOwnProperty(key) && this[key] !== undefined) {
+        if (this.hasOwnProperty(key) && this[key] !== null) {
             args[key] = this[key];
         }
     }
 
+    if (args.nickname) {
+        args.name = args.name || {};
+        args.name.nickname = args.nickname;
+    }
+
+    if (args.displayName) {
+        args.name = args.name || {};
+        args.name.displayName = args.displayName;
+    }
+
+    if (args.birthday && args.birthday.toDateString) {
+        args.birthday = args.birthday.toDateString();
+    }
+
+    if (args.anniversary && args.anniversary.toDateString) {
+        args.anniversary = args.anniversary.toDateString();
+    }
+
+    args.id = this.id;
     args._eventId = guid();
 
     saveCallback = function (args) {
         var result = JSON.parse(unescape(args.result));
 
         if (result._success) {
-            this.id = result.id;
-
             if (successCallback) {
-                successCallback(this);
+                if (result.name && result.name.nickname) {
+                    result.nickname = result.name.nickname;
+                }
+
+                if (result.name && result.name.displayName) {
+                    result.displayName = result.name.displayName;
+                }
+
+                var newContact = new Contact(result);
+                successCallback(newContact);
             }
         } else {
             if (errorCallback) {
@@ -85,7 +112,7 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
         }
     };
 
-    window.webworks.event.once(_ID, args._eventId, saveCallback.bind(this));
+    window.webworks.event.once(_ID, args._eventId, saveCallback);
     return window.webworks.execAsync(_ID, "save", args);
 };
 
@@ -112,12 +139,12 @@ Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
         }
     };
 
-    window.webworks.event.once(_ID, args._eventId, removeCallback.bind(this));
+    window.webworks.event.once(_ID, args._eventId, removeCallback);
     return window.webworks.execAsync(_ID, "remove", args);
 };
 
 Contact.prototype.clone = function () {
-    var contact = new Contact(),
+    var contact = new Contact({"id" : -1 * this.id}),
         key;
 
     for (key in this) {
@@ -126,7 +153,6 @@ Contact.prototype.clone = function () {
         }
     }
 
-    contact.id = -1 * this.id;
     return contact;
 };
 
