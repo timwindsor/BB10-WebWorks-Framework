@@ -22,7 +22,7 @@ _self.getMemory = function () {
 };
 
 _self.monitorMemory = function (cb) {
-    window.webworks.event.once(_ID, "example.memory.memoryEvent", cb);
+    window.webworks.event.add(_ID, "example.memory.memoryEvent", cb);
 
     return window.webworks.execSync(_ID, "monitorMemoryServer", null);
 };

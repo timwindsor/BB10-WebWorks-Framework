@@ -13,7 +13,8 @@
             }
             
             function monitorMemoryUsage() {
-                example.memory.monitorMemory(memoryUsageCallback);
+                var ret = example.memory.monitorMemory(memoryUsageCallback);
+                alert(ret);
             }
         </script>
 	</head>
