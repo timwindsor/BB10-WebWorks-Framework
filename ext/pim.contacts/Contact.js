@@ -36,6 +36,8 @@ Contact = function (properties) {
     this.name = properties && properties.name ? properties.name : null; // ContactName
     this.nickname = properties && properties.nickname ? properties.nickname : "";
     this.phoneNumbers = properties && properties.phoneNumbers ? properties.phoneNumbers : null; // ContactField[]
+    this.faxNumbers = properties && properties.faxNumbers ? properties.faxNumbers : null; // ContactField[]
+    this.pagerNumbers = properties && properties.pagerNumbers ? properties.pagerNumbers : null; // ContactField[]
     this.emails = properties && properties.emails ? properties.emails : null; // ContactField[]
     this.addresses = properties && properties.addresses ? properties.addresses : null; // ContactAddress[]
     this.ims = properties && properties.ims ? properties.ims : null; // ContactField[]
@@ -49,6 +51,7 @@ Contact = function (properties) {
     this.videoChat = properties && properties.videoChat ? properties.videoChat : null; // String[]
     this.socialNetworks = properties && properties.socialNetworks ? properties.socialNetworks : null; // ContactField[]
     this.ringtone = properties && properties.ringtone ? properties.ringtone : "";
+    this.favorite = properties && properties.favorite ? properties.favorite : false;
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {

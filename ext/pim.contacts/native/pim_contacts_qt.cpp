@@ -32,6 +32,7 @@ StringToSubKindMap PimContactsQt::_attributeSubKindMap;
 KindToStringMap PimContactsQt::_kindAttributeMap;
 SubKindToStringMap PimContactsQt::_subKindAttributeMap;
 QList<bbpim::SortSpecifier> PimContactsQt::_sortSpecs;
+std::map<bbpim::ContactId, bbpim::Contact> PimContactsQt::_contactSearchMap;
 
 PimContactsQt::PimContactsQt()
 {
@@ -56,16 +57,8 @@ PimContactsQt::~PimContactsQt()
 
 Json::Value PimContactsQt::Find(const Json::Value& argsObj)
 {
-    fprintf(stderr, "%s", "Beginning of find\n");
-
-    _contactSearchMap.clear();
-    _sortSpecs.clear();
-
     Json::Value contactFields;
     QSet<bbpim::ContactId> results;
-
-    Json::Value filter;
-    Json::Value sort;
     int limit;
     bool favorite;
 
@@ -79,53 +72,8 @@ Json::Value PimContactsQt::Find(const Json::Value& argsObj)
         } else if (key == "options") {
             favorite = argsObj[key]["favorite"].asBool();
             limit = argsObj[key]["limit"].asInt();
-
-            filter = argsObj[key]["filter"];
-            if (filter.isArray()) {
-                for (int j = 0; j < filter.size(); j++) {
-                    QSet<bbpim::ContactId> currentResults = singleFieldSearch(filter[j], contactFields, favorite);
-
-                    if (currentResults.empty()) {
-                        // no need to continue, can return right away
-                        results = currentResults;
-                        break;
-                    } else {
-                        if (j == 0) {
-                            results = currentResults;
-                        } else {
-                            results.intersect(currentResults);
-                        }
-                    }
-                }
-            }
-
-            sort = argsObj[key]["sort"];
-            if (sort.isArray()) {
-                for (int j = 0; j < sort.size(); j++) {
-                    bbpim::SortOrder::Type order;
-                    bbpim::SortColumn::Type sortField;
-
-                    if (sort[j]["desc"].asBool()) {
-                        order = bbpim::SortOrder::Descending;
-                    } else {
-                        order = bbpim::SortOrder::Ascending;
-                    }
-
-                    switch (sort[j]["fieldName"].asInt()) {
-                        case bbpim::SortColumn::FirstName:
-                            sortField = bbpim::SortColumn::FirstName;
-                            break;
-                        case bbpim::SortColumn::LastName:
-                            sortField = bbpim::SortColumn::LastName;
-                            break;
-                        case bbpim::SortColumn::CompanyName:
-                            sortField = bbpim::SortColumn::CompanyName;
-                            break;
-                    }
-
-                    _sortSpecs.append(bbpim::SortSpecifier(sortField, order));
-                }
-            }
+            results = getPartialSearchResults(argsObj[key]["filter"], contactFields, favorite);
+            getSortSpecs(argsObj[key]["sort"]);
         }
     }
 
@@ -321,6 +269,65 @@ QList<bbpim::SearchField::Type> PimContactsQt::getSearchFields(const Json::Value
     return searchFields;
 }
 
+void PimContactsQt::getSortSpecs(const Json::Value& sort)
+{
+    _sortSpecs.clear();
+
+    if (sort.isArray()) {
+        for (int j = 0; j < sort.size(); j++) {
+            bbpim::SortOrder::Type order;
+            bbpim::SortColumn::Type sortField;
+
+            if (sort[j]["desc"].asBool()) {
+                order = bbpim::SortOrder::Descending;
+            } else {
+                order = bbpim::SortOrder::Ascending;
+            }
+
+            switch (sort[j]["fieldName"].asInt()) {
+                case bbpim::SortColumn::FirstName:
+                    sortField = bbpim::SortColumn::FirstName;
+                    break;
+                case bbpim::SortColumn::LastName:
+                    sortField = bbpim::SortColumn::LastName;
+                    break;
+                case bbpim::SortColumn::CompanyName:
+                    sortField = bbpim::SortColumn::CompanyName;
+                    break;
+            }
+
+            _sortSpecs.append(bbpim::SortSpecifier(sortField, order));
+        }
+    }
+}
+
+QSet<bbpim::ContactId> PimContactsQt::getPartialSearchResults(const Json::Value& filter, const Json::Value& contactFields, const bool favorite)
+{
+    QSet<bbpim::ContactId> results;
+
+    _contactSearchMap.clear();
+
+    if (filter.isArray()) {
+        for (int j = 0; j < filter.size(); j++) {
+            QSet<bbpim::ContactId> currentResults = singleFieldSearch(filter[j], contactFields, favorite);
+
+            if (currentResults.empty()) {
+                // no need to continue, can return right away
+                results = currentResults;
+                break;
+            } else {
+                if (j == 0) {
+                    results = currentResults;
+                } else {
+                    results.intersect(currentResults);
+                }
+            }
+        }
+    }
+
+    return results;
+}
+
 QSet<bbpim::ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contact_fields, bool favorite)
 {
     QList<bbpim::SearchField::Type> searchFields = PimContactsQt::getSearchFields(searchFieldsJson);
@@ -344,8 +351,6 @@ QSet<bbpim::ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searc
 
             if (kindIter != _attributeKindMap.end()) {
                 includeFields.append(kindIter->second);
-            } else {
-                fprintf(stderr, "Could not find search field in map: %s\n", contact_fields[i].asString().c_str());
             }
         }
 
@@ -365,7 +370,6 @@ QSet<bbpim::ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searc
 
 void PimContactsQt::populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray)
 {
-    fprintf(stderr, "populateField kind= %d\n", kind);
     QList<bbpim::ContactAttribute> attrs = contact.filteredAttributes(kind);
     QList<bbpim::ContactAttribute>::const_iterator k = attrs.constBegin();
 
@@ -396,10 +400,8 @@ void PimContactsQt::populateField(const bbpim::Contact& contact, bbpim::Attribut
                     }
                 }
             }
-        } else {
-            // TODO(rtse): not found in map
-            fprintf(stderr, "populateField: subkind not found in map: %d\n", currentAttr.subKind());
         }
+
         ++k;
     }
 }
@@ -449,9 +451,6 @@ void PimContactsQt::populateOrganizations(const bbpim::Contact& contact, Json::V
 
             if (typeIter != _subKindAttributeMap.end()) {
                 org[typeIter->second] = Json::Value(attr.value().toStdString());
-            } else {
-                // TODO(rtse): not found in map
-                fprintf(stderr, "populateOrganizations: subkind not found in map%s\n");
             }
 
             ++k;
@@ -519,7 +518,6 @@ bool PimContactsQt::lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2)
 
 Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& resultIds, const Json::Value& contactFields, int limit)
 {
-    fprintf(stderr, "Beginning of assembleSearchResults, results size=%d\n", resultIds.size());
     QMap<bbpim::ContactId, bbpim::Contact> completeResults;
     QSet<bbpim::ContactId>::const_iterator i = resultIds.constBegin();
 
@@ -565,16 +563,8 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& r
                         break;
                     }
 
-                    case bbpim::AttributeKind::Date: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
-                        break;
-                    }
-
-                    case bbpim::AttributeKind::Note: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
-                        break;
-                    }
-
+                    case bbpim::AttributeKind::Date:
+                    case bbpim::AttributeKind::Note:
                     case bbpim::AttributeKind::Sound: {
                         populateField(sortedResults[i], kindIter->second, contactItem, false, false);
                         break;
@@ -582,7 +572,7 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& r
 
                     case bbpim::AttributeKind::VideoChat: {
                         contactItem[field] = Json::Value();
-                        populateField(sortedResults[i], kindIter->second, contactItem[field], false, false);
+                        populateField(sortedResults[i], kindIter->second, contactItem[field], false, true);
                         break;
                     }
 
@@ -616,8 +606,6 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& r
             }
         }
 
-        // TODO(rtse): always include id?
-        // TODO(rtse): handle fields not under regular kinds/subkinds
         contactItem["id"] = Json::Value(sortedResults[i].id());
 
         contactArray.append(contactItem);
@@ -892,16 +880,11 @@ void PimContactsQt::createKindAttributeMap() {
     _kindAttributeMap[bbpim::AttributeKind::Email] = "emails";
     _kindAttributeMap[bbpim::AttributeKind::Website] = "urls";
     _kindAttributeMap[bbpim::AttributeKind::Profile] = "socialNetworks";
-    //attributeKindMap[bbpim::AttributeKind::Date] = "anniversary";
-    // attributeKindMap[bbpim::AttributeKind::Date] = "birthday";
-    //attributeKindMap["name"] = bbpim::AttributeKind::Name;
-    //attributeKindMap["displayName"] = bbpim::AttributeKind::Name;
     _kindAttributeMap[bbpim::AttributeKind::OrganizationAffiliation] = "organizations";
     _kindAttributeMap[bbpim::AttributeKind::Education] = "education";
     _kindAttributeMap[bbpim::AttributeKind::Note] = "note";
     _kindAttributeMap[bbpim::AttributeKind::InstantMessaging] = "ims";
     _kindAttributeMap[bbpim::AttributeKind::VideoChat] = "videoChat";
-    //kindAttributeMap[bbpim::AttributeKind::Invalid] = "addresses";
     _kindAttributeMap[bbpim::AttributeKind::Sound] = "ringtone";
     _kindAttributeMap[bbpim::AttributeKind::Website] = "urls";
 }

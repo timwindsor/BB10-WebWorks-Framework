@@ -62,16 +62,17 @@ public:
 
 private:
     // Helper functions for Find
-    QSet<bbpim::ContactId> singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contactFields, bool favorite);
     Json::Value assembleSearchResults(const QSet<bbpim::ContactId>& results, const Json::Value& contactFields, int limit);
     void populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray);
     void populateOrganizations(const bbpim::Contact& contact, Json::Value& contactOrgs);
     void populateAddresses(const bbpim::Contact& contact, Json::Value& contactAddrs);
     void populatePhotos(const bbpim::Contact& contact, Json::Value& contactPhotos);
 
+    static QSet<bbpim::ContactId> singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contactFields, bool favorite);
     static QString getSortFieldValue(const bbpim::SortColumn::Type sortField, const bbpim::Contact& contact);
     static QList<bbpim::SearchField::Type> getSearchFields(const Json::Value& searchFieldsJson);
-
+    static void getSortSpecs(const Json::Value& sort);
+    static QSet<bbpim::ContactId> getPartialSearchResults(const Json::Value& filter, const Json::Value& contactFields, const bool favorite);
     static bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2);
 
     // Helper functions for Save
@@ -96,7 +97,7 @@ private:
     static SubKindToStringMap _subKindAttributeMap;
     static QList<bbpim::SortSpecifier> _sortSpecs;
 
-    std::map<bbpim::ContactId, bbpim::Contact> _contactSearchMap;
+    static std::map<bbpim::ContactId, bbpim::Contact> _contactSearchMap;
 };
 
 } // namespace webworks
