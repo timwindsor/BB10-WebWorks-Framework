@@ -15,13 +15,12 @@
  */
  
 var _self = {},
-    Contact,
-    ContactField,
-    ContactAddress,
-    ContactName,
-    ContactOrganization,
-    ContactPhoto,
-    _ID = require("./manifest.json").namespace;
+    _ID = require("./manifest.json").namespace,
+    Contact = require("./Contact"),
+    ContactName = require("./ContactName"),
+    ContactOrganization = require("./ContactOrganization"),
+    ContactAddress = require("./ContactAddress"),
+    ContactField = require("./ContactField");
 
 function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -31,8 +30,66 @@ function guid() {
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 }
 
-_self.find = function (findOptions) {
-    return window.webworks.execSync(_ID, "find", findOptions || {});
+function populateFieldArray(contactProps, field, ClassName) {
+    if (contactProps[field]) {
+        var list = [];
+        contactProps[field].forEach(function (obj) {
+            if (ClassName === ContactField) {
+                list.push(new ClassName(obj.type, obj.value));
+            } else {
+                list.push(new ClassName(obj));
+            }
+        });
+        contactProps[field] = list;
+    }
+}
+
+_self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
+    // TODO validation
+    var callback = function (args) {
+            var result = JSON.parse(unescape(args.result)),
+                contacts = result.contacts,
+                realContacts = [];
+
+            if (result._success) {
+                if (onFindSuccess) {
+                    contacts.forEach(function (contact) {
+                        var name = new ContactName(contact.name);
+
+                        populateFieldArray(contact, "addresses", ContactAddress);
+                        populateFieldArray(contact, "organizations", ContactOrganization);
+                        populateFieldArray(contact, "emails", ContactField);
+                        populateFieldArray(contact, "phoneNumbers", ContactField);
+                        populateFieldArray(contact, "faxNumbers", ContactField);
+                        populateFieldArray(contact, "pagerNumbers", ContactField);
+                        populateFieldArray(contact, "ims", ContactField);
+                        populateFieldArray(contact, "socialNetworks", ContactField);
+                        populateFieldArray(contact, "urls", ContactField);
+
+                        contact.displayName = contact.name.displayName;
+                        contact.nickname = contact.name.nickname;
+                        contact.name = name;
+
+                        realContacts.push(new Contact(contact));
+                    });
+
+                    onFindSuccess(realContacts);
+                }
+            } else {
+                if (onFindError) {
+                    onFindError(result);
+                }
+            }
+        },
+        eventId = guid();
+
+    window.webworks.event.once(_ID, eventId, callback);
+
+    return window.webworks.execAsync(_ID, "find", {
+        "_eventId": eventId,
+        "fields": contactFields,
+        "options": findOptions
+    });
 };
 
 _self.create = function (properties) {
@@ -48,145 +105,12 @@ _self.create = function (properties) {
     return contact;
 };
 
-Contact = function () {
-    this.id = "";
-
-    // Undefined?
-    this.addresses = undefined;
-    this.anniversary = undefined;
-    this.birthday = undefined;
-    this.categories = undefined;
-    this.displayName = undefined;
-    this.emails = undefined;
-    this.favorite = undefined;
-    this.faxNumbers = undefined;
-    this.ims = undefined;
-    this.name = undefined;
-    this.nickname = undefined;
-    this.note = undefined;
-    this.organizations = undefined;
-    this.pagerNumbers = undefined;
-    this.phoneNumbers = undefined;
-    this.photos = undefined;
-    this.ringtone = undefined;
-    this.socialNetworks = undefined;
-    this.urls = undefined;
-    this.videoChat = undefined;
-};
-
-Contact.prototype.save = function (onSaveSuccess, onSaveError) {
-    var args = {},
-        key,
-        successCallback = onSaveSuccess,
-        errorCallback = onSaveError,
-        saveCallback;
-
-    for (key in this) {
-        if (this.hasOwnProperty(key) && this[key] !== undefined) {
-            args[key] = this[key];
-        }
-    }
-
-    args._eventId = guid();
-
-    saveCallback = function (args) {
-        var result = JSON.parse(unescape(args.result));
-
-        if (result._success) {
-            this.id = result.id;
-
-            if (successCallback) {
-                successCallback(this);
-            }
-        } else {
-            if (errorCallback) {
-                errorCallback(result);
-            }
-        }
-    };
-
-    window.webworks.event.once(_ID, args._eventId, saveCallback.bind(this));
-    return window.webworks.execAsync(_ID, "save", args);
-};
-
-Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
-    var args = {},
-        successCallback = onRemoveSuccess,
-        errorCallback = onRemoveError,
-        removeCallback;
-
-    args.contactId = this.id;
-    args._eventId = guid();
-
-    removeCallback = function (args) {
-        var result = JSON.parse(unescape(args.result));
-
-        if (result._success) {
-            if (successCallback) {
-                successCallback();
-            }
-        } else {
-            if (errorCallback) {
-                errorCallback(result);
-            }
-        }
-    };
-
-    window.webworks.event.once(_ID, args._eventId, removeCallback.bind(this));
-    return window.webworks.execAsync(_ID, "remove", args);
-};
-
-Contact.prototype.clone = function () {
-    var contact = new Contact(),
-        key;
-
-    for (key in this) {
-        if (this.hasOwnProperty(key)) {
-            contact[key] = this[key];
-        }
-    }
-
-    contact.id = -1 * this.id;
-    return contact;
-};
-
-ContactField = function (type, value, pref) {
-    this.type = type || "";
-    this.value = value || "";
-    this.pref = pref || false;
-};
-
-ContactAddress = function (type, address1, address2, locality, region, postalCode, country, pref) {
-    this.type = type || "";
-    this.address1 = address1 || "";
-    this.address2 = address2 || "";
-    this.locality = locality || "";
-    this.region = region || "";
-    this.postalCode = postalCode || "";
-    this.country = country || "";
-    this.pref = pref || false;
-};
-
-ContactName = function () {
-};
-
-ContactOrganization = function (name, department, title, pref) {
-    this.name = name || "";
-    this.department = department || "";
-    this.title = title || "";
-    this.pref = pref || false;
-};
-
-ContactPhoto = function (originalFilePath, pref) {
-    this.originalFilePath = originalFilePath || "";
-    this.pref = pref || false;
-};
-
 _self.Contact = Contact;
 _self.ContactField = ContactField;
 _self.ContactAddress = ContactAddress;
 _self.ContactName = ContactName;
 _self.ContactOrganization = ContactOrganization;
-_self.ContactPhoto = ContactPhoto;
+_self.ContactFindOptions = require("./ContactFindOptions");
+_self.ContactPhoto = require("./ContactPhoto");
 
 module.exports = _self;
