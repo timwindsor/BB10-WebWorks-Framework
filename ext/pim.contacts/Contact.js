@@ -30,11 +30,11 @@ function guid() {
  * @param properties
  */
 Contact = function (properties) {
-    this.id = properties && properties.id ? properties.id : null;
+    this.id = properties && properties.id ? properties.id : "";
     this.rawId = null;
-    this.displayName = properties && properties.displayName ? properties.displayName : null;
+    this.displayName = properties && properties.displayName ? properties.displayName : "";
     this.name = properties && properties.name ? properties.name : null; // ContactName
-    this.nickname = properties && properties.nickname ? properties.nickname : null;
+    this.nickname = properties && properties.nickname ? properties.nickname : "";
     this.phoneNumbers = properties && properties.phoneNumbers ? properties.phoneNumbers : null; // ContactField[]
     this.emails = properties && properties.emails ? properties.emails : null; // ContactField[]
     this.addresses = properties && properties.addresses ? properties.addresses : null; // ContactAddress[]
@@ -42,12 +42,13 @@ Contact = function (properties) {
     this.organizations = properties && properties.organizations ? properties.organizations : null; // ContactOrganization[]
     this.birthday = properties && properties.birthday ? properties.birthday : null;
     this.anniversary = properties && properties.anniversary ? properties.anniversary : null;
-    this.note = properties && properties.note ? properties.note : null;
+    this.note = properties && properties.note ? properties.note : "";
     this.photos = properties && properties.photos ? properties.photos : null; // ContactField[]
     this.categories = properties && properties.categories ? properties.categories : null; // ContactField[]
     this.urls = properties && properties.urls ? properties.urls : null; // ContactField[]
     this.videoChat = properties && properties.videoChat ? properties.videoChat : null; // String[]
     this.socialNetworks = properties && properties.socialNetworks ? properties.socialNetworks : null; // ContactField[]
+    this.ringtone = properties && properties.ringtone ? properties.ringtone : "";
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {

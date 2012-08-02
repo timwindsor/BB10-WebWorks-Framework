@@ -316,16 +316,8 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& resultId
                         break;
                     }
 
-                    case AttributeKind::Date: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
-                        break;
-                    }
-
-                    case AttributeKind::Note: {
-                        populateField(sortedResults[i], kindIter->second, contactItem, false, false);
-                        break;
-                    }
-
+                    case AttributeKind::Date:
+                    case AttributeKind::Note:
                     case AttributeKind::Sound: {
                         populateField(sortedResults[i], kindIter->second, contactItem, false, false);
                         break;
@@ -333,7 +325,7 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<ContactId>& resultId
 
                     case AttributeKind::VideoChat: {
                         contactItem[field] = Json::Value();
-                        populateField(sortedResults[i], kindIter->second, contactItem[field], false, false);
+                        populateField(sortedResults[i], kindIter->second, contactItem[field], false, true);
                         break;
                     }
 
