@@ -20,8 +20,9 @@
 #include <json/value.h>
 #include <pthread.h>
 #include <string>
-
 #include "../common/plugin.h"
+
+typedef void* ThreadFunc(void *);
 
 class PimContacts : public JSExt
 {
@@ -36,7 +37,7 @@ public:
     static void* SaveThread(void *args);
     static void* RemoveThread(void *args);
 private:
-    bool startThread(void* (*threadFunction)(void *), Json::Value *jsonObj);
+    bool startThread(ThreadFunc threadFunction, Json::Value *jsonObj);
 
     std::string m_id;
 };

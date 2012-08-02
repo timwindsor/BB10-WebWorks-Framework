@@ -35,10 +35,14 @@ _self.find = function (findOptions) {
     return window.webworks.execSync(_ID, "find", findOptions || {});
 };
 
-_self.create = function (attributes) {
-    var contact = new Contact();
+_self.create = function (properties) {
+    var contact = new Contact(),
+        key;
 
-    for (key in attributes) {
+    for (key in properties) {
+        if (properties.hasOwnProperty(key)) {
+            contact[key] = properties[key];
+        }
     }
 
     return contact;
@@ -48,26 +52,26 @@ Contact = function () {
     this.id = "";
 
     // Undefined?
-    this.addresses;
-    this.anniversary;
-    this.birthday;
-    this.categories;
-    this.displayName;
-    this.emails;
-    this.favorite;
-    this.faxNumbers;
-    this.ims;
-    this.name;
-    this.nickname;
-    this.note;
-    this.organizations;
-    this.pagerNumbers;
-    this.phoneNumbers;
-    this.photos;
-    this.ringtone;
-    this.socialNetworks;
-    this.urls;
-    this.videoChat;
+    this.addresses = undefined;
+    this.anniversary = undefined;
+    this.birthday = undefined;
+    this.categories = undefined;
+    this.displayName = undefined;
+    this.emails = undefined;
+    this.favorite = undefined;
+    this.faxNumbers = undefined;
+    this.ims = undefined;
+    this.name = undefined;
+    this.nickname = undefined;
+    this.note = undefined;
+    this.organizations = undefined;
+    this.pagerNumbers = undefined;
+    this.phoneNumbers = undefined;
+    this.photos = undefined;
+    this.ringtone = undefined;
+    this.socialNetworks = undefined;
+    this.urls = undefined;
+    this.videoChat = undefined;
 };
 
 Contact.prototype.save = function (onSaveSuccess, onSaveError) {
@@ -78,7 +82,7 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
         saveCallback;
 
     for (key in this) {
-        if (this.hasOwnProperty(key) && this[key] != undefined) {
+        if (this.hasOwnProperty(key) && this[key] !== undefined) {
             args[key] = this[key];
         }
     }

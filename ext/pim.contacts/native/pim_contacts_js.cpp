@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "pim_contacts_js.hpp"
-#include "pim_contacts_qt.hpp"
 #include <json/reader.h>
 #include <json/writer.h>
 #include <string>
+#include "pim_contacts_js.hpp"
+#include "pim_contacts_qt.hpp"
 
 PimContacts::PimContacts(const std::string& id) : m_id(id)
 {
@@ -86,7 +86,7 @@ void PimContacts::NotifyEvent(const std::string& eventId, const std::string& eve
     SendPluginEvent(eventString.c_str(), m_pContext);
 }
 
-bool PimContacts::startThread(void* (*threadFunction)(void *), Json::Value *jsonObj) {
+bool PimContacts::startThread(ThreadFunc threadFunction, Json::Value *jsonObj) {
     webworks::PimContactsThreadInfo *thread_info = new webworks::PimContactsThreadInfo;
     thread_info->parent = this;
     thread_info->jsonObj = jsonObj;
@@ -97,7 +97,7 @@ bool PimContacts::startThread(void* (*threadFunction)(void *), Json::Value *json
     pthread_attr_setdetachstate(&thread_attr, PTHREAD_CREATE_DETACHED);
 
     pthread_t thread;
-    pthread_create(&thread, &thread_attr, (*threadFunction), static_cast<void *>(thread_info));
+    pthread_create(&thread, &thread_attr, threadFunction, static_cast<void *>(thread_info));
     pthread_attr_destroy(&thread_attr);
 
     if (!thread) {

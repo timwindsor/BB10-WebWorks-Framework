@@ -105,12 +105,11 @@ JNEXT.PimContacts = function ()
     };
    
     self.onEvent = function (strData) {
-        console.log(strData);
         var arData = strData.split(" "),
-            strEventDesc = arData[0];
+            strEventDesc = arData[0],
+            args = {};
             
         if (strEventDesc === "result") {
-            var args = {};
             args.result = escape(strData.split(" ").slice(2).join(" "));
             _event.trigger(arData[1], args);
         }

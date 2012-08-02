@@ -17,8 +17,6 @@
 #ifndef PIM_CONTACTS_QT_H_
 #define PIM_CONTACTS_QT_H_
 
-#include <string>
-#include <map>
 #include <json/value.h>
 #include <bb/pim/contacts/ContactService.hpp>
 #include <bb/pim/contacts/ContactConsts.hpp>
@@ -30,16 +28,18 @@
 #include <bb/pim/contacts/ContactPostalAddressBuilder.hpp>
 #include <bb/pim/contacts/ContactPhoto.hpp>
 #include <bb/pim/contacts/ContactPhotoBuilder.hpp>
+#include <string>
+#include <map>
 #include "../common/plugin.h"
 
 class PimContacts;
 
 namespace webworks {
 
-using namespace bb::pim::contacts;
+namespace bbpim = bb::pim::contacts;
 
-typedef std::map<std::string, AttributeKind::Type> StringKindMap;
-typedef std::map<std::string, AttributeSubKind::Type> StringSubKindMap;
+typedef std::map<std::string, bbpim::AttributeKind::Type> StringToKindMap;
+typedef std::map<std::string, bbpim::AttributeSubKind::Type> StringToSubKindMap;
 
 struct PimContactsThreadInfo {
     PimContacts *parent;
@@ -55,23 +55,23 @@ public:
     Json::Value Save(const Json::Value& attributeObj);
     Json::Value CreateContact(const Json::Value& attributeObj);
     Json::Value DeleteContact(const Json::Value& contactObj);
-    Json::Value EditContact(Contact& contact, const Json::Value& attributeObj);
-    Json::Value CloneContact(Contact& contact, const Json::Value& attributeObj);
+    Json::Value EditContact(bbpim::Contact& contact, const Json::Value& attributeObj);
+    Json::Value CloneContact(bbpim::Contact& contact, const Json::Value& attributeObj);
 
 private:
-    ContactBuilder& buildAttributeKind(ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
-    ContactBuilder& buildGroupedAttributes(ContactBuilder& contactBuilder, const Json::Value& fieldsObj, AttributeKind::Type kind, const std::string& groupKey);
-    ContactBuilder& buildFieldAttribute(ContactBuilder& contactBuilder, const Json::Value& fieldObj, AttributeKind::Type kind);
-    ContactBuilder& buildPostalAddress(ContactBuilder& contactBuilder, const Json::Value& addressObj);
-    ContactBuilder& buildPhoto(ContactBuilder& contactBuilder, const Json::Value& photoObj);
+    bbpim::ContactBuilder& buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
+    bbpim::ContactBuilder& buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::AttributeKind::Type kind, const std::string& groupKey);
+    bbpim::ContactBuilder& buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::AttributeKind::Type kind);
+    bbpim::ContactBuilder& buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj);
+    bbpim::ContactBuilder& buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj);
 
-    ContactBuilder& addAttribute(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value);
-    ContactBuilder& addAttributeToGroup(ContactBuilder& contactBuilder, const AttributeKind::Type kind, const AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
+    bbpim::ContactBuilder& addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
+    bbpim::ContactBuilder& addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
 
     static void createAttributeKindMap();
     static void createAttributeSubKindMap();
-    static std::map<std::string, AttributeKind::Type> _attributeKindMap;
-    static std::map<std::string, AttributeSubKind::Type> _attributeSubKindMap;
+    static StringToKindMap _attributeKindMap;
+    static StringToSubKindMap _attributeSubKindMap;
 };
 
 } // namespace webworks
