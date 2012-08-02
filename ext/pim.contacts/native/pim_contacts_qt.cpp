@@ -651,7 +651,17 @@ bbpim::ContactBuilder& PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& 
             }
 
             // Strings:
-            case bbpim::AttributeKind::Date:
+            case bbpim::AttributeKind::Date: {
+                StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
+
+                if (subkindIter != _attributeSubKindMap.end()) {
+                    std::string value = jsonObj.asString();
+                    contactBuilder = addAttributeDate(contactBuilder, kindIter->second, subkindIter->second, value);
+                }
+
+                break;
+            }
+
             case bbpim::AttributeKind::Note:
             case bbpim::AttributeKind::Sound: {
                 StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
@@ -714,6 +724,25 @@ bbpim::ContactBuilder& PimContactsQt::addAttribute(bbpim::ContactBuilder& contac
     attributeBuilder = attributeBuilder.setKind(kind);
     attributeBuilder = attributeBuilder.setSubKind(subkind);
     attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+
+    return contactBuilder.addAttribute(attribute);
+}
+
+bbpim::ContactBuilder& PimContactsQt::addAttributeDate(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value)
+{
+    bbpim::ContactAttribute attribute;
+    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+
+    QDateTime date = QDateTime::fromString(QString(value.c_str()), QString("ddd MMM dd yyyy"));
+
+    attributeBuilder = attributeBuilder.setKind(kind);
+    attributeBuilder = attributeBuilder.setSubKind(subkind);
+
+    if (date.isValid()) {
+        attributeBuilder = attributeBuilder.setValue(date);
+    } else {
+        attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+    }
 
     return contactBuilder.addAttribute(attribute);
 }

@@ -69,14 +69,6 @@ JNEXT.PimContacts = function ()
     };
 
     self.save = function (args) {
-        if (args.displayName) {
-            args.name.displayName = args.displayName;
-        } 
-
-        if (args.nickname) {
-            args.name.nickname = args.nickname;
-        }
-
         JNEXT.invoke(self.m_id, "save " + JSON.stringify(args));
         return "";
     };
