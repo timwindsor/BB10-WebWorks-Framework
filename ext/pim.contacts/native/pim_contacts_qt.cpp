@@ -385,12 +385,7 @@ void PimContactsQt::populateField(const bbpim::Contact& contact, bbpim::Attribut
                     contactItem.append(val);
                 } else {
                     if (kind == bbpim::AttributeKind::Date) {
-                        //Json::Value::Int64 numMillisecs;
-                        //numMillisecs = static_cast<Json::Value::Int64> (currentAttr.valueAsDateTime().toMSecsSinceEpoch());
-                        //yyyy-MM-ddThh:mm:ss.zzzZ
                         QString format = "yyyy-MM-dd";
-                        // if it's a date field, store number of milliseconds since UTC and let JS convert it
-                        fprintf(stderr, "date=%s\n", currentAttr.valueAsDateTime().date().toString(format).toStdString().c_str());
                         contactItem[typeIter->second] = Json::Value(currentAttr.valueAsDateTime().date().toString(format).toStdString());
                     } else {
                         if (kind == bbpim::AttributeKind::Note) {
@@ -464,6 +459,27 @@ void PimContactsQt::populateOrganizations(const bbpim::Contact& contact, Json::V
 
         contactOrgs.append(org);
         ++j;
+    }
+}
+
+void PimContactsQt::populatePhotos(const bbpim::Contact& contact, Json::Value& contactPhotos)
+{
+    bbpim::ContactService contactService;
+    bbpim::Contact fullContact = contactService.contactDetails(contact.id());
+    QList<bbpim::ContactPhoto> photos = fullContact.photos();
+    bbpim::ContactPhoto primaryPhoto = fullContact.primaryPhoto();
+    QList<bbpim::ContactPhoto>::const_iterator k = photos.constBegin();
+
+    while (k != photos.constEnd()) {
+        Json::Value photo;
+
+        photo["originalFilePath"] = Json::Value((*k).originalPhoto().toStdString());
+        photo["largeFilePath"] = Json::Value((*k).largePhoto().toStdString());
+        photo["smallFilePath"] = Json::Value((*k).smallPhoto().toStdString());
+        photo["pref"] = Json::Value((primaryPhoto.id() == (*k).id()));
+
+        contactPhotos.append(photo);
+        ++k;
     }
 }
 
@@ -581,15 +597,21 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& r
                         populateField(sortedResults[i], kindIter->second, contactItem[field], true, false);
                         break;
                     }
-                }
-            } else {
-                fprintf(stderr, "cannot find field=%s in map\n", field.c_str());
 
-                if (field == "favorite") {
-                    contactItem[field] = Json::Value(sortedResults[i].isFavourite());
-                } else if (field == "addresses") {
-                    contactItem["addresses"] = Json::Value();
-                    populateAddresses(sortedResults[i], contactItem["addresses"]);
+                    // Special cases (treated differently in ContactBuilder):
+                    default: {
+                        if (field == "addresses") {
+                            contactItem[field] = Json::Value();
+                            populateAddresses(sortedResults[i], contactItem[field]);
+                        } else if (field == "photos") {
+                            contactItem[field] = Json::Value();
+                            populatePhotos(sortedResults[i], contactItem[field]);
+                        } else if (field == "favorite") {
+                            contactItem[field] = Json::Value(sortedResults[i].isFavourite());
+                        }
+
+                        break;
+                    }
                 }
             }
         }

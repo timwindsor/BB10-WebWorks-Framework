@@ -20,7 +20,8 @@ var _self = {},
     ContactName = require("./ContactName"),
     ContactOrganization = require("./ContactOrganization"),
     ContactAddress = require("./ContactAddress"),
-    ContactField = require("./ContactField");
+    ContactField = require("./ContactField"),
+    ContactPhoto = require("./ContactPhoto");
 
 function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -32,15 +33,27 @@ function guid() {
 
 function populateFieldArray(contactProps, field, ClassName) {
     if (contactProps[field]) {
-        var list = [];
+        var list = [],
+            photo;
         contactProps[field].forEach(function (obj) {
             if (ClassName === ContactField) {
                 list.push(new ClassName(obj.type, obj.value));
+            } else if (ClassName === ContactPhoto) {
+                photo = new ContactPhoto(obj.originalFilePath, obj.pref);
+                photo.largeFilePath = obj.largeFilePath;
+                photo.smallFilePath = obj.smallFilePath;
+                list.push(photo);
             } else {
                 list.push(new ClassName(obj));
             }
         });
         contactProps[field] = list;
+    }
+}
+
+function populateDate(contactProps, field) {
+    if (contactProps[field]) {
+        contactProps[field] = new Date(contactProps[field]);
     }
 }
 
@@ -65,6 +78,10 @@ _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
                         populateFieldArray(contact, "ims", ContactField);
                         populateFieldArray(contact, "socialNetworks", ContactField);
                         populateFieldArray(contact, "urls", ContactField);
+                        populateFieldArray(contact, "photos", ContactPhoto);
+
+                        populateDate(contact, "birthday");
+                        populateDate(contact, "anniversary");
 
                         contact.displayName = contact.name.displayName;
                         contact.nickname = contact.name.nickname;
@@ -110,7 +127,7 @@ _self.ContactField = ContactField;
 _self.ContactAddress = ContactAddress;
 _self.ContactName = ContactName;
 _self.ContactOrganization = ContactOrganization;
+_self.ContactPhoto = ContactPhoto;
 _self.ContactFindOptions = require("./ContactFindOptions");
-_self.ContactPhoto = require("./ContactPhoto");
 
 module.exports = _self;

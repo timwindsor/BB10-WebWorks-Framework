@@ -16,6 +16,8 @@
 var ContactPhoto = function (originalFilePath, pref) {
     this.originalFilePath = originalFilePath || "";
     this.pref = pref || false;
+    this.largeFilePath = "";
+    this.smallFilePath = "";
 };
 
 module.exports = ContactPhoto;

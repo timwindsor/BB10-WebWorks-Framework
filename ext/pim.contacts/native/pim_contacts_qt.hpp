@@ -67,6 +67,7 @@ private:
     void populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray);
     void populateOrganizations(const bbpim::Contact& contact, Json::Value& contactOrgs);
     void populateAddresses(const bbpim::Contact& contact, Json::Value& contactAddrs);
+    void populatePhotos(const bbpim::Contact& contact, Json::Value& contactPhotos);
 
     static QString getSortFieldValue(const bbpim::SortColumn::Type sortField, const bbpim::Contact& contact);
     static QList<bbpim::SearchField::Type> getSearchFields(const Json::Value& searchFieldsJson);
