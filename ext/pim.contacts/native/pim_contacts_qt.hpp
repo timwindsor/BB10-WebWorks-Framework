@@ -51,12 +51,14 @@ class PimContactsQt {
 public:
     PimContactsQt();
     ~PimContactsQt();
-    Json::Value Find(const Json::Value& optionsObj);
+    Json::Value Find(const Json::Value& argsJson);
     Json::Value Save(const Json::Value& attributeObj);
     Json::Value CreateContact(const Json::Value& attributeObj);
     Json::Value DeleteContact(const Json::Value& contactObj);
     Json::Value EditContact(bbpim::Contact& contact, const Json::Value& attributeObj);
     Json::Value CloneContact(bbpim::Contact& contact, const Json::Value& attributeObj);
+
+    friend bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2);
 
 private:
     bbpim::ContactBuilder& buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
@@ -68,10 +70,27 @@ private:
     bbpim::ContactBuilder& addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
     bbpim::ContactBuilder& addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
 
+    QSet<bbpim::ContactId> singleFieldSearch(const Json::Value& searchFieldsJson, const Json::Value& contactFields, bool favorite);
+    Json::Value assembleSearchResults(const QSet<bbpim::ContactId>& results, const Json::Value& contactFields, int limit);
+    void populateField(const bbpim::Contact& contact, bbpim::AttributeKind::Type kind, Json::Value& contactItem, bool isContactField, bool isArray);
+    void populateOrganizations(const bbpim::Contact& contact, Json::Value& contactOrgs);
+    void populateAddresses(const bbpim::Contact& contact, Json::Value& contactAddrs);
+
+    static QString getSortFieldValue(const bbpim::SortColumn::Type sortField, const bbpim::Contact& contact);
+    static QList<bbpim::SearchField::Type> getSearchFields(const Json::Value& searchFieldsJson);
+
     static void createAttributeKindMap();
     static void createAttributeSubKindMap();
+    static void createKindAttributeMap();
+    static void createSubKindAttributeMap();
+
     static StringToKindMap _attributeKindMap;
     static StringToSubKindMap _attributeSubKindMap;
+    static std::map<bbpim::AttributeKind::Type, std::string> _kindAttributeMap;
+    static std::map<bbpim::AttributeSubKind::Type, std::string> _subKindAttributeMap;
+    static QList<SortSpecifier> _sortSpecs;
+
+    std::map<bbpim::ContactId, bbpim::Contact> _contactSearchMap;
 };
 
 } // namespace webworks
