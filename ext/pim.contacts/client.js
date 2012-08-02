@@ -15,7 +15,21 @@
  */
  
 var _self = {},
-    _ID = require("./manifest.json").namespace;
+    _ID = require("./manifest.json").namespace,
+    Contact = require("./Contact"),
+    ContactName = require("./ContactName"),
+    ContactAddress = require("./ContactAddress"),
+    ContactOrganization = require("./ContactOrganization"),
+    ContactField = require("./ContactField");
+
+function populateFieldArray(contactProps, field, array, ClassName) {
+    if (contactProps[field]) {
+        contactProps[field].forEach(function (obj) {
+            array.push(new ClassName(obj));
+        });
+        contactProps[field] = array;
+    }
+}
 
 _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
     // TODO validation
@@ -24,7 +38,38 @@ _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
 
         if (result._success) {
             if (onFindSuccess) {
-                onFindSuccess(result.contacts);
+                var contacts = result.contacts,
+                    realContacts = [];
+
+                contacts.forEach(function (contact) {
+                    var name = new ContactName(contact.name),
+                        orgs = [],
+                        addresses = [],
+                        emails = [],
+                        phones = [],
+                        faxes = [],
+                        pagers = [],
+                        ims = [],
+                        socialNetworks,
+                        urls = [];
+
+                    populateFieldArray(contact, "addresses", addresses, ContactAddress);
+                    populateFieldArray(contact, "organizations", orgs, ContactOrganization);
+                    populateFieldArray(contact, "emails", emails, ContactField);
+                    populateFieldArray(contact, "phoneNumbers", phones, ContactField);
+                    populateFieldArray(contact, "faxNumbers", faxes, ContactField);
+                    populateFieldArray(contact, "pagerNumbers", pagers, ContactField);
+                    populateFieldArray(contact, "ims", ims, ContactField);
+                    populateFieldArray(contact, "socialNetworks", socialNetworks, ContactField);
+                    populateFieldArray(contact, "urls", urls, ContactField);
+
+                    contact.displayName = contact.name.displayName;
+                    contact.nickname = contact.name.nickname;
+                    contact.name = name;
+
+                    realContacts.push(new Contact(contact));
+                });
+                onFindSuccess(realContacts);
             }
         } else {
             if (onFindError) {
@@ -51,6 +96,11 @@ _self.deleteContact = function (attributes) {
     return window.webworks.execSync(_ID, "deleteContact", attributes);
 };
 
+_self.Contact = Contact;
+_self.ContactName = ContactName;
+_self.ContactAddress = ContactAddress;
+_self.ContactOrganization = ContactOrganization;
+_self.ContactField = ContactField;
 _self.ContactFindOptions = require("./ContactFindOptions");
 
 module.exports = _self;
