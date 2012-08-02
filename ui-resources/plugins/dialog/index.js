@@ -272,24 +272,25 @@ function showDialog(description) {
                 returnValue.username = res.hasOwnProperty('username') ? encodeURIComponent(res.username) : '';
                 returnValue.password = res.hasOwnProperty('password') ? encodeURIComponent(res.password) : '';
                 returnValue.oktext = res.hasOwnProperty('oktext') ? encodeURIComponent(res.oktext) : '';
+                returnValue.ok = true;
                 window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
         if (res.cancel) {
             x$(res.cancel).on('click', function () {
-                returnValue.result = null;
+                returnValue.cancel = true;
                 window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
         if (res.save) {
             x$(res.save).on('click', function () {
-                returnValue.result = 'save';
+                returnValue.save = true;
                 window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
         if (res.never) {
             x$(res.never).on('click', function () {
-                returnValue.result  = 'never';
+                returnValue.never = true;
                 window.qnx.webplatform.getController().remoteExec(1, 'dialog.result', [returnValue]);
             });
         }
