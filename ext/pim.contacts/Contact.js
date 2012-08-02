@@ -90,7 +90,8 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
     args._eventId = guid();
 
     saveCallback = function (args) {
-        var result = JSON.parse(unescape(args.result));
+        var result = JSON.parse(unescape(args.result)),
+            newContact;
 
         if (result._success) {
             if (successCallback) {
@@ -102,7 +103,7 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
                     result.displayName = result.name.displayName;
                 }
 
-                var newContact = new Contact(result);
+                newContact = new Contact(result);
                 successCallback(newContact);
             }
         } else {
