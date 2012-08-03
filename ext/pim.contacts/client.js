@@ -66,30 +66,31 @@ _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
 
             if (result._success) {
                 if (onFindSuccess) {
-                    contacts.forEach(function (contact) {
-                        var name = new ContactName(contact.name);
+                    if (contacts) {
+                        contacts.forEach(function (contact) {
+                            var name = new ContactName(contact.name);
 
-                        populateFieldArray(contact, "addresses", ContactAddress);
-                        populateFieldArray(contact, "organizations", ContactOrganization);
-                        populateFieldArray(contact, "emails", ContactField);
-                        populateFieldArray(contact, "phoneNumbers", ContactField);
-                        populateFieldArray(contact, "faxNumbers", ContactField);
-                        populateFieldArray(contact, "pagerNumbers", ContactField);
-                        populateFieldArray(contact, "ims", ContactField);
-                        populateFieldArray(contact, "socialNetworks", ContactField);
-                        populateFieldArray(contact, "urls", ContactField);
-                        populateFieldArray(contact, "photos", ContactPhoto);
+                            populateFieldArray(contact, "addresses", ContactAddress);
+                            populateFieldArray(contact, "organizations", ContactOrganization);
+                            populateFieldArray(contact, "emails", ContactField);
+                            populateFieldArray(contact, "phoneNumbers", ContactField);
+                            populateFieldArray(contact, "faxNumbers", ContactField);
+                            populateFieldArray(contact, "pagerNumbers", ContactField);
+                            populateFieldArray(contact, "ims", ContactField);
+                            populateFieldArray(contact, "socialNetworks", ContactField);
+                            populateFieldArray(contact, "urls", ContactField);
+                            populateFieldArray(contact, "photos", ContactPhoto);
 
-                        populateDate(contact, "birthday");
-                        populateDate(contact, "anniversary");
+                            populateDate(contact, "birthday");
+                            populateDate(contact, "anniversary");
 
-                        contact.displayName = contact.name.displayName;
-                        contact.nickname = contact.name.nickname;
-                        contact.name = name;
+                            contact.displayName = contact.name.displayName;
+                            contact.nickname = contact.name.nickname;
+                            contact.name = name;
 
-                        realContacts.push(new Contact(contact));
-                    });
-
+                            realContacts.push(new Contact(contact));
+                        });
+                    }
                     onFindSuccess(realContacts);
                 }
             } else {
