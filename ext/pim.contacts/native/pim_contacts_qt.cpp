@@ -118,7 +118,7 @@ Json::Value PimContactsQt::CreateContact(const Json::Value& attributeObj)
 
     for (int i = 0; i < attributeKeys.size(); i++) {
         const std::string key = attributeKeys[i];
-        Json::Value returnField = buildAttributeKind(contactBuilder, attributeObj[key], key);
+        Json::Value returnField = addAttributeKind(contactBuilder, attributeObj[key], key);
 
         if (!returnField.empty()) {
             returnObj[key] = returnField;
@@ -155,48 +155,11 @@ Json::Value PimContactsQt::EditContact(bbpim::Contact& contact, const Json::Valu
 
     for (int i = 0; i < attributeKeys.size(); i++) {
         const std::string key = attributeKeys[i];
-        if (key == "addresses") {
-            QList<bbpim::ContactPostalAddress> savedList = contact.postalAddresses();
+        Json::Value returnField = syncAttributeKind(contact, attributeObj[key], key);
 
-            for (int j = 0; j < savedList.size(); j++) {
-                contactBuilder = contactBuilder.deletePostalAddress(savedList[j]);
-            }
-        } else if (key == "photos") {
-            QList<bbpim::ContactPhoto> savedList = contact.photos();
-
-            for (int j = 0; j < savedList.size(); j++) {
-                contactBuilder = contactBuilder.deletePhoto(savedList[j]);
-            }
-        } else if (key == "birthday" || key == "anniversary") {
-            StringToKindMap::const_iterator kindIter = _attributeKindMap.find(key);
-            StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(key);
-
-            if (kindIter != _attributeKindMap.end() && subkindIter != _attributeSubKindMap.end()) {
-                QList<bbpim::ContactAttribute> savedList = contact.filteredAttributes(kindIter->second);
-
-                for (int j = 0; j < savedList.size(); j++) {
-                    if (savedList[j].subKind() == subkindIter->second) {
-                        contactBuilder = contactBuilder.deleteAttribute(savedList[j]);
-                    }
-                }
-            }
-        } else {
-            StringToKindMap::const_iterator kindIter = _attributeKindMap.find(key);
-
-            if (kindIter != _attributeKindMap.end()) {
-                QList<bbpim::ContactAttribute> savedList = contact.filteredAttributes(kindIter->second);
-
-                for (int j = 0; j < savedList.size(); j++) {
-                    contactBuilder = contactBuilder.deleteAttribute(savedList[j]);
-                }
-            }
-        }
-
-        Json::Value returnField = buildAttributeKind(contactBuilder, attributeObj[key], key);
-
-        if (!returnField.empty()) {
+        //if (!returnField.empty()) {
             returnObj[key] = returnField;
-        }
+        //}
     }
 
     bbpim::ContactService service;
@@ -615,7 +578,7 @@ Json::Value PimContactsQt::assembleSearchResults(const QSet<bbpim::ContactId>& r
  * Helper functions for Save
  ****************************************************************/
 
-Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field)
+Json::Value PimContactsQt::addAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field)
 {
     Json::Value returnObj;
     StringToKindMap::const_iterator kindIter = _attributeKindMap.find(field);
@@ -624,15 +587,19 @@ Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuil
         switch (kindIter->second) {
             // Attributes requiring group keys:
             case bbpim::AttributeKind::Name: {
-                returnObj = buildGroupedAttributes(contactBuilder, jsonObj, kindIter->second, "1");
+                QList<SubkindValuePair> convertedList = convertGroupedAttributes(jsonObj, returnObj);
+                addConvertedGroupedList(contactBuilder, kindIter->second, convertedList, "1");
                 break;
             }
             case bbpim::AttributeKind::OrganizationAffiliation: {
                 for (int i = 0; i < jsonObj.size(); i++) {
-                    Json::Value fieldObj = jsonObj[i];
+                    Json::Value orgObj;
                     std::stringstream groupKeyStream;
                     groupKeyStream << i + 1;
-                    returnObj.append(buildGroupedAttributes(contactBuilder, fieldObj, kindIter->second, groupKeyStream.str()));
+
+                    QList<SubkindValuePair> convertedList = convertGroupedAttributes(jsonObj[i], orgObj);
+                    addConvertedGroupedList(contactBuilder, kindIter->second, convertedList, groupKeyStream.str());
+                    returnObj.append(orgObj);
                 }
 
                 break;
@@ -640,12 +607,8 @@ Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuil
 
             // String arrays:
             case bbpim::AttributeKind::VideoChat: {
-                for (int i = 0; i < jsonObj.size(); i++) {
-                    std::string value = jsonObj[i].asString();
-                    addAttribute(contactBuilder, kindIter->second, bbpim::AttributeSubKind::VideoChatBbPlaybook, value);
-                }
-
-                returnObj = jsonObj;
+                QList<SubkindValuePair> convertedList = convertStringArray(jsonObj, returnObj, bbpim::AttributeSubKind::VideoChatBbPlaybook);
+                addConvertedList(contactBuilder, kindIter->second, convertedList);
                 break;
             }
 
@@ -668,8 +631,10 @@ Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuil
                 StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
 
                 if (subkindIter != _attributeSubKindMap.end()) {
+                    QList<SubkindValuePair> convertedList;
                     std::string value = jsonObj.asString();
-                    addAttribute(contactBuilder, kindIter->second, subkindIter->second, value);
+                    convertedList.append(SubkindValuePair(subkindIter->second, value));
+                    addConvertedList(contactBuilder, kindIter->second, convertedList);
                     returnObj = jsonObj;
                 }
 
@@ -685,11 +650,8 @@ Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuil
             case bbpim::AttributeKind::Website:
             case bbpim::AttributeKind::Group:
             case bbpim::AttributeKind::Profile: {
-                for (int i = 0; i < jsonObj.size(); i++) {
-                    Json::Value fieldObj = jsonObj[i];
-                    returnObj.append(buildFieldAttribute(contactBuilder, fieldObj, kindIter->second));
-                }
-
+                QList<SubkindValuePair> convertedList = convertFieldAttributes(jsonObj, returnObj);
+                addConvertedList(contactBuilder, kindIter->second, convertedList);
                 break;
             }
 
@@ -698,17 +660,17 @@ Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuil
                 if (field == "addresses") {
                     for (int i = 0; i < jsonObj.size(); i++) {
                         Json::Value addressObj = jsonObj[i];
-                        returnObj.append(buildPostalAddress(contactBuilder, addressObj));
+                        returnObj.append(addPostalAddress(contactBuilder, addressObj));
                     }
                 } else if (field == "photos") {
                     for (int i = 0; i < jsonObj.size(); i++) {
                         Json::Value photoObj = jsonObj[i];
-                        returnObj.append(buildPhoto(contactBuilder, photoObj));
+                        returnObj.append(addPhoto(contactBuilder, photoObj));
                     }
                 } else if (field == "favorite") {
                     bool isFavorite = jsonObj.asBool();
                     contactBuilder.setFavorite(isFavorite);
-                    returnObj["favorite"] = Json::Value(isFavorite);
+                    returnObj = jsonObj;
                 }
 
                 break;
@@ -719,16 +681,191 @@ Json::Value PimContactsQt::buildAttributeKind(bbpim::ContactBuilder& contactBuil
     return returnObj;
 }
 
-void PimContactsQt::addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value)
+Json::Value PimContactsQt::syncAttributeKind(bbpim::Contact& contact, const Json::Value& jsonObj, const std::string& field)
 {
-    bbpim::ContactAttribute attribute;
-    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+    Json::Value returnObj;
+    StringToKindMap::const_iterator kindIter = _attributeKindMap.find(field);
+    bbpim::ContactBuilder contactBuilder(contact.edit());
 
-    attributeBuilder = attributeBuilder.setKind(kind);
-    attributeBuilder = attributeBuilder.setSubKind(subkind);
-    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+    if (kindIter != _attributeKindMap.end()) {
+        switch (kindIter->second) {
+            // Attributes requiring group keys:
+            case bbpim::AttributeKind::Name: {
+                QList<QList<bbpim::ContactAttribute> > savedList = contact.filteredAttributesByGroupKey(kindIter->second);
+                QList<SubkindValuePair> convertedList = convertGroupedAttributes(jsonObj, returnObj);
 
-    contactBuilder.addAttribute(attribute);
+                if (!savedList.empty()) {
+                    syncConvertedGroupedList(contactBuilder, kindIter->second, savedList[0], convertedList, "1");
+                } else {
+                    addConvertedGroupedList(contactBuilder, kindIter->second, convertedList, "1");
+                }
+
+                break;
+            }
+            case bbpim::AttributeKind::OrganizationAffiliation: {
+                QList<QList<bbpim::ContactAttribute> > savedList = contact.filteredAttributesByGroupKey(kindIter->second);
+                returnObj = syncAttributeGroup(contactBuilder, kindIter->second, savedList, jsonObj);
+                break;
+            }
+
+            // String arrays:
+            case bbpim::AttributeKind::VideoChat: {
+                QList<bbpim::ContactAttribute> savedList = contact.filteredAttributes(kindIter->second);
+                QList<SubkindValuePair> convertedList = convertStringArray(jsonObj, returnObj, bbpim::AttributeSubKind::VideoChatBbPlaybook);
+                syncConvertedList(contactBuilder, kindIter->second, savedList, convertedList);
+                break;
+            }
+
+            // Dates:
+            case bbpim::AttributeKind::Date: {
+                StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
+
+                if (subkindIter != _attributeSubKindMap.end()) {
+                    QList<bbpim::ContactAttribute> savedList = contact.filteredAttributes(kindIter->second);
+                    syncAttributeDate(contactBuilder, savedList, subkindIter->second, jsonObj.asString());
+                    returnObj = jsonObj;
+                }
+
+                break;
+            }
+
+            // Strings:
+            case bbpim::AttributeKind::Note:
+            case bbpim::AttributeKind::Sound: {
+                QList<bbpim::ContactAttribute> savedList = contact.filteredAttributes(kindIter->second);
+                QList<SubkindValuePair> convertedList;
+                StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(field);
+
+                if (subkindIter != _attributeSubKindMap.end()) {
+                    std::string value = jsonObj.asString();
+                    convertedList.append(SubkindValuePair(subkindIter->second, value));
+                    returnObj = jsonObj;
+                }
+
+                syncConvertedList(contactBuilder, kindIter->second, savedList, convertedList);
+                break;
+            }
+
+            // ContactField attributes:
+            case bbpim::AttributeKind::Phone:
+            case bbpim::AttributeKind::Email:
+            case bbpim::AttributeKind::Fax:
+            case bbpim::AttributeKind::Pager:
+            case bbpim::AttributeKind::InstantMessaging:
+            case bbpim::AttributeKind::Website:
+            case bbpim::AttributeKind::Group:
+            case bbpim::AttributeKind::Profile: {
+                QList<bbpim::ContactAttribute> savedList = contact.filteredAttributes(kindIter->second);
+                QList<SubkindValuePair> convertedList = convertFieldAttributes(jsonObj, returnObj);
+                syncConvertedList(contactBuilder, kindIter->second, savedList, convertedList);
+                break;
+            }
+
+            // Special cases (treated differently in ContactBuilder):
+            default: {
+                if (field == "addresses") {
+                    QList<bbpim::ContactPostalAddress> savedList = contact.postalAddresses();
+                    syncPostalAddresses(contactBuilder, savedList, jsonObj);
+                    returnObj = jsonObj;
+                } else if (field == "photos") {
+                    QList<bbpim::ContactPhoto> savedList = contact.photos();
+                    syncPhotos(contactBuilder, savedList, jsonObj);
+                    returnObj = jsonObj;
+
+                } else if (field == "favorite") {
+                    bool isFavorite = jsonObj.asBool();
+                    contactBuilder.setFavorite(isFavorite);
+                    returnObj = jsonObj;
+                }
+
+                break;
+            }
+        }
+    }
+
+    return returnObj;
+}
+
+
+QList<SubkindValuePair> PimContactsQt::convertGroupedAttributes(const Json::Value& fieldsObj, Json::Value& returnObj)
+{
+    const Json::Value::Members fields = fieldsObj.getMemberNames();
+    QList<SubkindValuePair> convertedList;
+
+    for (int i = 0; i < fields.size(); i++) {
+        const std::string fieldKey = fields[i];
+        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(fieldKey);
+
+        if (subkindIter != _attributeSubKindMap.end()) {
+            convertedList.append(SubkindValuePair(subkindIter->second, fieldsObj[fieldKey].asString()));
+            returnObj[fieldKey] = fieldsObj[fieldKey];
+        }
+    }
+
+    return convertedList;
+}
+
+QList<SubkindValuePair> PimContactsQt::convertFieldAttributes(const Json::Value& fieldArray, Json::Value& returnObj)
+{
+    QList<SubkindValuePair> convertedList;
+
+    for (int i = 0; i < fieldArray.size(); i++) {
+        Json::Value fieldObj = fieldArray[i];
+        std::string type = fieldObj.get("type", "").asString();
+        std::string value = fieldObj.get("value", "").asString();
+        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(type);
+
+        if (subkindIter != _attributeSubKindMap.end()) {
+            convertedList.append(SubkindValuePair(subkindIter->second, value));
+            returnObj.append(fieldObj);
+        }
+    }
+
+    return convertedList;
+}
+
+QList<SubkindValuePair> PimContactsQt::convertStringArray(const Json::Value& stringArray, Json::Value& returnObj, bbpim::AttributeSubKind::Type subkind)
+{
+    QList<SubkindValuePair> convertedList;
+
+    for (int i = 0; i < stringArray.size(); i++) {
+        std::string value = stringArray[i].asString();
+        convertedList.append(SubkindValuePair(subkind, value));
+        returnObj.append(value);
+    }
+
+    return convertedList;
+}
+
+void PimContactsQt::addConvertedList(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const QList<SubkindValuePair>& convertedList)
+{
+    for (int i = 0; i < convertedList.size(); i++) {
+        //addAttribute(contactBuilder, kind, convertedList[i].first, convertedList[i].second);
+        bbpim::ContactAttribute attribute;
+        bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+
+        attributeBuilder = attributeBuilder.setKind(kind);
+        attributeBuilder = attributeBuilder.setSubKind(convertedList[i].first);
+        attributeBuilder = attributeBuilder.setValue(QString(convertedList[i].second.c_str()));
+
+        contactBuilder.addAttribute(attribute);
+    }
+}
+
+void PimContactsQt::addConvertedGroupedList(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const QList<SubkindValuePair>& convertedList, const std::string& groupKey)
+{
+    for (int i = 0; i < convertedList.size(); i++) {
+        //addAttributeToGroup(contactBuilder, kind, convertedList[i].first, convertedList[i].second, groupKey);
+        bbpim::ContactAttribute attribute;
+        bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+
+        attributeBuilder = attributeBuilder.setKind(kind);
+        attributeBuilder = attributeBuilder.setSubKind(convertedList[i].first);
+        attributeBuilder = attributeBuilder.setValue(QString(convertedList[i].second.c_str()));
+        attributeBuilder = attributeBuilder.setGroupKey(QString(groupKey.c_str()));
+
+        contactBuilder.addAttribute(attribute);
+    }
 }
 
 void PimContactsQt::addAttributeDate(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value)
@@ -750,6 +887,21 @@ void PimContactsQt::addAttributeDate(bbpim::ContactBuilder& contactBuilder, cons
     contactBuilder.addAttribute(attribute);
 }
 
+/*
+void PimContactsQt::addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value)
+{
+    bbpim::ContactAttribute attribute;
+    bbpim::ContactAttributeBuilder attributeBuilder(attribute.edit());
+
+    attributeBuilder = attributeBuilder.setKind(kind);
+    attributeBuilder = attributeBuilder.setSubKind(subkind);
+    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+
+    contactBuilder.addAttribute(attribute);
+}
+*/
+
+/*
 void PimContactsQt::addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey)
 {
     bbpim::ContactAttribute attribute;
@@ -762,41 +914,9 @@ void PimContactsQt::addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, c
 
     contactBuilder.addAttribute(attribute);
 }
+*/
 
-Json::Value PimContactsQt::buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::AttributeKind::Type kind, const std::string& groupKey)
-{
-    Json::Value returnObj;
-    const Json::Value::Members fields = fieldsObj.getMemberNames();
-
-    for (int i = 0; i < fields.size(); i++) {
-        const std::string fieldKey = fields[i];
-        StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(fieldKey);
-
-        if (subkindIter != _attributeSubKindMap.end()) {
-            addAttributeToGroup(contactBuilder, kind, subkindIter->second, fieldsObj[fieldKey].asString(), groupKey);
-            returnObj[fieldKey] = fieldsObj[fieldKey];
-        }
-    }
-
-    return returnObj;
-}
-
-Json::Value PimContactsQt::buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::AttributeKind::Type kind)
-{
-    Json::Value returnObj;
-    std::string type = fieldObj["type"].asString();
-    StringToSubKindMap::const_iterator subkindIter = _attributeSubKindMap.find(type);
-
-    if (subkindIter != _attributeSubKindMap.end()) {
-        bool pref = fieldObj["pref"].asBool();
-        addAttribute(contactBuilder, kind, subkindIter->second, fieldObj["value"].asString());
-        returnObj = fieldObj;
-    }
-
-    return returnObj;
-}
-
-Json::Value PimContactsQt::buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj)
+Json::Value PimContactsQt::addPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj)
 {
     Json::Value returnObj;
     bbpim::ContactPostalAddress address;
@@ -830,7 +950,7 @@ Json::Value PimContactsQt::buildPostalAddress(bbpim::ContactBuilder& contactBuil
     return returnObj;
 }
 
-Json::Value PimContactsQt::buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj)
+Json::Value PimContactsQt::addPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj)
 {
     Json::Value returnObj;
     bbpim::ContactPhoto photo;
@@ -849,6 +969,138 @@ Json::Value PimContactsQt::buildPhoto(bbpim::ContactBuilder& contactBuilder, con
 
     contactBuilder.addPhoto(photo, pref);
     return returnObj;
+}
+
+
+void PimContactsQt::syncConvertedList(bbpim::ContactBuilder& contactBuilder, bbpim::AttributeKind::Type kind, QList<bbpim::ContactAttribute> savedList, const QList<SubkindValuePair>& convertedList)
+{
+    int index;
+
+    for (index = 0; index < savedList.size() && index < convertedList.size(); index++) {
+        if (savedList[index].subKind() != convertedList[index].first || savedList[index].value().toStdString() != convertedList[index].second) {
+            bbpim::ContactAttributeBuilder attributeBuilder(savedList[index].edit());
+            attributeBuilder = attributeBuilder.setSubKind(convertedList[index].first);
+            attributeBuilder = attributeBuilder.setValue(QString(convertedList[index].second.c_str()));
+        }
+    }
+
+    if (index < savedList.size()) {
+        for (; index < savedList.size(); index++) {
+            contactBuilder = contactBuilder.deleteAttribute(savedList[index]);
+        }
+    } else if (index < convertedList.size()) {
+        for (; index < convertedList.size(); index++) {
+            QList<SubkindValuePair> remainingList = convertedList.mid(index);
+            addConvertedList(contactBuilder, kind, remainingList);
+        }
+    }
+}
+
+void PimContactsQt::syncConvertedGroupedList(bbpim::ContactBuilder& contactBuilder, bbpim::AttributeKind::Type kind, QList<bbpim::ContactAttribute> savedList, QList<SubkindValuePair> convertedList, const std::string& groupKey)
+{
+    int index;
+
+    for (index = 0; index < savedList.size() && index < convertedList.size(); index++) {
+        bbpim::ContactAttributeBuilder attributeBuilder(savedList[index].edit());
+        attributeBuilder = attributeBuilder.setSubKind(convertedList[index].first);
+        attributeBuilder = attributeBuilder.setValue(QString(convertedList[index].second.c_str()));
+        attributeBuilder = attributeBuilder.setGroupKey(QString(groupKey.c_str()));
+    }
+
+    if (index < savedList.size()) {
+        for (; index < savedList.size(); index++) {
+            contactBuilder = contactBuilder.deleteAttribute(savedList[index]);
+        }
+    } else if (index < convertedList.size()) {
+        for (; index < convertedList.size(); index++) {
+            QList<SubkindValuePair> remainingList = convertedList.mid(index);
+            addConvertedList(contactBuilder, kind, remainingList);
+        }
+    }
+}
+
+Json::Value PimContactsQt::syncAttributeGroup(bbpim::ContactBuilder& contactBuilder, bbpim::AttributeKind::Type kind, QList<QList<bbpim::ContactAttribute> > savedList, const Json::Value& jsonObj)
+{
+    int i;
+    Json::Value returnObj;
+
+    for (i = 0; i < jsonObj.size() && i < savedList.size(); i++) {
+        Json::Value orgObj;
+        std::stringstream groupKeyStream;
+        groupKeyStream << i + 1;
+
+        QList<SubkindValuePair> convertedList = convertGroupedAttributes(jsonObj[i], orgObj);
+        syncConvertedGroupedList(contactBuilder, kind, savedList[i], convertedList, groupKeyStream.str());
+        returnObj.append(orgObj);
+    }
+
+    if (i < savedList.size()) {
+        for (; i < savedList.size(); i++) {
+            for (int j = 0; j < savedList[i].size(); j++) {
+                contactBuilder = contactBuilder.deleteAttribute(savedList[i][j]);
+            }
+        }
+    } else if (i < jsonObj.size()) {
+        for (; i < jsonObj.size(); i++) {
+            Json::Value orgObj;
+            std::stringstream groupKeyStream;
+            groupKeyStream << i + 1;
+
+            QList<SubkindValuePair> convertedList = convertGroupedAttributes(jsonObj[i], orgObj);
+            addConvertedGroupedList(contactBuilder, kind, convertedList, groupKeyStream.str());
+            returnObj.append(orgObj);
+        }
+    }
+
+    return returnObj;
+}
+
+void PimContactsQt::syncAttributeDate(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactAttribute>& savedList, const bbpim::AttributeSubKind::Type subkind, const std::string& value)
+{
+    bool found = false;
+
+    for (int i = 0; i < savedList.size(); i++) {
+        if (savedList[i].subKind() == subkind) {
+            if (found) {
+                contactBuilder = contactBuilder.deleteAttribute(savedList[i]);
+            } else {
+                found = true;
+                bbpim::ContactAttributeBuilder attributeBuilder(savedList[i].edit());
+                QDateTime date = QDateTime::fromString(QString(value.c_str()), QString("ddd MMM dd yyyy"));
+
+                if (date.isValid()) {
+                    attributeBuilder = attributeBuilder.setValue(date);
+                } else {
+                    attributeBuilder = attributeBuilder.setValue(QString(value.c_str()));
+                }
+            }
+        }
+    }
+}
+
+//TODO(miwong) Need to optimize syncing addresses and photos
+void PimContactsQt::syncPostalAddresses(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactPostalAddress>& savedList, const Json::Value& jsonObj)
+{
+    for (int j = 0; j < savedList.size(); j++) {
+        contactBuilder = contactBuilder.deletePostalAddress(savedList[j]);
+    }
+
+    for (int i = 0; i < jsonObj.size(); i++) {
+        Json::Value addressObj = jsonObj[i];
+        addPostalAddress(contactBuilder, addressObj);
+    }
+}
+
+void PimContactsQt::syncPhotos(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactPhoto>& savedList, const Json::Value& jsonObj)
+{
+    for (int j = 0; j < savedList.size(); j++) {
+        contactBuilder = contactBuilder.deletePhoto(savedList[j]);
+    }
+
+    for (int i = 0; i < jsonObj.size(); i++) {
+        Json::Value photoObj = jsonObj[i];
+        addPhoto(contactBuilder, photoObj);
+    }
 }
 
 /****************************************************************

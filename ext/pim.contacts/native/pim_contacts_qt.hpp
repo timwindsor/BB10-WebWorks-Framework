@@ -29,6 +29,7 @@
 #include <bb/pim/contacts/ContactPhoto.hpp>
 #include <bb/pim/contacts/ContactPhotoBuilder.hpp>
 #include <string>
+#include <utility>
 #include <map>
 #include "../common/plugin.h"
 
@@ -42,6 +43,8 @@ typedef std::map<std::string, bbpim::AttributeKind::Type> StringToKindMap;
 typedef std::map<std::string, bbpim::AttributeSubKind::Type> StringToSubKindMap;
 typedef std::map<bbpim::AttributeKind::Type, std::string> KindToStringMap;
 typedef std::map<bbpim::AttributeSubKind::Type, std::string> SubKindToStringMap;
+
+typedef std::pair<bbpim::AttributeSubKind::Type, std::string> SubkindValuePair;
 
 struct PimContactsThreadInfo {
     PimContacts *parent;
@@ -76,15 +79,27 @@ private:
     static bool lessThan(const bbpim::Contact& c1, const bbpim::Contact& c2);
 
     // Helper functions for Save
-    Json::Value buildAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
-    Json::Value buildGroupedAttributes(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldsObj, bbpim::AttributeKind::Type kind, const std::string& groupKey);
-    Json::Value buildFieldAttribute(bbpim::ContactBuilder& contactBuilder, const Json::Value& fieldObj, bbpim::AttributeKind::Type kind);
-    Json::Value buildPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj);
-    Json::Value buildPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj);
+    Json::Value addAttributeKind(bbpim::ContactBuilder& contactBuilder, const Json::Value& jsonObj, const std::string& field);
+    Json::Value addPostalAddress(bbpim::ContactBuilder& contactBuilder, const Json::Value& addressObj);
+    Json::Value addPhoto(bbpim::ContactBuilder& contactBuilder, const Json::Value& photoObj);
 
-    void addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
+    Json::Value syncAttributeKind(bbpim::Contact& contact, const Json::Value& jsonObj, const std::string& field);
+    void syncConvertedList(bbpim::ContactBuilder& contactBuilder, bbpim::AttributeKind::Type kind, QList<bbpim::ContactAttribute> savedList, const QList<SubkindValuePair>& convertedList);
+    void syncConvertedGroupedList(bbpim::ContactBuilder& contactBuilder, bbpim::AttributeKind::Type kind, QList<bbpim::ContactAttribute> savedList, QList<SubkindValuePair> convertedList, const std::string& groupKey);
+    Json::Value syncAttributeGroup(bbpim::ContactBuilder& contactBuilder, bbpim::AttributeKind::Type kind, QList<QList<bbpim::ContactAttribute> > savedList, const Json::Value& jsonObj);
+    void syncAttributeDate(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactAttribute>& savedList, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
+    void syncPostalAddresses(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactPostalAddress>& savedList, const Json::Value& jsonObj);
+    void syncPhotos(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactPhoto>& savedList, const Json::Value& jsonObj);
+
+    void addConvertedList(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const QList<SubkindValuePair>& convertedList);
+    void addConvertedGroupedList(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const QList<SubkindValuePair>& convertedList, const std::string& groupKey);
     void addAttributeDate(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
-    void addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
+//    void addAttribute(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value);
+//    void addAttributeToGroup(bbpim::ContactBuilder& contactBuilder, const bbpim::AttributeKind::Type kind, const bbpim::AttributeSubKind::Type subkind, const std::string& value, const std::string& groupKey);
+
+    QList<SubkindValuePair> convertGroupedAttributes(const Json::Value& fieldsObj, Json::Value& returnObj);
+    QList<SubkindValuePair> convertFieldAttributes(const Json::Value& fieldArray, Json::Value& returnObj);
+    QList<SubkindValuePair> convertStringArray(const Json::Value& stringArray, Json::Value& returnObj, bbpim::AttributeSubKind::Type subkind);
 
     // Mappings between JSON strings and attribute kinds/subkinds
     static void createAttributeKindMap();

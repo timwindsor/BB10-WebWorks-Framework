@@ -86,7 +86,7 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
         args.anniversary = args.anniversary.toDateString();
     }
 
-    args.id = parseInt(this.id);
+    args.id = window.parseInt(this.id);
     args._eventId = guid();
 
     saveCallback = function (args) {
@@ -104,6 +104,8 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
                 }
 
                 result.id = result.id.toString();
+                result.birthday = new Date(result.birthday);
+                result.anniversary = new Date(result.anniversary);
 
                 newContact = new Contact(result);
                 successCallback(newContact);
@@ -125,7 +127,7 @@ Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
         errorCallback = onRemoveError,
         removeCallback;
 
-    args.contactId = parseInt(this.id);
+    args.contactId = window.parseInt(this.id);
     args._eventId = guid();
 
     removeCallback = function (args) {
