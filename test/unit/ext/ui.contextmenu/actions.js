@@ -188,7 +188,6 @@ describe("blackberry.ui.actions.handlers index", function () {
         actions.removeCustomItem(actionId);
         actions.runHandler(actionId);
         expect(libEvent.trigger).not.toHaveBeenCalled();
-        expect(actions.ShareLink).toBeDefined();
     });
 
 });
