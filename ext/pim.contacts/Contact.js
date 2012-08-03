@@ -51,7 +51,7 @@ Contact = function (properties) {
     this.ringtone = properties && properties.ringtone ? properties.ringtone : "";
     this.favorite = properties && properties.favorite ? properties.favorite : false;
 
-    var privateId = properties && properties.id ? properties.id : null;
+    var privateId = properties && properties.id ? properties.id : "-1";
     Object.defineProperty(this, "id", { "value": privateId });
 };
 
@@ -86,7 +86,7 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
         args.anniversary = args.anniversary.toDateString();
     }
 
-    args.id = this.id;
+    args.id = parseInt(this.id);
     args._eventId = guid();
 
     saveCallback = function (args) {
@@ -102,6 +102,8 @@ Contact.prototype.save = function (onSaveSuccess, onSaveError) {
                 if (result.name && result.name.displayName) {
                     result.displayName = result.name.displayName;
                 }
+
+                result.id = result.id.toString();
 
                 newContact = new Contact(result);
                 successCallback(newContact);
@@ -123,7 +125,7 @@ Contact.prototype.remove = function (onRemoveSuccess, onRemoveError) {
         errorCallback = onRemoveError,
         removeCallback;
 
-    args.contactId = this.id;
+    args.contactId = parseInt(this.id);
     args._eventId = guid();
 
     removeCallback = function (args) {

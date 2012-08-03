@@ -165,7 +165,6 @@ Json::Value PimContactsQt::EditContact(bbpim::Contact& contact, const Json::Valu
             QList<bbpim::ContactPhoto> savedList = contact.photos();
 
             for (int j = 0; j < savedList.size(); j++) {
-                fprintf(stderr, "Delete photo %s\n", savedList[j].originalPhoto().toStdString().c_str());
                 contactBuilder = contactBuilder.deletePhoto(savedList[j]);
             }
         } else if (key == "birthday" || key == "anniversary") {
