@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var ContactField = function (type, value) {
-    this.type = type || "";
-    this.value = value || "";
+var ContactError = function (code) {
+    this.code = code;
 };
 
-ContactField.HOME = "home";
-ContactField.WORK = "work";
-ContactField.OTHER = "other";
-ContactField.MOBILE = "mobile";
-ContactField.DIRECT = "direct";
+ContactError.UNKNOWN_ERROR = 0;
+ContactError.INVALID_ARGUMENT_ERROR = 1;
+ContactError.TIMEOUT_ERROR = 2;
+ContactError.PENDING_OPERATION_ERROR = 3;
+ContactError.IO_ERROR = 4;
+ContactError.NOT_SUPPORTED_ERROR = 5;
+ContactError.PERMISSION_DENIED_ERROR = 20;
 
-module.exports = ContactField;
+module.exports = ContactError;
