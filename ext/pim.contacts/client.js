@@ -22,7 +22,8 @@ var _self = {},
     ContactAddress = require("./ContactAddress"),
     ContactField = require("./ContactField"),
     ContactPhoto = require("./ContactPhoto"),
-    ContactError = require("./ContactError");
+    ContactError = require("./ContactError"),
+    ContactFindOptions = require("./ContactFindOptions");
 
 function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -58,49 +59,134 @@ function populateDate(contactProps, field) {
     }
 }
 
-_self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
-    // TODO validation
-    var callback = function (args) {
-            var result = JSON.parse(unescape(args.result)),
-                contacts = result.contacts,
-                realContacts = [];
+function validateFindArguments(contactFields, onFindError, findOptions) {
+    var tempContact;
 
-            if (result._success) {
-                if (onFindSuccess) {
-                    if (contacts) {
-                        contacts.forEach(function (contact) {
-                            var name = new ContactName(contact.name);
+    if (contactFields && contactFields.length) {
+        tempContact = new Contact();
 
-                            populateFieldArray(contact, "addresses", ContactAddress);
-                            populateFieldArray(contact, "organizations", ContactOrganization);
-                            populateFieldArray(contact, "emails", ContactField);
-                            populateFieldArray(contact, "phoneNumbers", ContactField);
-                            populateFieldArray(contact, "faxNumbers", ContactField);
-                            populateFieldArray(contact, "pagerNumbers", ContactField);
-                            populateFieldArray(contact, "ims", ContactField);
-                            populateFieldArray(contact, "socialNetworks", ContactField);
-                            populateFieldArray(contact, "urls", ContactField);
-                            populateFieldArray(contact, "photos", ContactPhoto);
-
-                            populateDate(contact, "birthday");
-                            populateDate(contact, "anniversary");
-
-                            contact.displayName = contact.name.displayName;
-                            contact.nickname = contact.name.nickname;
-                            contact.name = name;
-
-                            realContacts.push(new Contact(contact));
-                        });
-                    }
-                    onFindSuccess(realContacts);
-                }
-            } else {
-                if (onFindError) {
-                    onFindError(result);
+        contactFields.forEach(function (field) {
+            if (!tempContact.hasOwnProperty(field)) {
+                if (onFindError && typeof onFindError === "function") {
+                    onFindError(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
+                    return false;
                 }
             }
-        },
-        eventId = guid();
+        });
+    }
+
+    if (findOptions) {
+        if (findOptions.filter && findOptions.filter.length) {
+            findOptions.filter.forEach(function (f) {
+                if (f.fieldName !== undefined) {
+                    switch (f.fieldName) {
+                    case ContactFindOptions.SEARCH_FIELD_GIVEN_NAME:
+                    case ContactFindOptions.SEARCH_FIELD_FAMILY_NAME:
+                    case ContactFindOptions.SEARCH_FIELD_ORGANIZATION_NAME:
+                    case ContactFindOptions.SEARCH_FIELD_PHONE:
+                    case ContactFindOptions.SEARCH_FIELD_EMAIL:
+                    case ContactFindOptions.SEARCH_FIELD_BBMPIN:
+                    case ContactFindOptions.SEARCH_FIELD_LINKEDIN:
+                    case ContactFindOptions.SEARCH_FIELD_TWITTER:
+                    case ContactFindOptions.SEARCH_FIELD_VIDEO_CHAT:
+                        break;
+                    default:
+                        if (onFindError && typeof onFindError === "function") {
+                            onFindError(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
+                            return false;
+                        }
+                    }
+
+                    if (!f.fieldValue) {
+                        if (onFindError && typeof onFindError === "function") {
+                            onFindError(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
+                            return false;
+                        }
+                    }
+                }
+            });
+        }
+
+        if (findOptions.sort && findOptions.sort.length) {
+            findOptions.sort.forEach(function (s) {
+                if (s.fieldName !== undefined) {
+                    switch (s.fieldName) {
+                    case ContactFindOptions.SORT_FIELD_GIVEN_NAME:
+                    case ContactFindOptions.SORT_FIELD_FAMILY_NAME:
+                    case ContactFindOptions.SORT_FIELD_ORGANIZATION_NAME:
+                        break;
+                    default:
+                        if (onFindError && typeof onFindError === "function") {
+                            onFindError(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
+                            return false;
+                        }
+                    }
+                }
+
+                if (s.desc === undefined) {
+                    if (onFindError && typeof onFindError === "function") {
+                        onFindError(new ContactError(ContactError.INVALID_ARGUMENT_ERROR));
+                        return false;
+                    }
+                }
+            });
+        }
+    }
+
+    return true;
+}
+
+_self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
+    var callback,
+        eventId;
+
+    if (!validateFindArguments(contactFields, onFindError, findOptions)) {
+        return;
+    }
+
+    callback = function (args) {
+        var result = JSON.parse(unescape(args.result)),
+            contacts = result.contacts,
+            realContacts = [];
+
+        if (result._success) {
+            if (onFindSuccess) {
+                if (contacts) {
+                    contacts.forEach(function (contact) {
+                        var name = new ContactName(contact.name);
+
+                        populateFieldArray(contact, "addresses", ContactAddress);
+                        populateFieldArray(contact, "organizations", ContactOrganization);
+                        populateFieldArray(contact, "emails", ContactField);
+                        populateFieldArray(contact, "phoneNumbers", ContactField);
+                        populateFieldArray(contact, "faxNumbers", ContactField);
+                        populateFieldArray(contact, "pagerNumbers", ContactField);
+                        populateFieldArray(contact, "ims", ContactField);
+                        populateFieldArray(contact, "socialNetworks", ContactField);
+                        populateFieldArray(contact, "urls", ContactField);
+                        populateFieldArray(contact, "photos", ContactPhoto);
+                        // TODO categories
+
+                        populateDate(contact, "birthday");
+                        populateDate(contact, "anniversary");
+
+                        contact.displayName = contact.name.displayName;
+                        contact.nickname = contact.name.nickname;
+                        contact.name = name;
+
+                        realContacts.push(new Contact(contact));
+                    });
+                }
+                onFindSuccess(realContacts);
+            }
+        } else {
+            if (onFindError) {
+                onFindError(result);
+            }
+        }
+    };
+
+    eventId = guid();
 
     window.webworks.event.once(_ID, eventId, callback);
 
@@ -131,6 +217,6 @@ _self.ContactName = ContactName;
 _self.ContactOrganization = ContactOrganization;
 _self.ContactPhoto = ContactPhoto;
 _self.ContactError = ContactError;
-_self.ContactFindOptions = require("./ContactFindOptions");
+_self.ContactFindOptions = ContactFindOptions;
 
 module.exports = _self;

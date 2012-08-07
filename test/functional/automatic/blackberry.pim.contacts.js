@@ -429,4 +429,193 @@ describe("blackberry.pim.contacts", function () {
             expect(findErrorCb).not.toHaveBeenCalled();
         });
     });
+
+    it('Find with invalid search field name invokes error callback', function () {
+        var findOptions = new ContactFindOptions([{
+                fieldName: 107,
+                fieldValue: "Smith"
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Alessandro"
+            }], [], 1, false),
+            error = false,
+            called = false,
+            findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+            }),
+            findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+                expect(errorObj.code).toBeDefined();
+                expect(errorObj.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
+            });
+
+        try {
+            contacts.find(["name", "emails"], findSuccessCb, findErrorCb, findOptions);
+        } catch (e) {
+            console.log("Error:  " + e);
+            error = true;
+        }
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(error).toBe(false);
+            expect(findSuccessCb).not.toHaveBeenCalled();
+            expect(findErrorCb).toHaveBeenCalled();
+        });
+    });
+
+    it('Find with missing search field value invokes error callback', function () {
+        var findOptions = new ContactFindOptions([{
+                fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Alessandro"
+            }], [], 1, false),
+            error = false,
+            called = false,
+            findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+            }),
+            findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+                expect(errorObj.code).toBeDefined();
+                expect(errorObj.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
+            });
+
+        try {
+            contacts.find(["name", "emails"], findSuccessCb, findErrorCb, findOptions);
+        } catch (e) {
+            console.log("Error:  " + e);
+            error = true;
+        }
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(error).toBe(false);
+            expect(findSuccessCb).not.toHaveBeenCalled();
+            expect(findErrorCb).toHaveBeenCalled();
+        });
+    });
+
+    it('Find with invalid contact field name invokes error callback', function () {
+        var findOptions = new ContactFindOptions([{
+                fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME,
+                fieldValue: "Smith"
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Alessandro"
+            }], [], 1, false),
+            error = false,
+            called = false,
+            findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+            }),
+            findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+                expect(errorObj.code).toBeDefined();
+                expect(errorObj.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
+            });
+
+        try {
+            contacts.find(["badFieldName", "emails"], findSuccessCb, findErrorCb, findOptions);
+        } catch (e) {
+            console.log("Error:  " + e);
+            error = true;
+        }
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(error).toBe(false);
+            expect(findSuccessCb).not.toHaveBeenCalled();
+            expect(findErrorCb).toHaveBeenCalled();
+        });
+    });
+
+    it('Find with invalid sort field name invokes error callback', function () {
+        var findOptions = new ContactFindOptions([{
+                fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME,
+                fieldValue: "Smith"
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Alessandro"
+            }], [{
+                fieldName: 23423,
+                desc: false
+            }], 1, false),
+            error = false,
+            called = false,
+            findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+            }),
+            findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+                expect(errorObj.code).toBeDefined();
+                expect(errorObj.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
+            });
+
+        try {
+            contacts.find(["name", "emails"], findSuccessCb, findErrorCb, findOptions);
+        } catch (e) {
+            console.log("Error:  " + e);
+            error = true;
+        }
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(error).toBe(false);
+            expect(findSuccessCb).not.toHaveBeenCalled();
+            expect(findErrorCb).toHaveBeenCalled();
+        });
+    });
+
+    it('Find with missing desc property in sort spec invokes error callback', function () {
+        var findOptions = new ContactFindOptions([{
+                fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME,
+                fieldValue: "Smith"
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Alessandro"
+            }], [{
+                fieldName: 23423
+            }], 1, false),
+            error = false,
+            called = false,
+            findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+            }),
+            findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+                expect(errorObj.code).toBeDefined();
+                expect(errorObj.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
+            });
+
+        try {
+            contacts.find(["name", "emails"], findSuccessCb, findErrorCb, findOptions);
+        } catch (e) {
+            console.log("Error:  " + e);
+            error = true;
+        }
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(error).toBe(false);
+            expect(findSuccessCb).not.toHaveBeenCalled();
+            expect(findErrorCb).toHaveBeenCalled();
+        });
+    });
 });
