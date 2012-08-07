@@ -310,7 +310,10 @@ QSet<bbpim::ContactId> PimContactsQt::singleFieldSearch(const Json::Value& searc
             std::map<std::string, bbpim::AttributeKind::Type>::const_iterator kindIter = _attributeKindMap.find(contact_fields[i].asString());
 
             if (kindIter != _attributeKindMap.end()) {
-                includeFields.append(kindIter->second);
+                // multiple fields can map to the same kind, only add kind to the list if it's not already added
+                if (includeFields.count(kindIter->second) == 0) {
+                    includeFields.append(kindIter->second);
+                }
             }
         }
 
