@@ -426,6 +426,36 @@ describe("blackberry.pim.contacts", function () {
         });
     });
 
+    it('Find with missing ContactFindOptions invokes error callback', function () {
+        var error = false,
+            called = false,
+            findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+            }),
+            findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+                expect(errorObj.code).toBeDefined();
+                expect(errorObj.code).toBe(ContactError.INVALID_ARGUMENT_ERROR);
+            });
+
+        try {
+            contacts.find(["name", "emails"], findSuccessCb, findErrorCb);
+        } catch (e) {
+            console.log("Error:  " + e);
+            error = true;
+        }
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(error).toBe(false);
+            expect(findSuccessCb).not.toHaveBeenCalled();
+            expect(findErrorCb).toHaveBeenCalled();
+        });
+    });
+
     it('Find with invalid search field name invokes error callback', function () {
         var findOptions = new ContactFindOptions([{
                 fieldName: 107,
