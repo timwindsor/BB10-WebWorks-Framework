@@ -65,21 +65,6 @@ describe("blackberry.pim.contacts", function () {
         expect(ContactFindOptions.SORT_FIELD_ORGANIZATION_NAME).toBeDefined();
     });
 
-    it('blackberry.pim.contacts.ContactFindOptions constants should exist', function () {
-        expect(ContactFindOptions.SEARCH_FIELD_GIVEN_NAME).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_FAMILY_NAME).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_ORGANIZATION_NAME).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_PHONE).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_EMAIL).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_BBMPIN).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_LINKEDIN).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_TWITTER).toBeDefined();
-        expect(ContactFindOptions.SEARCH_FIELD_VIDEO_CHAT).toBeDefined();
-        expect(ContactFindOptions.SORT_FIELD_GIVEN_NAME).toBeDefined();
-        expect(ContactFindOptions.SORT_FIELD_FAMILY_NAME).toBeDefined();
-        expect(ContactFindOptions.SORT_FIELD_ORGANIZATION_NAME).toBeDefined();
-    });
-
     it('blackberry.pim.contacts.ContactError constants should exist', function () {
         expect(ContactError.UNKNOWN_ERROR).toBeDefined();
         expect(ContactError.INVALID_ARGUMENT_ERROR).toBeDefined();
@@ -96,6 +81,12 @@ describe("blackberry.pim.contacts", function () {
         expect(ContactField.OTHER).toBeDefined();
         expect(ContactField.MOBILE).toBeDefined();
         expect(ContactField.DIRECT).toBeDefined();
+    });
+
+    it('blackberry.pim.contacts.ContactAddress constants should exist', function () {
+        expect(ContactAddress.HOME).toBeDefined();
+        expect(ContactAddress.WORK).toBeDefined();
+        expect(ContactAddress.OTHER).toBeDefined();
     });
 
     it('Can create blackberry.pim.contacts.ContactName object', function () {

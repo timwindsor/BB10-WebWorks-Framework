@@ -23,4 +23,8 @@ var ContactAddress = function (properties) {
     this.country = properties && properties.country ? properties.country : "";
 };
 
+ContactAddress.HOME = "home";
+ContactAddress.WORK = "work";
+ContactAddress.OTHER = "other";
+
 module.exports = ContactAddress;
