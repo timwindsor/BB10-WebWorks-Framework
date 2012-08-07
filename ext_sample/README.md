@@ -4,14 +4,14 @@ This document describes how to generate a WebWorks Extension.
 The implementation is split into two parts: [Native](#native) and [JavaScript](#JavaScript)
 
 The extension template folder includes the implementation of an example
-extension that retreives the current amount of free memory on the device.
+extension that retrieves the current amount of free memory on the device.
 
 The resources in the extension template folder include:
 
 * TestApplication/ - Resources for a WebWorks application that uses the Memory
 Extension to get the amount of free memory on the device.
-* javascript\_src - The JavaScript source files of the example Memory Extension.
-* native\_src/ - The native source files for the Memory Extension.
+* javascript_src/ - The JavaScript source files of the example Memory Extension.
+* native_src/ - The native source files for the Memory Extension.
 * output/ - An example file structure of a completed extension that can
 be copied into a WebWorks Installation extension folder.
 * project/ - An example file structure of a native extension project that can
@@ -42,11 +42,12 @@ otherwise the application will not be able to use the extension.
 ### <a name="native">Native Part - Overview</a>
 
 This part of the document will describe:
+
 1. How to setup a native extension project in eclipse.
 2. The steps needed to implement a JNEXT extension on the native side.
 3. How to build your native extension project.
 
-### How to create an Extension Project with the Native SDK
+### How to create an Extension Project with the [Native SDK](https://developer.blackberry.com/native/)
 
 1. Open the Momentics IDE. Navigate to the workbench and from the program menu
 select File -> New -> BlackBerry C/C++ Project.
@@ -68,7 +69,7 @@ the Project Explorer window.
 1. Right click on your project and select the import menu item. In the window
 that appears select the file system as an import source and click next.
 2. The next window will prompt you to provide a path to a folder. Select the
-common and src folders located in the native\_src folder of the extension
+common and src folders located in the native_src folder of the extension
 template folder. Import both of the folders and their contents. Then click
 finish. Your project should now have a common folder and a source folder which
 contains source and header files. If done correctly, the file structure of your
@@ -76,11 +77,11 @@ project should match the file structure of the project folder in the extension
 template folder.
 
 After following the instructions below to implement an extension you should
-[build your extension](#buildExtension) for both the device and the simultor.
+[build your extension](#buildExtension) for both the device and the simulator.
 
 ### How to implement a JNEXT extension on the native side
 
-The native and JavaScript portion of a Webworks extension communicate with each
+The native and JavaScript portion of a WebWorks extension communicate with each
 other through the use of an extension framework provided by JNEXT. The native
 interface for the JNEXT extension can be viewed in the plugin header file
 located in the common folder of your project. It also contains constants and
@@ -104,7 +105,7 @@ can be instantiated by this JNEXT extension.
 
 The onCreateObject function is the other callback that must be implemented by
 the native JNEXT extension. It takes two parameters. The first parameter is the
-name of the class requested to be created from the javascript side. Valid names
+name of the class requested to be created from the JavaScript side. Valid names
 are those that are returned in onGetObjList. The second parameter is the unique
 object id for the class. This method returns a pointer to the created extension
 object.
@@ -127,7 +128,7 @@ The m_id is an attribute that contains the JNEXT id for this object. The id is
 passed to the class as an argument to the constructor. It is needed to trigger
 events on the JavaScript side from native.
 
-The can delete method is used by JNEXT to determine whether your native object
+The CanDelete method is used by JNEXT to determine whether your native object
 can be deleted.
 
 The InvokeMethod function is called as a result from a request from JavaScript
@@ -150,9 +151,9 @@ m_pContext (inherited attribute from JSExt).
 
 ### <a name="buildExtension">How to build your native Extension</a>
 
-1. Right click your project and select the Clean Project ootion.
+1. Right click your project and select the Clean Project option.
 2. Right click your project again and select Build Configurations -> Build Selected... .
-3. A window will appear that has shows all the available build configurations
+3. A window will appear that shows all the available build configurations
 for the project. Depending on the profile you wish to use select the Device and
 corresponding Simulator build profiles and click ok.
 4. You should see the shared libraries generated in the folders for each Build
@@ -173,13 +174,13 @@ single configuration. If you wish to modify the build artifacts of all the build
 configurations you will need to modify each build configuration.
 
 ## <a name="JavaScript">JavaScript Part - Overview</a>
-Under the _javascrip\_src_ folder there are following JavaScript files:
+Under the javascript_src folder there are following JavaScript files:
 
 * __client.js__ - Considered to be a client side, exports APIs that are
-accessible from the client's application. __client.js__ file name is mandatory.
+accessible from the client's application. _client.js_ file name is mandatory.
 * __index.js__ - Considered to be a server side, exports APIs that are
 accessible from the _client.js_ and able to communicate with _native_ side.
-__index.js_ file name is mandatory.
+_index.js_ file name is mandatory.
 * __manifest.json__ - Descriptor defines Whitelisting flag, ID and Dependencies
 for the extension.
 
@@ -208,21 +209,16 @@ notified of memory events.
 The interaction between __client.js__ and __index.js__ is made by using APIs of
 __webworks__ object.
 
-The object __webworks__ has a mapping mechanism to communicate between client
-and server by calling corresponding methods and by storing the callbacks
-provided in request by client side (__client.js__) and later to call those
-callback and to pass parameters to them when response is ready on server side
-(__index.js__).
+The client side can make synchronous or asynchronous calls to the server side.
+When making a call to server side, each method in __client.js__  should provide
+the ID, method name and arguments to _execSync_ to get a synchronized call or to
+_execAsync_ when the request is asynchronous. This will result in the invocation
+of a corresponding method name in __index.js__.
 
-Each method in __client.js__ when making a call to server side should provide
-ID, method name and arguments to _execSync_ to get a synchronized call or to
-_execAsync_ when the request is asynchronous. As a result a corresponding method
-in __index.js__ is invoked.
-
-Events on the server side can be propagated to the client side throught the use
-of the event framework. In order for this to happen the client side must
-register the callback. An example of this functionality is the monitor memory
-function which registers a callback on the client side:
+The __webworks__ object has an event API that can be used to communicate between
+the client and server side. The client registers a callback against the event
+API which the server side can trigger. An example of this functionality is the
+monitor memory function which registers a callback on the client side:
 
 ```javascript
     window.webworks.event.add(_ID, "example.memory.memoryEvent", cb);

@@ -30,8 +30,7 @@ string convertLongToString(long l);
 /**
  * Default constructor.
  */
-Memory::Memory(const std::string& id) : m_id(id)
-{
+Memory::Memory(const std::string& id) : m_id(id) {
     m_thread = 0;
 }
 
@@ -92,8 +91,7 @@ string Memory::InvokeMethod(const string& command) {
  * to retrieve the memory usage until the native object is destroyed on the
  * JavaScript side.
  */
-void* MemoryThread(void* parent)
-{
+void* MemoryThread(void* parent) {
 	fprintf(stderr, "native side: thread init started\n");
 	Memory *pParent = static_cast<Memory *>(parent);
 
@@ -149,8 +147,7 @@ void Memory::SendMemoryInfo(long fm) {
 }
 
 // Notifies JavaScript of an event
-void Memory::NotifyEvent(const std::string& event)
-{
+void Memory::NotifyEvent(const std::string& event) {
     std::string eventString = m_id + " ";
     eventString.append(event);
     SendPluginEvent(eventString.c_str(), m_pContext);
