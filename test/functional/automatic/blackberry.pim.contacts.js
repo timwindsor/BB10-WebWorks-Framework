@@ -253,8 +253,6 @@ describe("blackberry.pim.contacts", function () {
             error = false,
             called = false,
             successCb = jasmine.createSpy("onSaveSuccess").andCallFake(function (contact) {
-                console.log("Save SUCCESS!!!!!");
-                console.log(contact);
                 called = true;
                 expect(contact).toBeDefined();
                 expect(contact.id).toBeDefined();
@@ -262,8 +260,6 @@ describe("blackberry.pim.contacts", function () {
                 expect(contact.name.givenName).toBe("Alessandro");
             }),
             errorCb = jasmine.createSpy("onSaveError").andCallFake(function (errorObj) {
-                console.log("Save ERROR!!!!!");
-                console.log(errorObj);
                 called = true;
             });
 
@@ -297,12 +293,12 @@ describe("blackberry.pim.contacts", function () {
 
             new_contact.urls = [ new contacts.ContactField("personal", "www.mywebsite.com", true) ];
 
-            new_contact.addresses = [ new contacts.ContactAddress({"type":"home", "address1":"123 Rainbow Rd", "locality":"Toronto", "region":"Ontario", "country":"Canada", "pref":true}), 
-                                      new contacts.ContactAddress({"type":"work", "address1":"4701 Tahoe Blvd", "address1":"Tahoe B", "locality":"Mississauga", "region":"Ontario", "country":"Canada", "postalCode":"L4W3B1", "pref":false}) ];
+            new_contact.addresses = [ new contacts.ContactAddress({"type": "home", "address1": "123 Rainbow Rd", "locality": "Toronto", "region": "Ontario", "country": "Canada", "pref": true}),
+                                      new contacts.ContactAddress({"type": "work", "address1": "4701 Tahoe Blvd", "address2": "Tahoe B", "locality": "Mississauga", "region": "Ontario", "country": "Canada", "postalCode": "L4W3B1", "pref": false}) ];
 
-            new_contact.organizations = [ new contacts.ContactOrganization({"name":"RIM", "department":"BlackBerry WebWorks", "title":"Developer"}), 
-                                          new contacts.ContactOrganization({"name":"IBM", "title":"Manager"}), 
-                                          new contacts.ContactOrganization({"name":"The Cool Co.", "department":"Cooler", "title":"Mr. Cool"}) ];
+            new_contact.organizations = [ new contacts.ContactOrganization({"name": "RIM", "department": "BlackBerry WebWorks", "title": "Developer"}),
+                                          new contacts.ContactOrganization({"name": "IBM", "title": "Manager"}),
+                                          new contacts.ContactOrganization({"name": "The Cool Co.", "department": "Cooler", "title": "Mr. Cool"}) ];
 
             new_contact.photos = [ new contacts.ContactPhoto("/accounts/1000/shared/camera/earth.gif", false),
                                    new contacts.ContactPhoto("/accounts/1000/shared/camera/twitter.jpg", true) ];
@@ -330,17 +326,15 @@ describe("blackberry.pim.contacts", function () {
 
     it('Can find the contact that has just been created', function () {
         var findOptions = new ContactFindOptions([{
-                    fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME,
-                    fieldValue: "Smith"
-                }, {
-                    fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
-                    fieldValue: "Alessandro"
-                }], [], 1, false),
+                fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME,
+                fieldValue: "Smith"
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Alessandro"
+            }], [], 1, false),
             error = false,
             called = false,
             successCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
-                console.log("Find SUCCESS!!!!!");
-                console.log(contacts);
                 called = true;
                 expect(contacts).toBeDefined();
                 expect(contacts.length).toBe(1);
@@ -350,8 +344,6 @@ describe("blackberry.pim.contacts", function () {
                 expect(contacts[0].name.familyName).toBe("Smith");
             }),
             errorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
-                console.log("Find ERROR!!!!!");
-                console.log(errorObj);
                 called = true;
             });
 
@@ -377,11 +369,10 @@ describe("blackberry.pim.contacts", function () {
         var error = false,
             called = false,
             removeSuccessCb = jasmine.createSpy("onRemoveSuccess").andCallFake(function () {
-                console.log("Remove SUCCESS!");
+                called = true;
             }),
             removeErrorCb = jasmine.createSpy("onRemoveError").andCallFake(function (errorObj) {
-                console.log("Remove ERROR!!!!!");
-                console.log(errorObj);
+                called = true;
             });
 
         try {
@@ -413,15 +404,11 @@ describe("blackberry.pim.contacts", function () {
             error = false,
             called = false,
             findSuccessCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
-                console.log("Find SUCCESS!!!!!");
-                console.log(contacts);
                 called = true;
                 expect(contacts).toBeDefined();
                 expect(contacts.length).toBe(0);
             }),
             findErrorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
-                console.log("Find ERROR!!!!!");
-                console.log(errorObj);
                 called = true;
             });
 
@@ -433,7 +420,7 @@ describe("blackberry.pim.contacts", function () {
         }
 
         waitsFor(function () {
-            return called; // TODO console.log is printed but timed out for some reason?
+            return called;
         }, "success/error callback never called", 15000);
 
         runs(function () {
