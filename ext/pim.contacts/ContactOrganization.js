@@ -17,7 +17,6 @@ var ContactOrganization = function (properties) {
     this.name = properties && properties.name ? properties.name : "";
     this.department = properties && properties.department ? properties.department : "";
     this.title = properties && properties.title ? properties.title : "";
-    this.pref = properties && properties.pref ? properties.pref : false;
 };
 
 module.exports = ContactOrganization;

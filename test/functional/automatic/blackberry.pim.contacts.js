@@ -131,8 +131,7 @@ describe("blackberry.pim.contacts", function () {
             "locality": "Waterloo",
             "region": "Kitchener-Waterloo",
             "postalCode": "N2L 3G1",
-            "country": "Canada",
-            "pref": false
+            "country": "Canada"
         });
         expect(addr).toBeDefined();
         expect(addr.type).toBe("work");
@@ -142,7 +141,6 @@ describe("blackberry.pim.contacts", function () {
         expect(addr.region).toBe("Kitchener-Waterloo");
         expect(addr.postalCode).toBe("N2L 3G1");
         expect(addr.country).toBe("Canada");
-        expect(addr.pref).toBe(false);
     });
 
     it('Can create blackberry.pim.contacts.ContactField object', function () {
@@ -156,14 +154,12 @@ describe("blackberry.pim.contacts", function () {
         var org = new ContactOrganization({
             "name": "Research In Motion",
             "department": "Research",
-            "title": "Software Developer",
-            "pref": false
+            "title": "Software Developer"
         });
         expect(org).toBeDefined();
         expect(org.name).toBe("Research In Motion");
         expect(org.department).toBe("Research");
         expect(org.title).toBe("Software Developer");
-        expect(org.pref).toBe(false);
     });
 
     it('Can create blackberry.pim.contacts.ContactPhoto object', function () {
@@ -293,8 +289,8 @@ describe("blackberry.pim.contacts", function () {
 
             new_contact.urls = [ new contacts.ContactField("personal", "www.mywebsite.com", true) ];
 
-            new_contact.addresses = [ new contacts.ContactAddress({"type": "home", "address1": "123 Rainbow Rd", "locality": "Toronto", "region": "Ontario", "country": "Canada", "pref": true}),
-                                      new contacts.ContactAddress({"type": "work", "address1": "4701 Tahoe Blvd", "address2": "Tahoe B", "locality": "Mississauga", "region": "Ontario", "country": "Canada", "postalCode": "L4W3B1", "pref": false}) ];
+            new_contact.addresses = [ new contacts.ContactAddress({"type": "home", "address1": "123 Rainbow Rd", "locality": "Toronto", "region": "Ontario", "country": "Canada"}),
+                                      new contacts.ContactAddress({"type": "work", "address1": "4701 Tahoe Blvd", "address2": "Tahoe B", "locality": "Mississauga", "region": "Ontario", "country": "Canada", "postalCode": "L4W3B1"}) ];
 
             new_contact.organizations = [ new contacts.ContactOrganization({"name": "RIM", "department": "BlackBerry WebWorks", "title": "Developer"}),
                                           new contacts.ContactOrganization({"name": "IBM", "title": "Manager"}),

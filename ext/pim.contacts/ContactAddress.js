@@ -21,7 +21,6 @@ var ContactAddress = function (properties) {
     this.region = properties && properties.region ? properties.region : "";
     this.postalCode = properties && properties.postalCode ? properties.postalCode : "";
     this.country = properties && properties.country ? properties.country : "";
-    this.pref = properties && properties.pref ? properties.pref : false;
 };
 
 module.exports = ContactAddress;
