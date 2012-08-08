@@ -386,8 +386,8 @@ void PimContactsQt::populateAddresses(const bbpim::Contact& contact, Json::Value
             addr["type"] = Json::Value(typeIter->second);
         }
 
-        addr["address1"] = Json::Value(currentAddr.line1().toStdString());
-        addr["address2"] = Json::Value(currentAddr.line2().toStdString());
+        addr["streetAddress"] = Json::Value(currentAddr.line1().toStdString());
+        addr["streetOther"] = Json::Value(currentAddr.line2().toStdString());
         addr["country"] = Json::Value(currentAddr.country().toStdString());
         addr["locality"] = Json::Value(currentAddr.city().toStdString());
         addr["postalCode"] = Json::Value(currentAddr.postalCode().toStdString());
@@ -935,15 +935,15 @@ Json::Value PimContactsQt::addPostalAddress(bbpim::ContactBuilder& contactBuilde
         }
     }
 
-    addressBuilder = addressBuilder.setLine1(QString(addressObj.get("address1", "").asCString()));
-    addressBuilder = addressBuilder.setLine2(QString(addressObj.get("address2", "").asCString()));
+    addressBuilder = addressBuilder.setLine1(QString(addressObj.get("streetAddress", "").asCString()));
+    addressBuilder = addressBuilder.setLine2(QString(addressObj.get("streetOther", "").asCString()));
     addressBuilder = addressBuilder.setCity(QString(addressObj.get("locality", "").asCString()));
     addressBuilder = addressBuilder.setRegion(QString(addressObj.get("region", "").asCString()));
     addressBuilder = addressBuilder.setCountry(QString(addressObj.get("country", "").asCString()));
     addressBuilder = addressBuilder.setPostalCode(QString(addressObj.get("postalCode", "").asCString()));
 
-    returnObj["address1"] = addressObj["address1"];
-    returnObj["address2"] = addressObj["address2"];
+    returnObj["streetAddress"] = addressObj["streetAddress"];
+    returnObj["streetOther"] = addressObj["streetOther"];
     returnObj["locality"] = addressObj["locality"];
     returnObj["region"] = addressObj["region"];
     returnObj["country"] = addressObj["country"];
