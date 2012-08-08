@@ -31,7 +31,7 @@ public:
     virtual std::string InvokeMethod(const std::string& command);
 
 // Methods for the memory thread
-    void SendMemoryInfo(long fm);
+    void SendMemoryInfo();
     void NotifyEvent(const std::string& event);
 
 private:

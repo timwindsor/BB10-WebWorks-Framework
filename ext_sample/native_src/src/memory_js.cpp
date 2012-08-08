@@ -93,8 +93,7 @@ void* MemoryThread(void* parent) {
 
     // Endless loop that collect memory information and send it to JNext JavaScript side
     while (true) {
-        long fm = getMemory();
-        pParent->SendMemoryInfo(fm);
+        pParent->SendMemoryInfo();
         sleep(1);
     }
 
@@ -138,8 +137,8 @@ string Memory::MonitorMemoryNative() {
  * Method used by the getMemoryUsage thread to pass the amount of free memory
  * on the JavaScript side by firing an event.
  */
-void Memory::SendMemoryInfo(long fm) {
-    std::string eventString = "FreeMemory " + convertLongToString(fm);
+void Memory::SendMemoryInfo() {
+    std::string eventString = "FreeMemory " + convertLongToString(getMemory());
     NotifyEvent(eventString);
 }
 
