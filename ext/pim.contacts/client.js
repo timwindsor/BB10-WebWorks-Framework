@@ -23,7 +23,10 @@ var _self = {},
     ContactField = require("./ContactField"),
     ContactPhoto = require("./ContactPhoto"),
     ContactError = require("./ContactError"),
-    ContactFindOptions = require("./ContactFindOptions");
+    ContactFindOptions = require("./ContactFindOptions"),
+    ContactNews = require("./ContactNews"),
+    ContactActivity = require("./ContactActivity"),
+    ContactOnlineStatus = require("./ContactOnlineStatus");
 
 function S4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -216,5 +219,8 @@ _self.ContactOrganization = ContactOrganization;
 _self.ContactPhoto = ContactPhoto;
 _self.ContactError = ContactError;
 _self.ContactFindOptions = ContactFindOptions;
+_self.ContactNews = ContactNews;
+_self.ContactActivity = ContactActivity;
+_self.ContactOnlineStatus = ContactOnlineStatus;
 
 module.exports = _self;

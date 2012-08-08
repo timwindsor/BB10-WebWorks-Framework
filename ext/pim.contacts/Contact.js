@@ -50,6 +50,9 @@ Contact = function (properties) {
     this.socialNetworks = properties && properties.socialNetworks ? properties.socialNetworks : null; // ContactField[]
     this.ringtone = properties && properties.ringtone ? properties.ringtone : "";
     this.favorite = properties && properties.favorite ? properties.favorite : false;
+    this.news = properties && properties.news ? properties.news : null; // ContactNews[]
+    this.activity = properties && properties.activity ? properties.activity : null; // ContactActivity[]
+    this.onlineStatus = properties && properties.onlineStatus ? properties.onlineStatus : null; // ContactOnlineStatus[]
 
     var privateId = properties && properties.id ? properties.id : "-1";
     Object.defineProperty(this, "id", { "value": privateId });
