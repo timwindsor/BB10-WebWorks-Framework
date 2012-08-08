@@ -63,7 +63,10 @@ function validateFindArguments(contactFields, onFindError, findOptions) {
     var tempContact,
         error = false;
 
-    if (contactFields && contactFields.length) {
+    // contactFields is mandatory
+    if (!contactFields || !contactFields.length) {
+        error = true;
+    } else {
         tempContact = new Contact();
 
         contactFields.forEach(function (field) {
@@ -71,55 +74,52 @@ function validateFindArguments(contactFields, onFindError, findOptions) {
                 error = true;
             }
         });
-    }
 
-    if (!findOptions || !findOptions.filter || !findOptions.filter.length) {
-        error = true;
-    }
-
-    if (!error) {
-        findOptions.filter.forEach(function (f) {
-            if (f.fieldName !== undefined) {
-                switch (f.fieldName) {
-                case ContactFindOptions.SEARCH_FIELD_GIVEN_NAME:
-                case ContactFindOptions.SEARCH_FIELD_FAMILY_NAME:
-                case ContactFindOptions.SEARCH_FIELD_ORGANIZATION_NAME:
-                case ContactFindOptions.SEARCH_FIELD_PHONE:
-                case ContactFindOptions.SEARCH_FIELD_EMAIL:
-                case ContactFindOptions.SEARCH_FIELD_BBMPIN:
-                case ContactFindOptions.SEARCH_FIELD_LINKEDIN:
-                case ContactFindOptions.SEARCH_FIELD_TWITTER:
-                case ContactFindOptions.SEARCH_FIELD_VIDEO_CHAT:
-                    break;
-                default:
-                    error = true;
-                }
-
-                if (!f.fieldValue) {
-                    error = true;
-                }
-            }
-        });
-    }
-
-    if (!error) {
-        if (findOptions.sort && findOptions.sort.length) {
-            findOptions.sort.forEach(function (s) {
-                if (s.fieldName !== undefined) {
-                    switch (s.fieldName) {
-                    case ContactFindOptions.SORT_FIELD_GIVEN_NAME:
-                    case ContactFindOptions.SORT_FIELD_FAMILY_NAME:
-                    case ContactFindOptions.SORT_FIELD_ORGANIZATION_NAME:
+        if (!error) {
+            // findOptions and findOptions.filter are mandatory
+            if (!findOptions || !findOptions.filter || !findOptions.filter.length ||
+                typeof findOptions.limit !== "number" || typeof findOptions.favorite !== "boolean") {
+                error = true;
+            } else {
+                findOptions.filter.forEach(function (f) {
+                    switch (f.fieldName) {
+                    case ContactFindOptions.SEARCH_FIELD_GIVEN_NAME:
+                    case ContactFindOptions.SEARCH_FIELD_FAMILY_NAME:
+                    case ContactFindOptions.SEARCH_FIELD_ORGANIZATION_NAME:
+                    case ContactFindOptions.SEARCH_FIELD_PHONE:
+                    case ContactFindOptions.SEARCH_FIELD_EMAIL:
+                    case ContactFindOptions.SEARCH_FIELD_BBMPIN:
+                    case ContactFindOptions.SEARCH_FIELD_LINKEDIN:
+                    case ContactFindOptions.SEARCH_FIELD_TWITTER:
+                    case ContactFindOptions.SEARCH_FIELD_VIDEO_CHAT:
                         break;
                     default:
                         error = true;
                     }
-                }
 
-                if (s.desc === undefined) {
-                    error = true;
+                    if (!f.fieldValue) {
+                        error = true;
+                    }
+                });
+
+                // findOptions.sort is optional
+                if (!error && findOptions.sort && findOptions.sort.length) {
+                    findOptions.sort.forEach(function (s) {
+                        switch (s.fieldName) {
+                        case ContactFindOptions.SORT_FIELD_GIVEN_NAME:
+                        case ContactFindOptions.SORT_FIELD_FAMILY_NAME:
+                        case ContactFindOptions.SORT_FIELD_ORGANIZATION_NAME:
+                            break;
+                        default:
+                            error = true;
+                        }
+
+                        if (s.desc === undefined || typeof s.desc !== "boolean") {
+                            error = true;
+                        }
+                    });
                 }
-            });
+            }
         }
     }
 
@@ -196,16 +196,7 @@ _self.find = function (contactFields, onFindSuccess, onFindError, findOptions) {
 };
 
 _self.create = function (properties) {
-    var contact = new Contact(),
-        key;
-
-    for (key in properties) {
-        if (properties.hasOwnProperty(key)) {
-            contact[key] = properties[key];
-        }
-    }
-
-    return contact;
+    return new Contact(properties);
 };
 
 _self.Contact = Contact;
