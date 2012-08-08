@@ -24,6 +24,7 @@ function validateOptions(args) {
 var bbm = require("./BBMJNEXT").bbm,
     _event = require("../../lib/event"),
     _utils = require("../../lib/utils"),
+    _ppsUtils = require("../../lib/pps/ppsUtils"),
     _actionMap = {
         onaccesschanged: {
             context: require("./BBMEvents"),
@@ -164,6 +165,30 @@ module.exports = {
             }
 
             bbm.setDisplayPicture(args.displayPicture);
+        }
+    },
+
+    users : {
+        inviteToDownload : function (success, fail, args, env) {
+            var PPSUtils = _ppsUtils.createObject(),
+                gid,
+                onSuccess = function () {
+                    alert("yes");
+                },
+                onError = function (e) {
+                    alert(e);
+                };
+             
+            PPSUtils.init();
+            gid = PPSUtils.getId();
+            PPSUtils.close();
+
+            blackberry.invoke.invoke({
+                target: 'com.rim.bb.bbm.composer',
+                type: 'bbm/sp',
+                action: 'bbm.sp.action.DOWNLOAD_INVITE'
+            }, onSuccess, onError);
+            
         }
     }
 };
