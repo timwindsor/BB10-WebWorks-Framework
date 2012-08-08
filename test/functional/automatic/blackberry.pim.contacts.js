@@ -117,8 +117,8 @@ describe("blackberry.pim.contacts", function () {
     it('Can create blackberry.pim.contacts.ContactAddress object', function () {
         var addr = new ContactAddress({
             "type": "work",
-            "address1": "200 University Ave W",
-            "address2": "University of Waterloo",
+            "streetAddress": "200 University Ave W",
+            "streetOther": "University of Waterloo",
             "locality": "Waterloo",
             "region": "Kitchener-Waterloo",
             "postalCode": "N2L 3G1",
@@ -126,8 +126,8 @@ describe("blackberry.pim.contacts", function () {
         });
         expect(addr).toBeDefined();
         expect(addr.type).toBe("work");
-        expect(addr.address1).toBe("200 University Ave W");
-        expect(addr.address2).toBe("University of Waterloo");
+        expect(addr.streetAddress).toBe("200 University Ave W");
+        expect(addr.streetOther).toBe("University of Waterloo");
         expect(addr.locality).toBe("Waterloo");
         expect(addr.region).toBe("Kitchener-Waterloo");
         expect(addr.postalCode).toBe("N2L 3G1");
@@ -280,8 +280,8 @@ describe("blackberry.pim.contacts", function () {
 
             new_contact.urls = [ new contacts.ContactField("personal", "www.mywebsite.com", true) ];
 
-            new_contact.addresses = [ new contacts.ContactAddress({"type": "home", "address1": "123 Rainbow Rd", "locality": "Toronto", "region": "Ontario", "country": "Canada"}),
-                                      new contacts.ContactAddress({"type": "work", "address1": "4701 Tahoe Blvd", "address2": "Tahoe B", "locality": "Mississauga", "region": "Ontario", "country": "Canada", "postalCode": "L4W3B1"}) ];
+            new_contact.addresses = [ new contacts.ContactAddress({"type": "home", "streetAddress": "123 Rainbow Rd", "locality": "Toronto", "region": "Ontario", "country": "Canada"}),
+                                      new contacts.ContactAddress({"type": "work", "streetAddress": "4701 Tahoe Blvd", "streetOther": "Tahoe B", "locality": "Mississauga", "region": "Ontario", "country": "Canada", "postalCode": "L4W3B1"}) ];
 
             new_contact.organizations = [ new contacts.ContactOrganization({"name": "RIM", "department": "BlackBerry WebWorks", "title": "Developer"}),
                                           new contacts.ContactOrganization({"name": "IBM", "title": "Manager"}),
