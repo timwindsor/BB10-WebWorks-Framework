@@ -302,7 +302,7 @@ void BBMBPS::SetDisplayPicture(const std::string& imgPath)
     std::string fileType = imgPath.substr(imgPath.find_last_of(".") + 1, imgPath.length());
     bbmsp_image_type_t type;
 
-    if (fileType == "jpg") {
+    if (fileType == "jpg" || fileType == "jpeg") {
         type = BBMSP_IMAGE_TYPE_JPG;
     } else if (fileType == "png") {
         type = BBMSP_IMAGE_TYPE_PNG;
