@@ -86,7 +86,7 @@ _self.self.setDisplayPicture = function (displayPicture) {
 };
 
 _self.users.inviteToDownload = function () {
-    return window.webworks.execAsync(_ID, "users/inviteToDownload", null);
+    return window.webworks.execAsync(_ID, "users/inviteToDownload");
 };
 
 window.webworks.execSync(_ID, "registerEvents", null);

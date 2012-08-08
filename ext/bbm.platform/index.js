@@ -169,7 +169,7 @@ module.exports = {
     },
 
     users : {
-        inviteToDownload : function (success, fail, args, env) {
+        inviteToDownload : function (success, fail, args) {
             var PPSUtils = _ppsUtils.createObject(),
                 gid,
                 onSuccess = function () {
@@ -184,12 +184,19 @@ module.exports = {
             PPSUtils.close();
 
             blackberry.invoke.invoke({
-                target: 'com.rim.bb.bbm.composer',
-                type: 'bbm/sp',
-                action: 'bbm.sp.action.DOWNLOAD_INVITE'
+                target : 'com.rim.bb.bbm.composer',
+                type : 'bbm/sp',
+                action : 'bbm.sp.action.DOWNLOAD_INVITE',
+                data : {
+                    "ContactPicker" : {
+                        "gid" : gid,
+                        "payload" : {
+                            "DownloadContactPicker" : {}
+                        }
+                    }
+                }
             }, onSuccess, onError);
-            
+ 
         }
     }
 };
-
