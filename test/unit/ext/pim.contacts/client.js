@@ -199,7 +199,7 @@ describe("pim.contacts client", function () {
                 }),
                 addresses: [
                     new ContactAddress({
-                        address1: "200 University Ave W",
+                        streetAddress: "200 University Ave W",
                         locality: "Waterloo",
                         country: "Canada",
                         postalCode: "N2L3G1"
@@ -236,7 +236,7 @@ describe("pim.contacts client", function () {
             expect(contact.emails[1].value).toBe("jsmith@work.com");
             expect(contact.favorite).toBe(true);
             expect(contact.addresses.length).toBe(1);
-            expect(contact.addresses[0].address1).toBe("200 University Ave W");
+            expect(contact.addresses[0].streetAddress).toBe("200 University Ave W");
             expect(contact.addresses[0].locality).toBe("Waterloo");
             expect(contact.addresses[0].country).toBe("Canada");
             expect(contact.addresses[0].postalCode).toBe("N2L3G1");

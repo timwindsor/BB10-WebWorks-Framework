@@ -15,8 +15,8 @@
  */
 var ContactAddress = function (properties) {
     this.type = properties && properties.type ? properties.type : "";
-    this.address1 = properties && properties.address1 ? properties.address1 : "";
-    this.address2 = properties && properties.address2 ? properties.address2 : "";
+    this.streetAddress = properties && properties.streetAddress ? properties.streetAddress : "";
+    this.streetOther = properties && properties.streetOther ? properties.streetOther : "";
     this.locality = properties && properties.locality ? properties.locality : "";
     this.region = properties && properties.region ? properties.region : "";
     this.postalCode = properties && properties.postalCode ? properties.postalCode : "";
