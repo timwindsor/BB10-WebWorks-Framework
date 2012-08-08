@@ -51,7 +51,7 @@ Contact = function (properties) {
     this.ringtone = properties && properties.ringtone ? properties.ringtone : "";
     this.favorite = properties && properties.favorite ? properties.favorite : false;
 
-    var privateId = properties && properties.id ? properties.id : "-1";
+    var privateId = properties && properties.id ? properties.id : "0";
     Object.defineProperty(this, "id", { "value": privateId });
 };
 
