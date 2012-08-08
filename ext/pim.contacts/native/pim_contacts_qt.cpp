@@ -1096,6 +1096,28 @@ void PimContactsQt::syncPostalAddresses(bbpim::ContactBuilder& contactBuilder, Q
 
 void PimContactsQt::syncPhotos(bbpim::ContactBuilder& contactBuilder, QList<bbpim::ContactPhoto>& savedList, const Json::Value& jsonObj)
 {
+    int i;
+
+    for (i = 0; i < savedList.size() && i < jsonObj.size(); i++) {
+        std::string filepath = jsonObj[i].get("originalFilePath", "").asString();
+        bool pref = jsonObj[i].get("pref", true).asBool();
+
+        bbpim::ContactPhotoBuilder photoBuilder(savedList[i].edit());
+        photoBuilder.setOriginalPhoto(QString(filepath.c_str()));
+        photoBuilder.setPrimaryPhoto(pref);
+    }
+
+    if (i < savedList.size()) {
+        for (; i < savedList.size(); i++) {
+            contactBuilder = contactBuilder.deletePhoto(savedList[i]);
+        }
+    } else if (i < jsonObj.size()) {
+        for (; i < jsonObj.size(); i++) {
+            addPhoto(contactBuilder, jsonObj[i]);
+        }
+    }
+
+    /*
     for (int j = 0; j < savedList.size(); j++) {
         contactBuilder = contactBuilder.deletePhoto(savedList[j]);
     }
@@ -1104,6 +1126,7 @@ void PimContactsQt::syncPhotos(bbpim::ContactBuilder& contactBuilder, QList<bbpi
         Json::Value photoObj = jsonObj[i];
         addPhoto(contactBuilder, photoObj);
     }
+    */
 }
 
 /****************************************************************
