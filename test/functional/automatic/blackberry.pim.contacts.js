@@ -233,6 +233,17 @@ describe("blackberry.pim.contacts", function () {
         expect(contactObj2.birthday).toBe(null);
     });
 
+    it('Ensures that the id field of Contact is read-only', function () {
+        var contactObj,
+            oldId;
+
+        contactObj = blackberry.pim.contacts.create({"id" : "123", "displayName" : "John"});
+        var oldId = contactObj.id;
+        contactObj.id = "InvalidId";
+
+        expect(contactObj.id).toEqual(oldId);
+    });
+
     it('Can create & save a contact to the device using Contact.save()', function () {
         var first_name,
             last_name,
@@ -347,6 +358,73 @@ describe("blackberry.pim.contacts", function () {
 
         runs(function () {
             expect(error).toBe(false);
+            expect(successCb).toHaveBeenCalled();
+            expect(errorCb).not.toHaveBeenCalled();
+        });
+    });
+
+    it('Can edit and save the contact that was found', function () {
+        var first_name,
+            last_name,
+            called = false,
+            successCb = jasmine.createSpy("onSaveSuccess").andCallFake(function (contact) {
+                called = true;
+                expect(contact).toBeDefined();
+                expect(contact.id).toBeDefined();
+                expect(contact.name).toBeDefined();
+                expect(contact.name.givenName).toBe("Benjamin");
+                //foundContact = contact;
+            }),
+            errorCb = jasmine.createSpy("onSaveError").andCallFake(function (errorObj) {
+                called = true;
+            });
+
+        first_name = "Benjamin";
+        last_name = "Smith";
+        foundContact.name.givenName = first_name;
+        foundContact.name.familyName = last_name;
+
+        foundContact.save(successCb, errorCb);
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
+            expect(successCb).toHaveBeenCalled();
+            expect(errorCb).not.toHaveBeenCalled();
+        });
+    });
+
+    it('Can find the contact that was just edited', function () {
+        var findOptions = new ContactFindOptions([{
+                fieldName: ContactFindOptions.SEARCH_FIELD_FAMILY_NAME,
+                fieldValue: "Smith"
+            }, {
+                fieldName: ContactFindOptions.SEARCH_FIELD_GIVEN_NAME,
+                fieldValue: "Benjamin"
+            }], [], 1, false),
+            called = false,
+            successCb = jasmine.createSpy("onFindSuccess").andCallFake(function (contacts) {
+                called = true;
+                expect(contacts).toBeDefined();
+                expect(contacts.length).toBe(1);
+                foundContact = contacts[0];
+                expect(contacts[0].name).toBeDefined();
+                expect(contacts[0].name.givenName).toBe("Benjamin");
+                expect(contacts[0].name.familyName).toBe("Smith");
+            }),
+            errorCb = jasmine.createSpy("onFindError").andCallFake(function (errorObj) {
+                called = true;
+            });
+
+        contacts.find(["name", "emails"], successCb, errorCb, findOptions);
+
+        waitsFor(function () {
+            return called;
+        }, "success/error callback never called", 15000);
+
+        runs(function () {
             expect(successCb).toHaveBeenCalled();
             expect(errorCb).not.toHaveBeenCalled();
         });
