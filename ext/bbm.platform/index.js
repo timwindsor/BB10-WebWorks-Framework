@@ -56,7 +56,7 @@ module.exports = {
             fail(-1, e);
         }
     },
-    
+
     register: function (success, fail, args, env) {
         if (args) {
             args.options = JSON.parse(decodeURIComponent(args.options));
@@ -65,7 +65,7 @@ module.exports = {
                 fail(-1, "options are not valid");
                 return;
             }
-        
+
             bbm.register(args.options);
             success();
         }
@@ -129,7 +129,7 @@ module.exports = {
             if (args) {
                 args.status = JSON.parse(decodeURIComponent(args.status));
                 args.statusMessage = JSON.parse(decodeURIComponent(args.statusMessage));
-            
+
                 if (args.status !== "available" && args.status !== "busy") {
                     fail(-1, "status is not valid");
                     return;
@@ -178,25 +178,25 @@ module.exports = {
                 onError = function (e) {
                     alert(e);
                 };
-             
+
             PPSUtils.init();
             gid = PPSUtils.getId();
             PPSUtils.close();
 
-            blackberry.invoke.invoke({
+            qnx.webplatform.getApplication().invocation.invoke({
                 target : 'com.rim.bb.bbm.composer',
                 type : 'bbm/sp',
                 action : 'bbm.sp.action.DOWNLOAD_INVITE',
-                data : {
+                data : window.btoa(JSON.stringify({
                     "ContactPicker" : {
                         "gid" : gid,
                         "payload" : {
                             "DownloadContactPicker" : {}
                         }
                     }
-                }
+                }))
             }, onSuccess, onError);
- 
+
         }
     }
 };
